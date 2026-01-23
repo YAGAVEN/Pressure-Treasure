@@ -57,6 +57,33 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Custom Game Colors
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+          dark: "hsl(var(--gold-dark))",
+        },
+        crimson: "hsl(var(--crimson))",
+        "ice-blue": "hsl(var(--ice-blue))",
+        "forest-green": "hsl(var(--forest-green))",
+        "dragon-fire": "hsl(var(--dragon-fire))",
+        "night-king": "hsl(var(--night-king))",
+        // House Colors
+        house: {
+          stark: "hsl(var(--house-stark))",
+          lannister: "hsl(var(--house-lannister))",
+          targaryen: "hsl(var(--house-targaryen))",
+          baratheon: "hsl(var(--house-baratheon))",
+          greyjoy: "hsl(var(--house-greyjoy))",
+          tyrell: "hsl(var(--house-tyrell))",
+          martell: "hsl(var(--house-martell))",
+          tully: "hsl(var(--house-tully))",
+        },
+      },
+      fontFamily: {
+        cinzel: ['Cinzel', 'serif'],
+        decorative: ['Cinzel Decorative', 'cursive'],
+        sans: ['Inter', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +92,27 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-gold": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--gold) / 0.4)" },
+          "50%": { boxShadow: "0 0 20px 10px hsl(var(--gold) / 0.2)" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-gold": "pulse-gold 2s ease-in-out infinite",
+        "shimmer": "shimmer 3s linear infinite",
       },
     },
   },

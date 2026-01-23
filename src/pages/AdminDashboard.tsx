@@ -1,0 +1,381 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useGame } from '@/contexts/GameContext';
+import { HOUSE_NAMES, HOUSE_MOTTOS, HouseTheme, Room } from '@/types/game';
+import { formatTime } from '@/lib/gameUtils';
+import { 
+  Shield, Plus, Trash2, Play, Square, RotateCcw, Users, 
+  Clock, Crown, LogOut, Copy, Check
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const { 
+    admin, 
+    isAdminAuthenticated, 
+    adminLogout,
+    rooms, 
+    createRoom, 
+    deleteRoom,
+    startGame,
+    endGame,
+    resetGame,
+    getPlayersInRoom,
+    kickPlayer
+  } = useGame();
+  const { toast } = useToast();
+  
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newRoomName, setNewRoomName] = useState('');
+  const [newRoomDescription, setNewRoomDescription] = useState('');
+  const [newRoomHouse, setNewRoomHouse] = useState<HouseTheme>('stark');
+  const [newRoomTimer, setNewRoomTimer] = useState(30);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [, forceUpdate] = useState({});
+
+  // Force re-render every second for timer display
+  useEffect(() => {
+    const interval = setInterval(() => forceUpdate({}), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAdminAuthenticated) {
+      navigate('/admin/auth');
+    }
+  }, [isAdminAuthenticated, navigate]);
+
+  if (!isAdminAuthenticated) {
+    return null;
+  }
+
+  const adminRooms = rooms.filter(r => r.adminId === admin?.id);
+
+  const handleCreateRoom = () => {
+    if (!newRoomName.trim()) {
+      toast({
+        title: "Name Required",
+        description: "Please enter a name for the room.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const room = createRoom(
+      newRoomName.trim(),
+      newRoomDescription.trim(),
+      newRoomHouse,
+      newRoomTimer * 60
+    );
+
+    toast({
+      title: "Room Created",
+      description: `${room.name} is ready. Share code: ${room.code}`,
+    });
+
+    setIsCreateDialogOpen(false);
+    setNewRoomName('');
+    setNewRoomDescription('');
+    setNewRoomHouse('stark');
+    setNewRoomTimer(30);
+  };
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleLogout = () => {
+    adminLogout();
+    navigate('/');
+  };
+
+  const getStatusBadge = (room: Room) => {
+    const baseClasses = "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium";
+    
+    switch (room.status) {
+      case 'waiting':
+        return <span className={`${baseClasses} bg-muted text-muted-foreground`}>Waiting</span>;
+      case 'playing':
+        return <span className={`${baseClasses} bg-primary/10 text-primary`}>In Progress</span>;
+      case 'finished':
+        return <span className={`${baseClasses} bg-accent/10 text-accent`}>Finished</span>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-medieval-pattern">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+              <Shield className="h-5 w-5 text-accent" />
+            </div>
+            <div>
+              <p className="font-cinzel text-lg font-semibold">Game Master</p>
+              <p className="text-sm text-muted-foreground">{admin?.displayName}</p>
+            </div>
+          </div>
+          
+          <Button variant="ghost" onClick={handleLogout} className="gap-2">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        {/* Create Room Button */}
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="font-cinzel text-2xl font-bold">Your Rooms</h1>
+          
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 font-cinzel">
+                <Plus className="h-4 w-4" />
+                Create Room
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="font-cinzel">Create New Room</DialogTitle>
+                <DialogDescription>
+                  Set up a new treasure hunt for your players
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="room-name">Room Name</Label>
+                  <Input
+                    id="room-name"
+                    placeholder="The Great Hunt"
+                    value={newRoomName}
+                    onChange={(e) => setNewRoomName(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="room-description">Description (Optional)</Label>
+                  <Textarea
+                    id="room-description"
+                    placeholder="A brief description of this hunt..."
+                    value={newRoomDescription}
+                    onChange={(e) => setNewRoomDescription(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="room-house">House Theme</Label>
+                  <Select value={newRoomHouse} onValueChange={(v) => setNewRoomHouse(v as HouseTheme)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(HOUSE_NAMES).map(([key, name]) => (
+                        <SelectItem key={key} value={key}>
+                          <span className="font-cinzel">{name}</span>
+                          <span className="ml-2 text-muted-foreground">— {HOUSE_MOTTOS[key as HouseTheme]}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="room-timer">Timer Duration (minutes)</Label>
+                  <Select value={newRoomTimer.toString()} onValueChange={(v) => setNewRoomTimer(parseInt(v))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[5, 10, 15, 20, 30, 45, 60].map((mins) => (
+                        <SelectItem key={mins} value={mins.toString()}>
+                          {mins} minutes
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateRoom} className="font-cinzel">
+                  Create Room
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Rooms Grid */}
+        {adminRooms.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Crown className="mb-4 h-12 w-12 text-muted-foreground/50" />
+              <p className="font-cinzel text-lg text-muted-foreground">No rooms yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Create your first treasure hunt to get started
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {adminRooms.map((room) => {
+              const players = getPlayersInRoom(room.code);
+              const winner = room.winnerId ? players.find(p => p.id === room.winnerId) : null;
+              
+              return (
+                <Card key={room.id} className="overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="font-cinzel text-lg">{room.name}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {HOUSE_NAMES[room.houseTheme]}
+                        </CardDescription>
+                      </div>
+                      {getStatusBadge(room)}
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    {/* Room Code */}
+                    <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                      <span className="font-mono text-lg tracking-widest">{room.code}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleCopyCode(room.code)}
+                        className="h-8 w-8"
+                      >
+                        {copiedCode === room.code ? (
+                          <Check className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    
+                    {/* Stats */}
+                    <div className="flex gap-4 text-sm">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        <span>{players.length} players</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>{formatTime(room.timerRemaining)}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Winner Display */}
+                    {room.status === 'finished' && winner && (
+                      <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2">
+                        <Crown className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">Winner: {winner.username}</span>
+                      </div>
+                    )}
+                    
+                    {/* Player List */}
+                    {players.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">Players:</p>
+                        <div className="max-h-24 space-y-1 overflow-y-auto">
+                          {players.map((player) => (
+                            <div key={player.id} className="flex items-center justify-between rounded bg-muted/30 px-2 py-1">
+                              <span className="text-sm">{player.username}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">{player.progress}%</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => kickPlayer(player.id)}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Controls */}
+                    <div className="flex gap-2 pt-2">
+                      {room.status === 'waiting' && (
+                        <Button
+                          onClick={() => startGame(room.id)}
+                          className="flex-1 gap-2"
+                          disabled={players.length === 0}
+                        >
+                          <Play className="h-4 w-4" />
+                          Start
+                        </Button>
+                      )}
+                      
+                      {room.status === 'playing' && (
+                        <Button
+                          onClick={() => endGame(room.id)}
+                          variant="secondary"
+                          className="flex-1 gap-2"
+                        >
+                          <Square className="h-4 w-4" />
+                          End Game
+                        </Button>
+                      )}
+                      
+                      {room.status === 'finished' && (
+                        <Button
+                          onClick={() => resetGame(room.id)}
+                          variant="secondary"
+                          className="flex-1 gap-2"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                          Reset
+                        </Button>
+                      )}
+                      
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => {
+                          deleteRoom(room.id);
+                          toast({
+                            title: "Room Deleted",
+                            description: `${room.name} has been removed.`,
+                          });
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default AdminDashboard;
