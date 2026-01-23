@@ -8,6 +8,7 @@ import { useGame } from '@/contexts/GameContext';
 import { Users, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import * as roomService from '@/lib/roomService';
 
 const PlayerJoin = () => {
   const navigate = useNavigate();
@@ -18,12 +19,21 @@ const PlayerJoin = () => {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleJoin = (e: React.FormEvent) => {
+  const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     const formattedCode = roomCode.toUpperCase().trim();
-    const room = getRoom(formattedCode);
+    let room = getRoom(formattedCode);
+    
+    // If not found locally, try Supabase
+    if (!room) {
+      try {
+        room = await roomService.getRoomByCode(formattedCode);
+      } catch (err) {
+        console.error('Error fetching room:', err);
+      }
+    }
     
     if (!room) {
       toast({
@@ -45,7 +55,7 @@ const PlayerJoin = () => {
       return;
     }
     
-    const player = joinRoom(formattedCode, username.trim());
+    const player = await joinRoom(formattedCode, username.trim());
     
     if (player) {
       toast({

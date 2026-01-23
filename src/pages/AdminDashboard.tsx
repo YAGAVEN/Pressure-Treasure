@@ -95,8 +95,8 @@ const AdminDashboard = () => {
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
-  const handleLogout = () => {
-    adminLogout();
+  const handleLogout = async () => {
+    await adminLogout();
     navigate('/');
   };
 

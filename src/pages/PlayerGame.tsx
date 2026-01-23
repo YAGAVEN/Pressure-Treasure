@@ -6,6 +6,8 @@ import { Progress } from '@/components/ui/progress';
 import { useGame } from '@/contexts/GameContext';
 import { CHALLENGES, HOUSE_NAMES, HOUSE_MOTTOS } from '@/types/game';
 import { formatTime, getLeaderboard } from '@/lib/gameUtils';
+import { supabase } from '@/lib/supabase';
+import * as roomService from '@/lib/roomService';
 import { 
   Crown, Clock, Users, CheckCircle2, Circle, Trophy,
   ArrowLeft, LogOut
@@ -25,16 +27,98 @@ const PlayerGame = () => {
   } = useGame();
   const { toast } = useToast();
   const [, forceUpdate] = useState({});
-
-  // Force re-render every second for timer
-  useEffect(() => {
-    const interval = setInterval(() => forceUpdate({}), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
+  
+  // Define room and players early so they can be used in useEffects
   const room = roomCode ? getRoom(roomCode) : undefined;
   const players = roomCode ? getPlayersInRoom(roomCode) : [];
   const leaderboard = getLeaderboard(players);
+  
+  // Initialize timer from room data
+  const [roomTimer, setRoomTimer] = useState(room?.timerRemaining ?? 0);
+  const [roomStatus, setRoomStatus] = useState<'waiting' | 'playing' | 'finished'>((room?.status as any) ?? 'waiting');
+
+  // Local countdown timer - counts down every second when game is playing
+  useEffect(() => {
+    if (roomStatus !== 'playing' || roomTimer <= 0) return;
+
+    const interval = setInterval(() => {
+      setRoomTimer(prev => {
+        const newTimer = Math.max(0, prev - 1);
+        if (newTimer === 0) {
+          setRoomStatus('finished');
+        }
+        return newTimer;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [roomStatus]);
+
+  // Sync state with room data when room changes (initial load)
+  useEffect(() => {
+    if (room) {
+      console.log('[ROOM_SYNC] Syncing room state - Timer:', room.timerRemaining, 'Status:', room.status);
+      setRoomTimer(room.timerRemaining ?? 0);
+      setRoomStatus((room.status as any) ?? 'waiting');
+    }
+  }, [room?.id]);
+
+  // Subscribe to real-time room updates (status, timer, etc)
+  useEffect(() => {
+    if (!room?.id) return;
+
+    console.log('[REALTIME_ROOM] Subscribing to room updates:', room.id);
+    
+    const subscription = roomService.subscribeToRoomChanges(
+      room.id,
+      (updatedRoom) => {
+        console.log('[REALTIME_ROOM] Room updated:', updatedRoom);
+        if (updatedRoom) {
+          // Update state so component re-renders
+          setRoomTimer(updatedRoom.timerRemaining);
+          setRoomStatus(updatedRoom.status);
+          console.log('[REALTIME_ROOM] Updated state - Timer:', updatedRoom.timerRemaining, 'Status:', updatedRoom.status);
+        }
+      }
+    );
+
+    return () => {
+      console.log('[REALTIME_ROOM] Unsubscribing from room');
+      subscription?.unsubscribe();
+    };
+  }, [room?.id]);
+
+  // Subscribe to real-time player updates for this room
+  useEffect(() => {
+    if (!room?.id) return;
+
+    console.log('[REALTIME_PLAYERS] Subscribing to players in room:', room.id);
+    
+    const subscription = supabase
+      .channel(`room_players_${room.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'players',
+          filter: `room_id=eq.${room.id}`,
+        },
+        (payload) => {
+          console.log('[REALTIME_PLAYERS] Player update received:', payload);
+          // Force re-render to reflect new player data
+          forceUpdate({});
+        }
+      )
+      .subscribe((status) => {
+        console.log('[REALTIME_PLAYERS] Subscription status:', status);
+      });
+
+    return () => {
+      console.log('[REALTIME_PLAYERS] Unsubscribing from players');
+      supabase.removeChannel(subscription);
+    };
+  }, [room?.id]);
 
   // Redirect if no room or no player
   useEffect(() => {
@@ -100,10 +184,10 @@ const PlayerGame = () => {
             {/* Timer */}
             <div className={cn(
               "flex items-center gap-2 rounded-lg px-3 py-1",
-              room.status === 'playing' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              roomStatus === 'playing' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
             )}>
               <Clock className="h-4 w-4" />
-              <span className="font-mono text-lg font-bold">{formatTime(room.timerRemaining)}</span>
+              <span className="font-mono text-lg font-bold">{formatTime(roomTimer)}</span>
             </div>
             
             <Button variant="ghost" size="icon" onClick={handleLeave}>
@@ -119,11 +203,29 @@ const PlayerGame = () => {
           {/* Status Banner */}
           {room.status === 'waiting' && (
             <Card className="border-muted bg-muted/30">
-              <CardContent className="flex items-center gap-3 py-4">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Waiting for Game Master</p>
-                  <p className="text-sm text-muted-foreground">The hunt will begin soon...</p>
+              <CardContent className="space-y-4 py-6">
+                <div className="flex items-center gap-3">
+                  <div className="animate-pulse h-5 w-5 rounded-full bg-primary" />
+                  <div>
+                    <p className="font-medium">Waiting for Game Master</p>
+                    <p className="text-sm text-muted-foreground">
+                      {players.length} player{players.length !== 1 ? 's' : ''} ready • The hunt begins soon...
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Show joining players */}
+                <div className="text-xs text-muted-foreground">
+                  <p className="font-medium mb-2">Players Joining:</p>
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {players.map(p => (
+                      <div key={p.id} className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-primary" />
+                        <span className="truncate">{p.username}</span>
+                        {p.id === currentPlayer?.id && <span className="text-primary font-medium">(You)</span>}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -212,14 +314,21 @@ const PlayerGame = () => {
                     </div>
                   </CardHeader>
                   
-                  {isCurrent && room.status === 'playing' && (
+                  {isCurrent && (
                     <CardContent className="pt-2">
                       <Button 
                         onClick={() => handleCompleteChallenge(challenge.id)}
+                        disabled={room.status !== 'playing' || isCompleted}
                         className="w-full font-cinzel"
                       >
-                        Complete Challenge
+                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Complete Challenge' : 'Waiting for Game Master...'}
                       </Button>
+                    </CardContent>
+                  )}
+                  
+                  {isLocked && (
+                    <CardContent className="pt-2 text-sm text-muted-foreground">
+                      <p>Complete challenge {challenge.id - 1} first</p>
                     </CardContent>
                   )}
                 </Card>

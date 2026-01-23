@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,16 +23,19 @@ const AdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already authenticated
-  if (isAdminAuthenticated) {
-    navigate('/admin/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    if (isAdminAuthenticated) {
+      navigate('/admin/dashboard');
+    }
+  }, [isAdminAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
+    console.log('Attempting login with email:', loginEmail);
     const success = await adminLogin(loginEmail, loginPassword);
+    console.log('Login result:', success);
     
     if (success) {
       toast({
@@ -65,7 +68,9 @@ const AdminAuth = () => {
       return;
     }
     
+    console.log('Attempting signup with:', { email: signupEmail, displayName: signupName });
     const success = await adminSignup(signupEmail, signupPassword, signupName);
+    console.log('Signup result:', success);
     
     if (success) {
       toast({
@@ -76,7 +81,7 @@ const AdminAuth = () => {
     } else {
       toast({
         title: "Signup Failed",
-        description: "An account with this email already exists.",
+        description: "An account with this email already exists or an error occurred.",
         variant: "destructive",
       });
     }
