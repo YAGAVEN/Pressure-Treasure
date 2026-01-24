@@ -114,23 +114,32 @@ const PlayerGame = () => {
           table: 'rooms',
           filter: `id=eq.${room.id}`,
         },
-        (payload) => {
-          console.log('[REALTIME_ROOM] Room update received:', payload);
+        async (payload) => {
+          console.log('[REALTIME_ROOM] Room update received! Event:', payload.eventType, 'Data:', payload.new);
+          
           if (payload.new) {
-            setRoomTimer(payload.new.timer_remaining ?? roomTimer);
-            setRoomStatus(payload.new.status ?? roomStatus);
+            // Update room timer and status immediately
+            const newTimer = payload.new.timer_remaining ?? 0;
+            const newStatus = payload.new.status ?? 'waiting';
+            
+            console.log('[REALTIME_ROOM] ✅ Updating - Timer:', newTimer, 'Status:', newStatus);
+            setRoomTimer(newTimer);
+            setRoomStatus(newStatus);
           }
         }
       )
       .subscribe((status) => {
         console.log('[REALTIME_ROOM] Subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('[REALTIME_ROOM] ✅ Successfully subscribed to room updates');
+        }
       });
 
     return () => {
       console.log('[REALTIME_ROOM] Unsubscribing from room');
       supabase.removeChannel(subscription);
     };
-  }, [room?.id, roomTimer, roomStatus]);
+  }, [room?.id]);
 
   // Subscribe to real-time player updates for this room
   useEffect(() => {
