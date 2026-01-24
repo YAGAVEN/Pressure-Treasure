@@ -1,9 +1,68 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Crown, Users, Shield } from 'lucide-react';
+import { Crown, Users, Shield, Volume2, VolumeX } from 'lucide-react';
 
 const Index = () => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    // Create audio element for background music
+    const audio = new Audio('/intro.mp3');
+    audio.loop = true;
+    audio.volume = 0.5;
+    audioRef.current = audio;
+
+    // Function to play audio
+    const playAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().catch((error) => {
+          console.log('Audio playback failed:', error);
+        });
+      }
+    };
+
+    // Try to play immediately
+    playAudio();
+
+    // Also play on first user interaction (click, touch, key press)
+    const handleUserInteraction = () => {
+      playAudio();
+      // Remove listener after first interaction
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
+
+    // Cleanup: stop and remove audio when component unmounts (user navigates away)
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      if (isMuted) {
+        audioRef.current.volume = 0.5;
+      } else {
+        audioRef.current.volume = 0;
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-medieval-pattern">
       {/* Hero Section */}
@@ -19,7 +78,7 @@ const Index = () => {
             
             {/* Title */}
             <h1 className="font-decorative text-4xl font-bold tracking-wide md:text-6xl lg:text-7xl">
-              <span className="text-gold-gradient">Treasure Hunt</span>
+              <span className="text-gold-gradient"> Pressure & Treasure </span>
             </h1>
             
             <p className="mt-4 font-cinzel text-xl text-muted-foreground md:text-2xl">
@@ -83,52 +142,26 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Features */}
-        <div className="mx-auto mt-16 max-w-4xl">
-          <h2 className="mb-8 text-center font-cinzel text-2xl font-semibold text-foreground/80">
-            How It Works
-          </h2>
-          
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-                1
-              </div>
-              <h3 className="font-cinzel text-lg font-medium">Join a Room</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Get a 6-character code from your Game Master and enter it to join.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-                2
-              </div>
-              <h3 className="font-cinzel text-lg font-medium">Complete Challenges</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Race through 5 epic challenges before the timer runs out.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-                3
-              </div>
-              <h3 className="font-cinzel text-lg font-medium">Claim Victory</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Finish first or have the most progress when time expires to win!
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-6">
-        <p className="text-center text-sm text-muted-foreground">
-          <span className="font-cinzel">Valar Morghulis</span> — All men must play
-        </p>
+        <div className="container mx-auto flex items-center justify-center gap-6 px-4">
+          <p className="text-center text-sm text-muted-foreground">
+            <span className="font-cinzel">Valar Morghulis</span> — All men must play
+          </p>
+          <button
+            onClick={toggleMute}
+            className="flex items-center justify-center rounded-full p-2 transition-colors hover:bg-primary/10 active:bg-primary/20"
+            aria-label={isMuted ? 'Unmute music' : 'Mute music'}
+          >
+            {isMuted ? (
+              <VolumeX className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <Volume2 className="h-5 w-5 text-primary" />
+            )}
+          </button>
+        </div>
       </footer>
     </div>
   );

@@ -81,9 +81,10 @@ export default {
         },
       },
       fontFamily: {
+        trajan: ['Trajan Pro', 'serif'],
         cinzel: ['Cinzel', 'serif'],
         decorative: ['Cinzel Decorative', 'cursive'],
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Trajan Pro', 'serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

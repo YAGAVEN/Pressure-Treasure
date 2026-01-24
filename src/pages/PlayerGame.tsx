@@ -400,15 +400,6 @@ const PlayerGame = () => {
               </div>
             </CardContent>
           </Card>
-          
-          {/* House Motto */}
-          <Card className="bg-muted/30">
-            <CardContent className="py-4 text-center">
-              <p className="font-decorative text-sm text-muted-foreground">
-                "{HOUSE_MOTTOS[room.houseTheme]}"
-              </p>
-            </CardContent>
-          </Card>
         </div>
       </main>
     </div>

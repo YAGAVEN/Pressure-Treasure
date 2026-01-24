@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Trajan+Pro&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -127,7 +127,15 @@
   }
 }
 
-@layer utilities {
+html {
+  font-family: 'Trajan Pro', serif;
+}
+
+body {
+  font-family: 'Trajan Pro', serif;
+}
+
+@layer components {
   .text-gold-gradient {
     background: linear-gradient(135deg, hsl(var(--gold-light)) 0%, hsl(var(--gold)) 50%, hsl(var(--gold-dark)) 100%);
     -webkit-background-clip: text;
