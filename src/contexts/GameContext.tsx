@@ -32,6 +32,7 @@ interface GameContextType {
   leaveRoom: () => void;
   getPlayersInRoom: (roomCode: string) => Player[];
   kickPlayer: (playerId: string) => void;
+  syncPlayersForRoom: (roomCode: string, newPlayers: Player[]) => void;
   
   // Challenge Progress
   completeChallenge: (challengeId: number) => void;
@@ -472,7 +473,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     // Also save to Supabase if authenticated
     if (room.id) {
       try {
-        const dbPlayer = await playerService.addPlayerToRoom(room.id, username);
+        const dbPlayer = await playerService.addPlayerToRoom(room.id, username, roomCode);
         if (dbPlayer) {
           const updatedPlayer = { ...player, id: dbPlayer.id };
           setCurrentPlayer(updatedPlayer);
@@ -510,6 +511,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     playerService.removePlayerFromRoom(playerId).catch(err =>
       console.error('Failed to kick player from Supabase:', err)
     );
+  }, []);
+
+  // Sync players for a specific room from database
+  const syncPlayersForRoom = useCallback((roomCode: string, newPlayers: Player[]) => {
+    setPlayers(prev => {
+      // Replace players in this room with new data, keep players from other rooms
+      const otherRoomPlayers = prev.filter(p => p.roomCode !== roomCode);
+      return [...otherRoomPlayers, ...newPlayers];
+    });
   }, []);
 
   // Challenge Progress
@@ -681,6 +691,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     leaveRoom,
     getPlayersInRoom,
     kickPlayer,
+    syncPlayersForRoom,
     completeChallenge,
     activeTimers,
   };

@@ -15,6 +15,7 @@ import {
   Clock, Crown, LogOut, Copy, Check
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -29,7 +30,8 @@ const AdminDashboard = () => {
     endGame,
     resetGame,
     getPlayersInRoom,
-    kickPlayer
+    kickPlayer,
+    syncPlayersForRoom
   } = useGame();
   const { toast } = useToast();
   
@@ -41,11 +43,115 @@ const AdminDashboard = () => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [, forceUpdate] = useState({});
 
+  // Define adminRooms early so it can be used in useEffects
+  const adminRooms = rooms.filter(r => r.adminId === admin?.id);
+
   // Force re-render every second for timer display
   useEffect(() => {
     const interval = setInterval(() => forceUpdate({}), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch initial players for all admin rooms from database
+  useEffect(() => {
+    const fetchPlayersForRooms = async () => {
+      for (const room of adminRooms) {
+        try {
+          const { data: players, error } = await supabase
+            .from('players')
+            .select('*')
+            .eq('room_code', room.code);
+
+          if (!error && players && players.length > 0) {
+            const appPlayers = players.map(p => ({
+              id: p.id,
+              roomCode: p.room_code,
+              username: p.username,
+              progress: p.progress || 0,
+              currentChallenge: p.current_challenge || 1,
+              completedChallenges: p.completed_challenges || [],
+              isOnline: p.is_online !== false,
+              joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
+              lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+            }));
+            syncPlayersForRoom(room.code, appPlayers);
+          }
+        } catch (err) {
+          console.error('[ADMIN] Error fetching players for room:', room.code, err);
+        }
+      }
+    };
+
+    if (adminRooms.length > 0) {
+      fetchPlayersForRooms();
+    }
+  }, [adminRooms.length, syncPlayersForRoom]);
+
+  // Subscribe to real-time player updates across all rooms
+  useEffect(() => {
+    console.log('[ADMIN] Setting up real-time player subscription');
+    
+    const subscription = supabase
+      .channel('realtime:players')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'players',
+        },
+        async (payload) => {
+          console.log('[ADMIN] Player change detected! Event:', payload.eventType, 'Data:', payload);
+          
+          // Extract room code from the payload
+          const roomCode = payload.new?.room_code || payload.old?.room_code;
+          if (!roomCode) {
+            console.log('[ADMIN] No room code in payload, skipping');
+            return;
+          }
+
+          // Fetch updated players for this room
+          try {
+            const { data: updatedPlayers, error } = await supabase
+              .from('players')
+              .select('*')
+              .eq('room_code', roomCode);
+
+            if (!error && updatedPlayers) {
+              // Convert database players to app format and sync
+              const appPlayers = updatedPlayers.map(p => ({
+                id: p.id,
+                roomCode: p.room_code,
+                username: p.username,
+                progress: p.progress || 0,
+                currentChallenge: p.current_challenge || 1,
+                completedChallenges: p.completed_challenges || [],
+                isOnline: p.is_online !== false,
+                joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
+                lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+              }));
+              
+              syncPlayersForRoom(roomCode, appPlayers);
+              console.log('[ADMIN] ✅ Synced', appPlayers.length, 'players for room:', roomCode);
+              forceUpdate({});
+            }
+          } catch (err) {
+            console.error('[ADMIN] Error fetching updated players:', err);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[ADMIN] Subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('[ADMIN] ✅ Successfully subscribed to player updates');
+        }
+      });
+
+    return () => {
+      console.log('[ADMIN] Cleaning up player subscription');
+      supabase.removeChannel(subscription);
+    };
+  }, [syncPlayersForRoom]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -57,8 +163,6 @@ const AdminDashboard = () => {
   if (!isAdminAuthenticated) {
     return null;
   }
-
-  const adminRooms = rooms.filter(r => r.adminId === admin?.id);
 
   const handleCreateRoom = () => {
     if (!newRoomName.trim()) {

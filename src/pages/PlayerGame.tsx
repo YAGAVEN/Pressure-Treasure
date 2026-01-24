@@ -23,7 +23,8 @@ const PlayerGame = () => {
     getRoom, 
     getPlayersInRoom, 
     leaveRoom,
-    completeChallenge
+    completeChallenge,
+    syncPlayersForRoom
   } = useGame();
   const { toast } = useToast();
   const [, forceUpdate] = useState({});
@@ -63,62 +64,133 @@ const PlayerGame = () => {
     }
   }, [room?.id]);
 
+  // Fetch initial players from database when joining room
+  useEffect(() => {
+    if (!roomCode) return;
+
+    const fetchPlayers = async () => {
+      try {
+        const { data: players, error } = await supabase
+          .from('players')
+          .select('*')
+          .eq('room_code', roomCode);
+
+        if (!error && players && players.length > 0) {
+          const appPlayers = players.map(p => ({
+            id: p.id,
+            roomCode: p.room_code,
+            username: p.username,
+            progress: p.progress || 0,
+            currentChallenge: p.current_challenge || 1,
+            completedChallenges: p.completed_challenges || [],
+            isOnline: p.is_online !== false,
+            joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
+            lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+          }));
+          syncPlayersForRoom(roomCode, appPlayers);
+          console.log('[PLAYER_SYNC] Loaded', appPlayers.length, 'players from database');
+        }
+      } catch (err) {
+        console.error('[PLAYER_SYNC] Error fetching players:', err);
+      }
+    };
+
+    fetchPlayers();
+  }, [roomCode, syncPlayersForRoom]);
+
   // Subscribe to real-time room updates (status, timer, etc)
   useEffect(() => {
     if (!room?.id) return;
 
     console.log('[REALTIME_ROOM] Subscribing to room updates:', room.id);
     
-    const subscription = roomService.subscribeToRoomChanges(
-      room.id,
-      (updatedRoom) => {
-        console.log('[REALTIME_ROOM] Room updated:', updatedRoom);
-        if (updatedRoom) {
-          // Update state so component re-renders
-          setRoomTimer(updatedRoom.timerRemaining);
-          setRoomStatus(updatedRoom.status);
-          console.log('[REALTIME_ROOM] Updated state - Timer:', updatedRoom.timerRemaining, 'Status:', updatedRoom.status);
+    const subscription = supabase
+      .channel(`realtime:rooms:${room.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'rooms',
+          filter: `id=eq.${room.id}`,
+        },
+        (payload) => {
+          console.log('[REALTIME_ROOM] Room update received:', payload);
+          if (payload.new) {
+            setRoomTimer(payload.new.timer_remaining ?? roomTimer);
+            setRoomStatus(payload.new.status ?? roomStatus);
+          }
         }
-      }
-    );
+      )
+      .subscribe((status) => {
+        console.log('[REALTIME_ROOM] Subscription status:', status);
+      });
 
     return () => {
       console.log('[REALTIME_ROOM] Unsubscribing from room');
-      subscription?.unsubscribe();
+      supabase.removeChannel(subscription);
     };
-  }, [room?.id]);
+  }, [room?.id, roomTimer, roomStatus]);
 
   // Subscribe to real-time player updates for this room
   useEffect(() => {
-    if (!room?.id) return;
+    if (!roomCode) return;
 
-    console.log('[REALTIME_PLAYERS] Subscribing to players in room:', room.id);
+    console.log('[REALTIME_PLAYERS] Setting up subscription for room:', roomCode);
     
     const subscription = supabase
-      .channel(`room_players_${room.id}`)
+      .channel(`realtime:players:${roomCode}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'players',
-          filter: `room_id=eq.${room.id}`,
+          filter: `room_code=eq.${roomCode}`,
         },
-        (payload) => {
-          console.log('[REALTIME_PLAYERS] Player update received:', payload);
-          // Force re-render to reflect new player data
-          forceUpdate({});
+        async (payload) => {
+          console.log('[REALTIME_PLAYERS] Change detected! Event:', payload.eventType, 'Data:', payload);
+          
+          // Refetch all players for this room to ensure we have latest data
+          try {
+            const { data: players, error } = await supabase
+              .from('players')
+              .select('*')
+              .eq('room_code', roomCode);
+
+            if (!error && players) {
+              const appPlayers = players.map(p => ({
+                id: p.id,
+                roomCode: p.room_code,
+                username: p.username,
+                progress: p.progress || 0,
+                currentChallenge: p.current_challenge || 1,
+                completedChallenges: p.completed_challenges || [],
+                isOnline: p.is_online !== false,
+                joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
+                lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+              }));
+              syncPlayersForRoom(roomCode, appPlayers);
+              console.log('[REALTIME_PLAYERS] Updated player list, count:', appPlayers.length);
+              forceUpdate({});
+            }
+          } catch (err) {
+            console.error('[REALTIME_PLAYERS] Error refetching players:', err);
+          }
         }
       )
       .subscribe((status) => {
         console.log('[REALTIME_PLAYERS] Subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('[REALTIME_PLAYERS] ✅ Successfully subscribed to player updates');
+        }
       });
 
     return () => {
       console.log('[REALTIME_PLAYERS] Unsubscribing from players');
       supabase.removeChannel(subscription);
     };
-  }, [room?.id]);
+  }, [roomCode, syncPlayersForRoom]);
 
   // Redirect if no room or no player
   useEffect(() => {

@@ -6,14 +6,15 @@ import { Player } from '@/types/game';
  */
 export async function addPlayerToRoom(
   roomId: string,
-  username: string
+  username: string,
+  roomCode: string
 ): Promise<Player | null> {
   try {
-    console.log('[PLAYERSERVICE] Adding player to room:', { roomId, username });
+    console.log('[PLAYERSERVICE] Adding player to room:', { roomCode, username });
     const { data, error } = await supabase
       .from('players')
       .insert({
-        room_id: roomId,
+        room_code: roomCode, // Only use room_code
         username,
         progress: 0,
         current_challenge: 1,
@@ -38,7 +39,7 @@ export async function addPlayerToRoom(
     return {
       id: data.id,
       username: data.username,
-      roomCode: '', // Will be populated from room context
+      roomCode: data.room_code || '',
       progress: data.progress,
       currentChallenge: data.current_challenge,
       completedChallenges: data.completed_challenges || [],
