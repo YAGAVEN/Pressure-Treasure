@@ -14,6 +14,7 @@ import AdminAuth from "./pages/AdminAuth";
 import AdminDashboard from "./pages/AdminDashboard";
 import PlayerJoin from "./pages/PlayerJoin";
 import PlayerGame from "./pages/PlayerGame";
+import RiddlePage from "./pages/RiddlePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/join" element={<PlayerJoin />} />
                 <Route path="/game/:roomCode" element={<PlayerGame />} />
+                <Route path="/riddle/:roomCode" element={<RiddlePage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

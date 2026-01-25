@@ -413,7 +413,7 @@ const PlayerGame = () => {
             {CHALLENGES.map((challenge, index) => {
               const isCompleted = currentPlayer.completedChallenges.includes(challenge.id);
               const isCurrent = currentPlayer.currentChallenge === challenge.id;
-              const isLocked = challenge.id > currentPlayer.currentChallenge;
+              const isLocked = false; // All challenges unlocked for testing
               
               return (
                 <Card 
@@ -444,7 +444,19 @@ const PlayerGame = () => {
                     </div>
                   </CardHeader>
                   
-                  {isCurrent && (
+                  {challenge.id === 2 && !isCompleted && (
+                    <CardContent className="pt-2">
+                      <Button 
+                        onClick={() => navigate(`/riddle/${roomCode}`)}
+                        disabled={room.status !== 'playing' || isCompleted}
+                        className="w-full font-cinzel"
+                      >
+                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Riddle Challenge' : 'Waiting for Game Master...'}
+                      </Button>
+                    </CardContent>
+                  )}
+                  
+                  {challenge.id !== 2 && !isCompleted && (
                     <CardContent className="pt-2">
                       <Button 
                         onClick={() => handleCompleteChallenge(challenge.id)}
@@ -456,9 +468,9 @@ const PlayerGame = () => {
                     </CardContent>
                   )}
                   
-                  {isLocked && (
+                  {isCompleted && (
                     <CardContent className="pt-2 text-sm text-muted-foreground">
-                      <p>Complete challenge {challenge.id - 1} first</p>
+                      <p>✓ Challenge completed</p>
                     </CardContent>
                   )}
                 </Card>
