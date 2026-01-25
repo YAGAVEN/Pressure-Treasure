@@ -57,6 +57,7 @@ export async function createRoomInDB(
       startedAt: data.started_at ? new Date(data.started_at).getTime() : null,
       endedAt: data.ended_at ? new Date(data.ended_at).getTime() : null,
       winnerId: data.winner_id || null,
+      winners: data.winners ? JSON.parse(data.winners) : [],
       adminId: data.admin_id,
     };
   } catch (err) {
@@ -94,6 +95,7 @@ export async function getAdminRooms(adminId: string): Promise<Room[]> {
       startedAt: room.started_at ? new Date(room.started_at).getTime() : null,
       endedAt: room.ended_at ? new Date(room.ended_at).getTime() : null,
       winnerId: room.winner_id || null,
+      winners: room.winners ? (typeof room.winners === 'string' ? JSON.parse(room.winners) : room.winners) : [],
       adminId: room.admin_id,
     }));
   } catch (err) {
@@ -139,6 +141,7 @@ export async function getRoomByCode(code: string): Promise<Room | null> {
       startedAt: roomData.started_at ? new Date(roomData.started_at).getTime() : null,
       endedAt: roomData.ended_at ? new Date(roomData.ended_at).getTime() : null,
       winnerId: roomData.winner_id || null,
+      winners: roomData.winners ? (typeof roomData.winners === 'string' ? JSON.parse(roomData.winners) : roomData.winners) : [],
       adminId: roomData.admin_id,
     };
   } catch (err) {
@@ -175,7 +178,8 @@ export async function deleteRoomFromDB(roomId: string): Promise<boolean> {
 export async function updateRoomStatus(
   roomCode: string,
   status: 'waiting' | 'playing' | 'finished',
-  winnerId?: string | null
+  winnerId?: string | null,
+  winners?: { playerId: string; rank: number; progress: number }[]
 ): Promise<boolean> {
   try {
     const updateData: any = { status };
@@ -187,6 +191,9 @@ export async function updateRoomStatus(
       updateData.ended_at = new Date().toISOString();
       if (winnerId) {
         updateData.winner_id = winnerId;
+      }
+      if (winners && winners.length > 0) {
+        updateData.winners = JSON.stringify(winners);
       }
     }
 
@@ -266,6 +273,7 @@ export function subscribeToRoomChanges(
             startedAt: room.started_at ? new Date(room.started_at).getTime() : null,
             endedAt: room.ended_at ? new Date(room.ended_at).getTime() : null,
             winnerId: room.winner_id || null,
+            winners: room.winners ? (typeof room.winners === 'string' ? JSON.parse(room.winners) : room.winners) : [],
             adminId: room.admin_id,
           });
         } else {

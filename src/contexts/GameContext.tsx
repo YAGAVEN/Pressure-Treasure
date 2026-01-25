@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { Room, Player, Admin, RoomStatus, HouseTheme, CHALLENGES } from '@/types/game';
-import { generateRoomCode, generateId, calculateProgress } from '@/lib/gameUtils';
+import { generateRoomCode, generateId, calculateProgress, calculateTopWinners } from '@/lib/gameUtils';
 import { supabase } from '@/lib/supabase';
 import * as roomService from '@/lib/roomService';
 import * as playerService from '@/lib/playerService';
@@ -20,6 +20,7 @@ interface GameContextType {
   deleteRoom: (roomId: string) => void;
   getRoom: (roomCode: string) => Room | undefined;
   getRoomById: (roomId: string) => Room | undefined;
+  updateRoom: (room: Room) => void;
   
   // Game Controls
   startGame: (roomId: string) => void;
@@ -28,7 +29,7 @@ interface GameContextType {
   
   // Player Management
   currentPlayer: Player | null;
-  joinRoom: (roomCode: string, username: string) => Player | null;
+  joinRoom: (roomCode: string, username: string) => Promise<Player | null>;
   leaveRoom: () => void;
   getPlayersInRoom: (roomCode: string) => Player[];
   kickPlayer: (playerId: string) => void;
@@ -246,6 +247,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       startedAt: null,
       endedAt: null,
       winnerId: null,
+      winners: [],
       adminId: admin?.id || '',
     };
     
@@ -294,6 +296,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return rooms.find(r => r.id === roomId);
   }, [rooms]);
 
+  const updateRoom = useCallback((updatedRoom: Room) => {
+    setRooms(prev => prev.map(r => r.id === updatedRoom.id ? updatedRoom : r));
+  }, []);
+
   // Game Controls
   const startGame = useCallback((roomId: string) => {
     const room = rooms.find(r => r.id === roomId);
@@ -334,12 +340,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           clearInterval(interval);
           console.log('[TIMER] Game ended for room:', room.code);
           
-          // Find winner (highest progress)
+          // Find top 3 winners
           const updatedRoomPlayers = players.filter(p => p.roomCode === updatedRoom.code);
-          const winner = updatedRoomPlayers.sort((a, b) => b.progress - a.progress)[0];
+          const topWinners = calculateTopWinners(updatedRoomPlayers);
+          const winner = updatedRoomPlayers.find(p => p.id === topWinners[0]?.playerId);
           
           // Update Supabase
-          roomService.updateRoomStatus(room.code, 'finished', winner?.id || null);
+          roomService.updateRoomStatus(room.code, 'finished', winner?.id || null, topWinners);
 
           return prev.map(r => r.id === roomId ? {
             ...r,
@@ -347,6 +354,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             status: 'finished' as RoomStatus,
             endedAt: Date.now(),
             winnerId: winner?.id || null,
+            winners: topWinners,
           } : r);
         }
 
@@ -375,16 +383,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const updatedRooms = prev.map(r => {
         if (r.id === roomId) {
           const roomPlayers = players.filter(p => p.roomCode === r.code);
-          const winner = roomPlayers.sort((a, b) => b.progress - a.progress)[0];
+          const topWinners = calculateTopWinners(roomPlayers);
+          const winner = roomPlayers.find(p => p.id === topWinners[0]?.playerId);
           
           // Update Supabase
-          roomService.updateRoomStatus(room.code, 'finished', winner?.id || null);
+          roomService.updateRoomStatus(room.code, 'finished', winner?.id || null, topWinners);
 
           return {
             ...r,
             status: 'finished' as RoomStatus,
             endedAt: Date.now(),
             winnerId: winner?.id || null,
+            winners: topWinners,
           };
         }
         return r;
@@ -415,6 +425,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           startedAt: null,
           endedAt: null,
           winnerId: null,
+          winners: [],
         };
       }
       return room;
@@ -426,13 +437,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const room = rooms.find(r => r.id === roomId);
         if (room && player.roomCode === room.code) {
           // Update Supabase player progress
-          playerService.updatePlayerProgress(player.id, [], 0);
+          playerService.updatePlayerProgress(player.id, []);
           
           return {
             ...player,
             progress: 0,
             currentChallenge: 1,
             completedChallenges: [],
+            completedAt: null,
           };
         }
         return player;
@@ -470,6 +482,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       completedChallenges: [],
       joinedAt: Date.now(),
       isOnline: true,
+      completedAt: null,
     };
     
     setPlayers(prev => [...prev, player]);
@@ -541,42 +554,61 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const newCompleted = [...player.completedChallenges, challengeId];
         const newProgress = calculateProgress(newCompleted);
         const nextChallenge = Math.min(challengeId + 1, CHALLENGES.length);
+        const now = Date.now();
         
         console.log('[CHALLENGE] Updated player progress:', { newCompleted, newProgress, nextChallenge });
+        
+        // Track completion time when all challenges are done
+        const completedAt = newCompleted.length === CHALLENGES.length ? now : player.completedAt;
         
         const updatedPlayer = {
           ...player,
           completedChallenges: newCompleted,
           progress: newProgress,
           currentChallenge: nextChallenge,
+          completedAt,
+          progressUpdatedAt: now, // Update timestamp when progress changes
         };
 
         // Update current player state
         setCurrentPlayer(updatedPlayer);
 
-        // Save to Supabase
-        playerService.updatePlayerProgress(player.id, newCompleted, newProgress).catch(
-          err => console.error('[CHALLENGE] Failed to update player progress in Supabase:', err)
-        );
-
         // Check if player completed all challenges
         if (newCompleted.length === CHALLENGES.length) {
-          console.log('[CHALLENGE] Player completed all challenges!');
-          // Find the room and set winner if game is still playing
-          const room = rooms.find(r => r.code === player.roomCode);
-          if (room && room.status === 'playing' && !room.winnerId) {
-            setRooms(prevRooms => prevRooms.map(r => 
-              r.id === room.id ? { ...r, winnerId: player.id, status: 'finished' as RoomStatus, endedAt: Date.now() } : r
-            ));
-            roomService.updateRoomStatus(room.code, 'finished', player.id);
+          console.log('[CHALLENGE] ⭐ Player completed all challenges!', { 
+            playerId: player.id, 
+            username: player.username,
+            completedAt, 
+            completedAtDate: new Date(completedAt).toISOString() 
+          });
+          
+          // End the game immediately when any player finishes
+          const currentRoom = rooms.find(r => r.code === player.roomCode);
+          if (currentRoom) {
+            console.log('[CHALLENGE] 🏁 Ending game - player finished all challenges');
+            // Delay to ensure all state updates (player progress, completedAt) propagate
+            setTimeout(() => endGame(currentRoom.id), 500);
           }
         }
+
+        // Save to Supabase (MUST save completedAt for ranking!)
+        playerService.updatePlayerProgress(player.id, newCompleted).then(
+          success => {
+            if (success) {
+              console.log('[CHALLENGE] ✅ Progress saved to database', { playerId: player.id, completedAt });
+            } else {
+              console.error('[CHALLENGE] ❌ Failed to save progress to database');
+            }
+          }
+        ).catch(
+          err => console.error('[CHALLENGE] ❌ Error saving to Supabase:', err)
+        );
 
         return updatedPlayer;
       }
       return player;
     }));
-  }, [currentPlayer, rooms]);
+  }, [currentPlayer, rooms, endGame]);
 
   // Load admin's rooms from Supabase when admin changes
   useEffect(() => {
@@ -602,7 +634,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         subscription = playerService.subscribeToRoomPlayers(
           room.id,
           (updatedPlayers) => {
-            console.log('[SUBSCRIPTION] Players updated:', updatedPlayers);
+            console.log('[SUBSCRIPTION] Players updated:', updatedPlayers.map(p => ({
+              username: p.username,
+              completedAt: p.completedAt,
+              completedAtDate: p.completedAt ? new Date(p.completedAt).toISOString() : null,
+              completedChallenges: p.completedChallenges
+            })));
             setPlayers(updatedPlayers.map(p => ({
               ...p,
               roomCode: room.code
@@ -688,6 +725,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     deleteRoom,
     getRoom,
     getRoomById,
+    updateRoom,
     startGame,
     endGame,
     resetGame,
