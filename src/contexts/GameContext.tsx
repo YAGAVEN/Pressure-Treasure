@@ -299,10 +299,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const room = rooms.find(r => r.id === roomId);
     if (!room) return;
 
-    console.log('[GAMECONTEXT] Starting game for room:', roomId);
+    console.log('[GAMECONTEXT] Starting game for room:', room.code);
 
-    // Update Supabase
+    // Update Supabase status to playing
     roomService.updateRoomStatus(room.code, 'playing');
+    roomService.updateRoomTimer(room.code, room.timerDuration);
 
     setRooms(prev => prev.map(r => {
       if (r.id === roomId) {
@@ -331,14 +332,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
         if (currentRemaining <= 0) {
           clearInterval(interval);
-          console.log('[TIMER] Game ended for room:', roomId);
+          console.log('[TIMER] Game ended for room:', room.code);
           
           // Find winner (highest progress)
           const updatedRoomPlayers = players.filter(p => p.roomCode === updatedRoom.code);
           const winner = updatedRoomPlayers.sort((a, b) => b.progress - a.progress)[0];
           
           // Update Supabase
-          roomService.updateRoomStatus(updatedRoom.code, 'finished', winner?.id || null);
+          roomService.updateRoomStatus(room.code, 'finished', winner?.id || null);
 
           return prev.map(r => r.id === roomId ? {
             ...r,
@@ -349,8 +350,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           } : r);
         }
 
-        // Save timer to Supabase so other clients see the update
-        roomService.updateRoomTimer(updatedRoom.id, currentRemaining).catch(
+        // Save timer to Supabase every second so other clients see the update
+        roomService.updateRoomTimer(room.code, currentRemaining).catch(
           err => console.error('[TIMER] Failed to save timer to Supabase:', err)
         );
 
@@ -368,22 +369,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
 
     setRooms(prev => {
-      const updatedRooms = prev.map(room => {
-        if (room.id === roomId) {
-          const roomPlayers = players.filter(p => p.roomCode === room.code);
+      const room = prev.find(r => r.id === roomId);
+      if (!room) return prev;
+
+      const updatedRooms = prev.map(r => {
+        if (r.id === roomId) {
+          const roomPlayers = players.filter(p => p.roomCode === r.code);
           const winner = roomPlayers.sort((a, b) => b.progress - a.progress)[0];
           
           // Update Supabase
           roomService.updateRoomStatus(room.code, 'finished', winner?.id || null);
 
           return {
-            ...room,
+            ...r,
             status: 'finished' as RoomStatus,
             endedAt: Date.now(),
             winnerId: winner?.id || null,
           };
         }
-        return room;
+        return r;
       });
       return updatedRooms;
     });
@@ -397,8 +401,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     const room = rooms.find(r => r.id === roomId);
     if (room) {
-      // Update Supabase room status to waiting
+      // Update Supabase room status to waiting and reset timer
       roomService.updateRoomStatus(room.code, 'waiting');
+      roomService.updateRoomTimer(room.code, room.timerDuration);
     }
 
     setRooms(prev => prev.map(room => {

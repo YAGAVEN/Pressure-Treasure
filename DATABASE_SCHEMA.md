@@ -29,6 +29,7 @@ CREATE TABLE rooms (
   description TEXT,
   house_theme TEXT NOT NULL,
   timer_duration INTEGER NOT NULL,
+  timer_remaining INTEGER,
   status TEXT NOT NULL DEFAULT 'waiting',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   started_at TIMESTAMP WITH TIME ZONE,
@@ -40,6 +41,10 @@ CREATE TABLE rooms (
 CREATE INDEX rooms_admin_id ON rooms(admin_id);
 CREATE INDEX rooms_code ON rooms(code);
 CREATE INDEX rooms_status ON rooms(status);
+
+-- Migration: Add timer_remaining column if it doesn't exist
+-- Run this if you already have the rooms table:
+-- ALTER TABLE rooms ADD COLUMN IF NOT EXISTS timer_remaining INTEGER;
 ```
 
 ### players
