@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useGame } from '@/contexts/GameContext';
 import { HOUSE_NAMES, HOUSE_MOTTOS, HouseTheme, Room } from '@/types/game';
-import { formatTime } from '@/lib/gameUtils';
+import { formatTime, calculateProgress } from '@/lib/gameUtils';
 import { 
   Shield, Plus, Trash2, Play, Square, RotateCcw, Users, 
   Clock, Crown, LogOut, Copy, Check
@@ -69,10 +69,14 @@ const AdminDashboard = () => {
               username: p.username,
               progress: p.progress || 0,
               currentChallenge: p.current_challenge || 1,
-              completedChallenges: p.completed_challenges || [],
+              completedChallenges: Array.isArray(p.completed_challenges)
+                ? p.completed_challenges.map((c: any) => typeof c === 'string' ? parseInt(c) : c)
+                : [],
               isOnline: p.is_online !== false,
               joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
               lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+              completedAt: p.completed_at ? new Date(p.completed_at).getTime() : null,
+              progressUpdatedAt: p.progress_updated_at ? new Date(p.progress_updated_at).getTime() : Date.now(),
             }));
             syncPlayersForRoom(room.code, appPlayers);
           }
@@ -125,10 +129,14 @@ const AdminDashboard = () => {
                 username: p.username,
                 progress: p.progress || 0,
                 currentChallenge: p.current_challenge || 1,
-                completedChallenges: p.completed_challenges || [],
+                completedChallenges: Array.isArray(p.completed_challenges)
+                  ? p.completed_challenges.map((c: any) => typeof c === 'string' ? parseInt(c) : c)
+                  : [],
                 isOnline: p.is_online !== false,
                 joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
                 lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+                completedAt: p.completed_at ? new Date(p.completed_at).getTime() : null,
+                progressUpdatedAt: p.progress_updated_at ? new Date(p.progress_updated_at).getTime() : Date.now(),
               }));
               
               syncPlayersForRoom(roomCode, appPlayers);
@@ -343,7 +351,7 @@ const AdminDashboard = () => {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {adminRooms.map((room) => {
               const players = getPlayersInRoom(room.code);
-              const winner = room.winnerId ? players.find(p => p.id === room.winnerId) : null;
+              const topWinners = room.winners || [];
               
               return (
                 <Card key={room.id} className="overflow-hidden">
@@ -389,11 +397,25 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                     
-                    {/* Winner Display */}
-                    {room.status === 'finished' && winner && (
-                      <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2">
-                        <Crown className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">Winner: {winner.username}</span>
+                    {/* Top 3 Winners Display */}
+                    {room.status === 'finished' && topWinners.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">Top Winners:</p>
+                        {topWinners.map((winner) => {
+                          const winnerPlayer = players.find(p => p.id === winner.playerId);
+                          if (!winnerPlayer) return null;
+                          return (
+                            <div key={winner.playerId} className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2">
+                              <span className="text-sm">
+                                {winner.rank === 1 && "🥇"}
+                                {winner.rank === 2 && "🥈"}
+                                {winner.rank === 3 && "🥉"}
+                              </span>
+                              <span className="text-sm font-medium flex-1">{winnerPlayer.username}</span>
+                              <span className="text-xs text-muted-foreground">{winner.progress}%</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     
@@ -402,22 +424,25 @@ const AdminDashboard = () => {
                       <div className="space-y-2">
                         <p className="text-xs font-medium text-muted-foreground">Players:</p>
                         <div className="max-h-24 space-y-1 overflow-y-auto">
-                          {players.map((player) => (
-                            <div key={player.id} className="flex items-center justify-between rounded bg-muted/30 px-2 py-1">
-                              <span className="text-sm">{player.username}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-muted-foreground">{player.progress}%</span>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6"
-                                  onClick={() => kickPlayer(player.id)}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
+                          {players.map((player) => {
+                            const actualProgress = calculateProgress(player.completedChallenges);
+                            return (
+                              <div key={player.id} className="flex items-center justify-between rounded bg-muted/30 px-2 py-1">
+                                <span className="text-sm">{player.username}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">{actualProgress}%</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6"
+                                    onClick={() => kickPlayer(player.id)}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}

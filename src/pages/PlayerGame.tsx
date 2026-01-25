@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { useGame } from '@/contexts/GameContext';
 import { CHALLENGES, HOUSE_NAMES, HOUSE_MOTTOS } from '@/types/game';
-import { formatTime, getLeaderboard } from '@/lib/gameUtils';
+import { formatTime } from '@/lib/gameUtils';
 import { supabase } from '@/lib/supabase';
 import * as roomService from '@/lib/roomService';
 import { 
@@ -24,7 +24,8 @@ const PlayerGame = () => {
     getPlayersInRoom, 
     leaveRoom,
     completeChallenge,
-    syncPlayersForRoom
+    syncPlayersForRoom,
+    updateRoom
   } = useGame();
   const { toast } = useToast();
   const [, forceUpdate] = useState({});
@@ -32,7 +33,6 @@ const PlayerGame = () => {
   // Define room and players early so they can be used in useEffects
   const room = roomCode ? getRoom(roomCode) : undefined;
   const players = roomCode ? getPlayersInRoom(roomCode) : [];
-  const leaderboard = getLeaderboard(players);
   
   // Initialize timer from room data
   const [roomTimer, setRoomTimer] = useState(room?.timerRemaining ?? 0);
@@ -66,29 +66,33 @@ const PlayerGame = () => {
 
   // Fetch initial players from database when joining room
   useEffect(() => {
-    if (!roomCode) return;
+    if (!room?.id) return;
 
     const fetchPlayers = async () => {
       try {
         const { data: players, error } = await supabase
           .from('players')
           .select('*')
-          .eq('room_code', roomCode);
+          .eq('room_id', room.id); // Use room_id to match subscription
 
         if (!error && players && players.length > 0) {
           const appPlayers = players.map(p => ({
             id: p.id,
-            roomCode: p.room_code,
+            roomCode: room.code, // Use room code from room object
             username: p.username,
             progress: p.progress || 0,
             currentChallenge: p.current_challenge || 1,
-            completedChallenges: p.completed_challenges || [],
+            completedChallenges: Array.isArray(p.completed_challenges) 
+              ? p.completed_challenges.map((c: any) => typeof c === 'string' ? parseInt(c) : c)
+              : [],
             isOnline: p.is_online !== false,
             joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
             lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+            completedAt: p.completed_at ? new Date(p.completed_at).getTime() : null,
+            progressUpdatedAt: p.progress_updated_at ? new Date(p.progress_updated_at).getTime() : Date.now(),
           }));
-          syncPlayersForRoom(roomCode, appPlayers);
-          console.log('[PLAYER_SYNC] Loaded', appPlayers.length, 'players from database');
+          syncPlayersForRoom(room.code, appPlayers);
+          console.log('[PLAYER_SYNC] Loaded', appPlayers.length, 'players from database for room', room.id);
         }
       } catch (err) {
         console.error('[PLAYER_SYNC] Error fetching players:', err);
@@ -96,11 +100,11 @@ const PlayerGame = () => {
     };
 
     fetchPlayers();
-  }, [roomCode, syncPlayersForRoom]);
+  }, [room?.id, syncPlayersForRoom]);
 
   // Subscribe to real-time room updates (status, timer, etc)
   useEffect(() => {
-    if (!room?.id) return;
+    if (!room?.id || !roomCode) return;
 
     console.log('[REALTIME_ROOM] Subscribing to room updates:', room.id);
     
@@ -125,6 +129,39 @@ const PlayerGame = () => {
             console.log('[REALTIME_ROOM] ✅ Updating - Timer:', newTimer, 'Status:', newStatus);
             setRoomTimer(newTimer);
             setRoomStatus(newStatus);
+            
+            // Refetch full room data from Supabase to get updated winners
+            try {
+              const { data: roomData, error } = await supabase
+                .from('rooms')
+                .select('*')
+                .eq('code', roomCode)
+                .single();
+              
+              if (!error && roomData) {
+                console.log('[REALTIME_ROOM] 📊 Refetched room data, winners:', roomData.winners);
+                // Update the room in GameContext with the latest data including winners
+                const updatedRoom = {
+                  id: roomData.id,
+                  code: roomData.code,
+                  name: roomData.name,
+                  description: roomData.description,
+                  houseTheme: roomData.house_theme,
+                  timerDuration: roomData.timer_duration,
+                  timerRemaining: roomData.timer_remaining,
+                  status: roomData.status,
+                  adminId: roomData.admin_id,
+                  createdAt: new Date(roomData.created_at).getTime(),
+                  startedAt: roomData.started_at ? new Date(roomData.started_at).getTime() : null,
+                  endedAt: roomData.ended_at ? new Date(roomData.ended_at).getTime() : null,
+                  winnerId: roomData.winner_id,
+                  winners: roomData.winners || [],
+                };
+                updateRoom(updatedRoom);
+              }
+            } catch (err) {
+              console.error('[REALTIME_ROOM] Error refetching room:', err);
+            }
           }
         }
       )
@@ -139,23 +176,23 @@ const PlayerGame = () => {
       console.log('[REALTIME_ROOM] Unsubscribing from room');
       supabase.removeChannel(subscription);
     };
-  }, [room?.id]);
+  }, [room?.id, roomCode, updateRoom]);
 
   // Subscribe to real-time player updates for this room
   useEffect(() => {
-    if (!roomCode) return;
+    if (!room?.id) return;
 
-    console.log('[REALTIME_PLAYERS] Setting up subscription for room:', roomCode);
+    console.log('[REALTIME_PLAYERS] Setting up subscription for room:', room.id);
     
     const subscription = supabase
-      .channel(`realtime:players:${roomCode}`)
+      .channel(`realtime:players:${room.id}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'players',
-          filter: `room_code=eq.${roomCode}`,
+          filter: `room_id=eq.${room.id}`,
         },
         async (payload) => {
           console.log('[REALTIME_PLAYERS] Change detected! Event:', payload.eventType, 'Data:', payload);
@@ -165,21 +202,25 @@ const PlayerGame = () => {
             const { data: players, error } = await supabase
               .from('players')
               .select('*')
-              .eq('room_code', roomCode);
+              .eq('room_id', room.id);
 
             if (!error && players) {
               const appPlayers = players.map(p => ({
                 id: p.id,
-                roomCode: p.room_code,
+                roomCode: room.code,
                 username: p.username,
                 progress: p.progress || 0,
                 currentChallenge: p.current_challenge || 1,
-                completedChallenges: p.completed_challenges || [],
+                completedChallenges: Array.isArray(p.completed_challenges) 
+                  ? p.completed_challenges.map((c: any) => typeof c === 'string' ? parseInt(c) : c)
+                  : [],
                 isOnline: p.is_online !== false,
                 joinedAt: p.joined_at ? new Date(p.joined_at).getTime() : Date.now(),
                 lastActiveAt: p.last_active_at ? new Date(p.last_active_at).getTime() : Date.now(),
+                completedAt: p.completed_at ? new Date(p.completed_at).getTime() : null,
+                progressUpdatedAt: p.progress_updated_at ? new Date(p.progress_updated_at).getTime() : Date.now(),
               }));
-              syncPlayersForRoom(roomCode, appPlayers);
+              syncPlayersForRoom(room.code, appPlayers);
               console.log('[REALTIME_PLAYERS] Updated player list, count:', appPlayers.length);
               forceUpdate({});
             }
@@ -199,7 +240,7 @@ const PlayerGame = () => {
       console.log('[REALTIME_PLAYERS] Unsubscribing from players');
       supabase.removeChannel(subscription);
     };
-  }, [roomCode, syncPlayersForRoom]);
+  }, [room?.id, syncPlayersForRoom]);
 
   // Redirect if no room or no player
   useEffect(() => {
@@ -212,9 +253,10 @@ const PlayerGame = () => {
     return null;
   }
 
-  const winner = room.winnerId ? players.find(p => p.id === room.winnerId) : null;
-  const isWinner = room.winnerId === currentPlayer.id;
-  const playerRank = leaderboard.findIndex(p => p.id === currentPlayer.id) + 1;
+  const topWinners = room.winners || [];
+  const currentPlayerWinner = topWinners.find(w => w.playerId === currentPlayer.id);
+  const isWinner = currentPlayerWinner !== undefined;
+  const winnerRank = currentPlayerWinner?.rank;
 
   const handleLeave = () => {
     leaveRoom();
@@ -260,8 +302,14 @@ const PlayerGame = () => {
               <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
             </div>
           </div>
-          
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-3">
+            {/* Player Name */}
+            <div className="hidden sm:flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{currentPlayer.username}</span>
+            </div>
+            
             {/* Timer */}
             <div className={cn(
               "flex items-center gap-2 rounded-lg px-3 py-1",
@@ -278,65 +326,66 @@ const PlayerGame = () => {
         </div>
       </header>
 
-      <main className="container mx-auto grid gap-6 px-4 py-6 lg:grid-cols-3">
+      <main className="container mx-auto px-4 py-6">
         {/* Main Content - Challenges */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-6 max-w-4xl mx-auto">
           {/* Status Banner */}
-          {room.status === 'waiting' && (
-            <Card className="border-muted bg-muted/30">
-              <CardContent className="space-y-4 py-6">
-                <div className="flex items-center gap-3">
-                  <div className="animate-pulse h-5 w-5 rounded-full bg-primary" />
-                  <div>
-                    <p className="font-medium">Waiting for Game Master</p>
-                    <p className="text-sm text-muted-foreground">
-                      {players.length} player{players.length !== 1 ? 's' : ''} ready • The hunt begins soon...
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Show joining players */}
-                <div className="text-xs text-muted-foreground">
-                  <p className="font-medium mb-2">Players Joining:</p>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {players.map(p => (
-                      <div key={p.id} className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-primary" />
-                        <span className="truncate">{p.username}</span>
-                        {p.id === currentPlayer?.id && <span className="text-primary font-medium">(You)</span>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {room.status === 'finished' && (
             <Card className={cn(
               "border-2",
               isWinner ? "border-primary bg-primary/10" : "border-accent/50 bg-accent/10"
             )}>
-              <CardContent className="flex items-center gap-4 py-6">
-                <Trophy className={cn(
-                  "h-10 w-10",
-                  isWinner ? "text-primary" : "text-accent"
-                )} />
-                <div>
-                  {isWinner ? (
-                    <>
-                      <p className="font-cinzel text-xl font-bold text-primary">Victory!</p>
-                      <p className="text-muted-foreground">You have claimed the Iron Throne!</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-cinzel text-xl font-bold">Game Over</p>
-                      <p className="text-muted-foreground">
-                        {winner ? `${winner.username} has won the hunt!` : 'The hunt has ended.'}
-                      </p>
-                    </>
-                  )}
+              <CardContent className="space-y-4 py-6">
+                <div className="flex items-center gap-4">
+                  <Trophy className={cn(
+                    "h-10 w-10",
+                    isWinner ? "text-primary" : "text-accent"
+                  )} />
+                  <div className="flex-1">
+                    {isWinner ? (
+                      <>
+                        <p className="font-cinzel text-xl font-bold text-primary">
+                          {winnerRank === 1 && "🥇 1st Place Victory!"}
+                          {winnerRank === 2 && "🥈 2nd Place Finish!"}
+                          {winnerRank === 3 && "🥉 3rd Place Podium!"}
+                        </p>
+                        <p className="text-muted-foreground">You've earned a place on the podium!</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-cinzel text-xl font-bold">Game Over</p>
+                        <p className="text-muted-foreground">The hunt has ended.</p>
+                      </>
+                    )}
+                  </div>
                 </div>
+                
+                {/* Top 3 Winners Podium */}
+                {topWinners.length > 0 && (
+                  <div className="border-t pt-4">
+                    <p className="text-sm font-medium mb-3">Final Podium:</p>
+                    <div className="space-y-2">
+                      {topWinners.map((winner) => {
+                        const winnerPlayer = players.find(p => p.id === winner.playerId);
+                        if (!winnerPlayer) return null;
+                        return (
+                          <div key={winner.playerId} className="flex items-center gap-3 p-2 rounded-lg bg-background/50">
+                            <span className="text-2xl">
+                              {winner.rank === 1 && "🥇"}
+                              {winner.rank === 2 && "🥈"}
+                              {winner.rank === 3 && "🥉"}
+                            </span>
+                            <div className="flex-1">
+                              <p className="font-medium">{winnerPlayer.username}</p>
+                            </div>
+                            <span className="text-sm font-bold">{winner.progress}%</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -416,71 +465,6 @@ const PlayerGame = () => {
               );
             })}
           </div>
-        </div>
-
-        {/* Sidebar - Leaderboard */}
-        <div className="space-y-6">
-          <Card className="sticky top-24">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                <CardTitle className="font-cinzel text-lg">Leaderboard</CardTitle>
-              </div>
-              <CardDescription>
-                Your rank: #{playerRank} of {players.length}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {leaderboard.map((player, index) => {
-                  const isCurrentPlayer = player.id === currentPlayer.id;
-                  const isRoomWinner = room.winnerId === player.id;
-                  
-                  return (
-                    <div
-                      key={player.id}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
-                        isCurrentPlayer && "bg-primary/10",
-                        isRoomWinner && "ring-2 ring-primary"
-                      )}
-                    >
-                      <span className={cn(
-                        "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
-                        index === 0 && "bg-primary text-primary-foreground",
-                        index === 1 && "bg-muted-foreground/30",
-                        index === 2 && "bg-accent/30",
-                        index > 2 && "bg-muted"
-                      )}>
-                        {index + 1}
-                      </span>
-                      
-                      <div className="flex-1 min-w-0">
-                        <p className={cn(
-                          "truncate text-sm font-medium",
-                          isCurrentPlayer && "text-primary"
-                        )}>
-                          {player.username}
-                          {isCurrentPlayer && " (You)"}
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {isRoomWinner && <Crown className="h-4 w-4 text-primary" />}
-                        <span className="text-sm font-medium">{player.progress}%</span>
-                      </div>
-                    </div>
-                  );
-                })}
-                
-                {players.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-4">
-                    No players yet
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </main>
     </div>

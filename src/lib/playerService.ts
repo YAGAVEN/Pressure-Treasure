@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { Player } from '@/types/game';
+import { calculateProgress } from './gameUtils';
 
 /**
  * Add a player to a room
@@ -42,9 +43,13 @@ export async function addPlayerToRoom(
       roomCode: data.room_code || '',
       progress: data.progress,
       currentChallenge: data.current_challenge,
-      completedChallenges: data.completed_challenges || [],
+      completedChallenges: Array.isArray(data.completed_challenges) 
+        ? data.completed_challenges.map((c: any) => typeof c === 'string' ? parseInt(c) : c)
+        : [],
       joinedAt: new Date(data.joined_at).getTime(),
       isOnline: data.is_online,
+      completedAt: data.completed_at ? new Date(data.completed_at).getTime() : null,
+      progressUpdatedAt: data.progress_updated_at ? new Date(data.progress_updated_at).getTime() : Date.now(),
     };
   } catch (err) {
     console.error('[PLAYERSERVICE] Unexpected error adding player:', err);
@@ -55,34 +60,59 @@ export async function addPlayerToRoom(
 /**
  * Get all players in a room
  */
-export async function getPlayersInRoom(roomId: string): Promise<Player[]> {
-  try {
-    const { data, error } = await supabase
-      .from('players')
-      .select()
-      .eq('room_id', roomId)
-      .order('joined_at', { ascending: true });
+// getPlayersInRoom - FIXED room_id vs room_code & parsing
+export async function getPlayersInRoom(roomCode: string): Promise<Player[]> {  // Use roomCode!
+  const { data, error } = await supabase
+    .from('players')
+    .select()
+    .eq('room_code', roomCode)  // ← FIXED: was room_id!
+    .order('joined_at', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching players:', error);
-      return [];
-    }
-
-    return (data || []).map(player => ({
-      id: player.id,
-      username: player.username,
-      roomCode: '', // Will be populated from room context
-      progress: player.progress,
-      currentChallenge: player.current_challenge,
-      completedChallenges: player.completed_challenges || [],
-      joinedAt: new Date(player.joined_at).getTime(),
-      isOnline: player.is_online,
-    }));
-  } catch (err) {
-    console.error('Unexpected error fetching players:', err);
-    return [];
-  }
+  return (data || []).map(player => ({
+    id: player.id,
+    username: player.username,
+    roomCode: roomCode,
+    progress: player.progress,
+    currentChallenge: player.current_challenge,
+    completedChallenges: Array.isArray(player.completed_challenges) 
+      ? player.completed_challenges.map((c: string | number) => Number(c))
+      : [],
+    joinedAt: new Date(player.joined_at).getTime(),
+    isOnline: player.is_online !== false,
+    completedAt: player.completed_at ? new Date(player.completed_at).getTime() : null,
+    progressUpdatedAt: player.progress_updated_at ? new Date(player.progress_updated_at).getTime() : Date.now(),
+  }));
 }
+
+// updatePlayerProgress - Only set completed_at on 100%
+export async function updatePlayerProgress(playerId: string, completedChallenges: number[]): Promise<boolean> {
+  const progress = calculateProgress(completedChallenges);
+  const completedAt = progress === 100 ? new Date().toISOString() : null;
+  const progressUpdatedAt = new Date().toISOString(); // Always update when progress changes
+
+  console.log('[PLAYERSERVICE] 💾 Updating player progress:', {
+    playerId,
+    completedChallenges,
+    progress,
+    completedAt,
+    progressUpdatedAt
+  });
+
+  const { error } = await supabase.from('players').update({
+    completed_challenges: completedChallenges,  // PostgreSQL JSONB handles arrays directly
+    progress,
+    current_challenge: Math.min(completedChallenges.length + 1, 6),
+    completed_at: completedAt,
+    progress_updated_at: progressUpdatedAt  // Track when progress was updated
+  }).eq('id', playerId);
+
+  if (error) {
+    console.error('[PLAYERSERVICE] ❌ Error updating progress:', error);
+  }
+
+  return !error;
+}
+
 
 /**
  * Remove a player from a room
@@ -109,32 +139,6 @@ export async function removePlayerFromRoom(playerId: string): Promise<boolean> {
 /**
  * Update player progress
  */
-export async function updatePlayerProgress(
-  playerId: string,
-  completedChallenges: number[],
-  progress: number
-): Promise<boolean> {
-  try {
-    const { error } = await supabase
-      .from('players')
-      .update({
-        completed_challenges: completedChallenges,
-        progress,
-        current_challenge: Math.min(completedChallenges.length + 1, 5),
-      })
-      .eq('id', playerId);
-
-    if (error) {
-      console.error('Error updating player progress:', error);
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error('Unexpected error updating player progress:', err);
-    return false;
-  }
-}
 
 /**
  * Update player online status
@@ -193,6 +197,9 @@ export function subscribeToRoomPlayers(
 ) {
   console.log('[PLAYERSERVICE] Setting up subscription for room:', roomId);
   
+  // Note: This function receives roomId but getPlayersInRoom expects roomCode
+  // The subscription filter uses room_id, but we can't call getPlayersInRoom(roomId)
+  // This needs to be handled by the caller passing the correct parameter
   const subscription = supabase
     .channel(`room-players-${roomId}`)
     .on(
@@ -203,13 +210,33 @@ export function subscribeToRoomPlayers(
         table: 'players',
         filter: `room_id=eq.${roomId}`,
       },
-      (payload) => {
+      async (payload) => {
         console.log('[PLAYERSERVICE] Change detected:', payload);
-        // Re-fetch players when any change occurs
-        getPlayersInRoom(roomId).then((players) => {
+        // Fetch players directly using room_id since subscription uses it
+        const { data, error } = await supabase
+          .from('players')
+          .select()
+          .eq('room_id', roomId)
+          .order('joined_at', { ascending: true });
+        
+        if (!error && data) {
+          const players = data.map(player => ({
+            id: player.id,
+            username: player.username,
+            roomCode: '', // Will be set by caller
+            progress: player.progress,
+            currentChallenge: player.current_challenge,
+            completedChallenges: Array.isArray(player.completed_challenges) 
+              ? player.completed_challenges.map((c: string | number) => Number(c))
+              : [],
+            joinedAt: new Date(player.joined_at).getTime(),
+            isOnline: player.is_online !== false,
+            completedAt: player.completed_at ? new Date(player.completed_at).getTime() : null,
+            progressUpdatedAt: player.progress_updated_at ? new Date(player.progress_updated_at).getTime() : Date.now(),
+          }));
           console.log('[PLAYERSERVICE] Fetched updated players:', players);
           callback(players);
-        });
+        }
       }
     )
     .subscribe((status) => {

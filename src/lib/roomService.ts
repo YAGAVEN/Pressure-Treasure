@@ -26,6 +26,7 @@ export async function createRoomInDB(
         description,
         house_theme: houseTheme,
         timer_duration: timerDuration,
+        timer_remaining: timerDuration,
         status: 'waiting',
       })
       .select()
@@ -56,6 +57,7 @@ export async function createRoomInDB(
       startedAt: data.started_at ? new Date(data.started_at).getTime() : null,
       endedAt: data.ended_at ? new Date(data.ended_at).getTime() : null,
       winnerId: data.winner_id || null,
+      winners: data.winners ? JSON.parse(data.winners) : [],
       adminId: data.admin_id,
     };
   } catch (err) {
@@ -87,12 +89,13 @@ export async function getAdminRooms(adminId: string): Promise<Room[]> {
       description: room.description,
       houseTheme: room.house_theme as HouseTheme,
       timerDuration: room.timer_duration,
-      timerRemaining: room.timer_duration,
+      timerRemaining: room.timer_remaining ?? room.timer_duration,
       status: room.status as 'waiting' | 'playing' | 'finished',
       createdAt: new Date(room.created_at).getTime(),
       startedAt: room.started_at ? new Date(room.started_at).getTime() : null,
       endedAt: room.ended_at ? new Date(room.ended_at).getTime() : null,
       winnerId: room.winner_id || null,
+      winners: room.winners ? (typeof room.winners === 'string' ? JSON.parse(room.winners) : room.winners) : [],
       adminId: room.admin_id,
     }));
   } catch (err) {
@@ -132,12 +135,13 @@ export async function getRoomByCode(code: string): Promise<Room | null> {
       description: roomData.description,
       houseTheme: roomData.house_theme as HouseTheme,
       timerDuration: roomData.timer_duration,
-      timerRemaining: roomData.timer_duration,
+      timerRemaining: roomData.timer_remaining ?? roomData.timer_duration,
       status: roomData.status as 'waiting' | 'playing' | 'finished',
       createdAt: new Date(roomData.created_at).getTime(),
       startedAt: roomData.started_at ? new Date(roomData.started_at).getTime() : null,
       endedAt: roomData.ended_at ? new Date(roomData.ended_at).getTime() : null,
       winnerId: roomData.winner_id || null,
+      winners: roomData.winners ? (typeof roomData.winners === 'string' ? JSON.parse(roomData.winners) : roomData.winners) : [],
       adminId: roomData.admin_id,
     };
   } catch (err) {
@@ -172,36 +176,43 @@ export async function deleteRoomFromDB(roomId: string): Promise<boolean> {
  * Update room status
  */
 export async function updateRoomStatus(
-  roomId: string,
+  roomCode: string,
   status: 'waiting' | 'playing' | 'finished',
-  updates?: { startedAt?: number; endedAt?: number; winnerId?: string }
+  winnerId?: string | null,
+  winners?: { playerId: string; rank: number; progress: number }[]
 ): Promise<boolean> {
   try {
     const updateData: any = { status };
     
-    if (updates?.startedAt) {
-      updateData.started_at = new Date(updates.startedAt).toISOString();
+    if (status === 'playing') {
+      updateData.started_at = new Date().toISOString();
     }
-    if (updates?.endedAt) {
-      updateData.ended_at = new Date(updates.endedAt).toISOString();
+    if (status === 'finished') {
+      updateData.ended_at = new Date().toISOString();
+      if (winnerId) {
+        updateData.winner_id = winnerId;
+      }
+      if (winners && winners.length > 0) {
+        updateData.winners = JSON.stringify(winners);
+      }
     }
-    if (updates?.winnerId) {
-      updateData.winner_id = updates.winnerId;
-    }
+
+    console.log('[ROOMSERVICE] Updating room status:', { roomCode, status, updateData });
 
     const { error } = await supabase
       .from('rooms')
       .update(updateData)
-      .eq('id', roomId);
+      .eq('code', roomCode);
 
     if (error) {
-      console.error('Error updating room:', error);
+      console.error('[ROOMSERVICE] Error updating room:', error);
       return false;
     }
 
+    console.log('[ROOMSERVICE] ✅ Room status updated successfully');
     return true;
   } catch (err) {
-    console.error('Unexpected error updating room:', err);
+    console.error('[ROOMSERVICE] Unexpected error updating room:', err);
     return false;
   }
 }
@@ -209,12 +220,12 @@ export async function updateRoomStatus(
 /**
  * Update room timer (for countdown)
  */
-export async function updateRoomTimer(roomId: string, timerRemaining: number): Promise<boolean> {
+export async function updateRoomTimer(roomCode: string, timerRemaining: number): Promise<boolean> {
   try {
     const { error } = await supabase
       .from('rooms')
       .update({ timer_remaining: timerRemaining })
-      .eq('id', roomId);
+      .eq('code', roomCode);
 
     if (error) {
       console.error('[ROOMSERVICE] Error updating room timer:', error);
@@ -262,6 +273,7 @@ export function subscribeToRoomChanges(
             startedAt: room.started_at ? new Date(room.started_at).getTime() : null,
             endedAt: room.ended_at ? new Date(room.ended_at).getTime() : null,
             winnerId: room.winner_id || null,
+            winners: room.winners ? (typeof room.winners === 'string' ? JSON.parse(room.winners) : room.winners) : [],
             adminId: room.admin_id,
           });
         } else {

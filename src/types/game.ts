@@ -26,6 +26,14 @@ export interface Player {
   completedChallenges: number[];
   joinedAt: number;
   isOnline: boolean;
+  completedAt: number | null; // timestamp when player completed all challenges
+  progressUpdatedAt: number | null; // timestamp when player last reached current progress level
+}
+
+export interface Winner {
+  playerId: string;
+  rank: number; // 1, 2, or 3
+  progress: number;
 }
 
 export interface Room {
@@ -40,7 +48,8 @@ export interface Room {
   createdAt: number;
   startedAt: number | null;
   endedAt: number | null;
-  winnerId: string | null;
+  winnerId: string | null; // deprecated, kept for backward compatibility
+  winners: Winner[]; // top 3 winners
   adminId: string;
 }
 
