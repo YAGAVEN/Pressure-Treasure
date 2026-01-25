@@ -456,7 +456,19 @@ const PlayerGame = () => {
                     </CardContent>
                   )}
                   
-                  {challenge.id !== 2 && !isCompleted && (
+                  {challenge.id === 4 && !isCompleted && (
+                    <CardContent className="pt-2">
+                      <Button 
+                        onClick={() => navigate(`/game4/${roomCode}`)}
+                        disabled={room.status !== 'playing' || isCompleted}
+                        className="w-full font-cinzel"
+                      >
+                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Maester\'s Trial' : 'Waiting for Game Master...'}
+                      </Button>
+                    </CardContent>
+                  )}
+                  
+                  {challenge.id !== 2 && challenge.id !== 4 && !isCompleted && (
                     <CardContent className="pt-2">
                       <Button 
                         onClick={() => handleCompleteChallenge(challenge.id)}
