@@ -14,7 +14,7 @@ const RiddlePage = () => {
   const { roomCode } = useParams<{ roomCode: string }>();
   const navigate = useNavigate();
   const { getRoom, completeChallenge } = useGame();
-  const [showDoorAnimation, setShowDoorAnimation] = useState(true);
+  const [showDoorAnimation, setShowDoorAnimation] = useState(false); // Start with false - no animation blocking
   const [showDoorOpenAnimation, setShowDoorOpenAnimation] = useState(false);
   
   const room = roomCode ? getRoom(roomCode) : undefined;

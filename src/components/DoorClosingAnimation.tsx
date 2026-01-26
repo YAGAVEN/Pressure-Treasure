@@ -7,14 +7,24 @@ interface DoorClosingAnimationProps {
 
 export const DoorClosingAnimation = ({ onAnimationComplete }: DoorClosingAnimationProps) => {
   const [isAnimating, setIsAnimating] = useState(true);
+  const [isOpening, setIsOpening] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Wait for close animation to complete (2.5s), then start opening
+    const closeTimer = setTimeout(() => {
+      setIsOpening(true);
+    }, 2500);
+
+    // After opening animation completes (2s), hide completely
+    const completeTimer = setTimeout(() => {
       setIsAnimating(false);
       onAnimationComplete();
-    }, 3000); // Animation duration
+    }, 5000); // 2.5s close + 2.5s open
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(closeTimer);
+      clearTimeout(completeTimer);
+    };
   }, [onAnimationComplete]);
 
   if (!isAnimating) return null;
@@ -25,7 +35,7 @@ export const DoorClosingAnimation = ({ onAnimationComplete }: DoorClosingAnimati
       <div className="door-overlay"></div>
 
       {/* Left door */}
-      <div className="door door-left">
+      <div className={`door door-left ${isOpening ? 'door-opening' : ''}`}>
         <div className="door-content">
           <div className="door-metal-frame"></div>
           <div className="door-lock"></div>
@@ -33,7 +43,7 @@ export const DoorClosingAnimation = ({ onAnimationComplete }: DoorClosingAnimati
       </div>
 
       {/* Right door */}
-      <div className="door door-right">
+      <div className={`door door-right ${isOpening ? 'door-opening' : ''}`}>
         <div className="door-content">
           <div className="door-metal-frame"></div>
           <div className="door-lock"></div>
