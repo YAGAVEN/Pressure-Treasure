@@ -1,10 +1,10 @@
 [
   {
-    "id": 1,
-    "riddle": "I exist without air, survive without water, speak without a mouth, and tell the truth without a heart. What am I?",
-    "answer": "ECHO",
-    "hint": "Sound travels..."
-  },
+  "id": 1,
+  "riddle": "Neural networks are inspired by which human body part?",
+  "answer": "BRAIN",
+  "hint": "Controls thinking."
+},
   {
     "id": 2,
     "riddle": "I am the brain's invisible friend, holding memories in ordered rows. Delete me and chaos unfolds. What am I?",
@@ -208,5 +208,119 @@
     "riddle": "I optimize queries in databases. What am I?",
     "answer": "INDEX",
     "hint": "Fast search..."
-  }
+  },
+  {
+  "id": 35,
+  "riddle": "I am a programming language that is easy to learn. I use indentation for blocks. I am named after a creature in wildlife. What am I?",
+  "answer": "PYTHON",
+  "hint": "I start with 'P' and am very beginner-friendly."
+},
+{
+  "id": 36,
+  "riddle": "I repeat code multiple times. I can count from 1 to 10. Users can control how many times I run. What am I?",
+  "answer": "LOOP",
+  "hint": "I help avoid writing the same code over and over."
+},
+{
+  "id": 37,
+  "riddle": "I am a process where systems learn patterns from examples and improve without being explicitly programmed. What am I?",
+  "answer": "MACHINE LEARNING",
+  "hint": "It's about learning from data."
+},
+{
+  "id": 38,
+  "riddle": "I help computers understand images and videos, detecting objects and faces. What am I?",
+  "answer": "COMPUTER VISION",
+  "hint": "It's about seeing and understanding visuals."
+},
+{
+  "id": 39,
+  "riddle": "I am inspired by how the human brain works and consist of connected units. What am I?",
+  "answer": "NEURAL NETWORK",
+  "hint": "Inspired by biological brains."
+},
+{
+  "id": 40,
+  "riddle": "I use many layers to learn complex patterns from data. What am I?",
+  "answer": "DEEP LEARNING",
+  "hint": "Multiple processing layers."
+},
+{
+  "id": 41,
+  "riddle": "I help machines understand human language and power chatbots and translators. What am I?",
+  "answer": "NLP",
+  "hint": "Natural language processing."
+},
+{
+  "id": 42,
+  "riddle": "I convert words into numbers while preserving meaning. What am I?",
+  "answer": "EMBEDDING",
+  "hint": "Words become vectors."
+},
+{
+  "id": 43,
+  "riddle": "I assign items into predefined categories like spam or not spam. What am I?",
+  "answer": "CLASSIFICATION",
+  "hint": "Putting things into groups."
+},
+{
+  "id": 44,
+  "riddle": "I group similar items together without labels. What am I?",
+  "answer": "CLUSTERING",
+  "hint": "Unsupervised grouping."
+},
+{
+  "id": 45,
+  "riddle": "I make machines act smart and intelligent. What am I?",
+  "answer": "ARTIFICIAL INTELLIGENCE",
+  "hint": "AI stands for?"
+},
+{
+  "id": 46,
+  "riddle": "I predict numerical values like price or temperature. What am I?",
+  "answer": "REGRESSION",
+  "hint": "Predicting continuous values."
+},
+{
+  "id": 47,
+  "riddle": "I make decisions using yes/no questions and look like an upside-down tree. What am I?",
+  "answer": "DECISION TREE",
+  "hint": "A tree that makes decisions."
+},
+{
+  "id": 48,
+  "riddle": "I measure how many predictions are correct out of all predictions. What am I?",
+  "answer": "ACCURACY",
+  "hint": "Overall correctness."
+},
+{
+  "id": 49,
+  "riddle": "I describe data like images, audio, and videos that don’t fit into tables. What am I?",
+  "answer": "UNSTRUCTURED DATA",
+  "hint": "Not rows and columns."
+},
+{
+  "id": 50,
+  "riddle": "Learning with labeled data is called what?",
+  "answer": "SUPERVISED LEARNING",
+  "hint": "Answers are provided during training."
+},
+{
+  "id": 51,
+  "riddle": "AI that talks like humans and answers questions is called what?",
+  "answer": "CHATBOT",
+  "hint": "ChatGPT is one."
+},
+{
+  "id": 52,
+  "riddle": "A neural network that learns from past or sequential data is called what?",
+  "answer": "RECURRENT NEURAL NETWORK",
+  "hint": "RNN stands for?"
+},
+{
+  "id": 53,
+  "riddle": "Neural networks are inspired by which human body part?",
+  "answer": "BRAIN",
+  "hint": "Controls thinking."
+}
 ]
