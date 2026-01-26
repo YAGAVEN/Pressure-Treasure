@@ -1,11 +1,23 @@
-import React from 'react';
-import { useGameEngine } from '../game/hooks';
-import { GAME_WIDTH, GAME_HEIGHT, LEVEL_NAMES } from '../game/constants';
-import { Button } from '../components/ui/button';
+import React, { useEffect } from 'react';
+import { useGameEngine } from '../game3/hooks';
+import { GAME_WIDTH, GAME_HEIGHT, LEVEL_NAMES } from '../game3/constants';
+import { Button } from '@/components/ui/button';
 
-const Game: React.FC = () => {
+interface Game3Props {
+  onComplete?: () => void;
+  onCancel?: () => void;
+}
+
+const Game3: React.FC<Game3Props> = ({ onComplete, onCancel }) => {
   const { canvasRef, engineState, startGame, nextLevel, restartGame } = useGameEngine();
   const { gameState } = engineState;
+
+  // Handle game completion
+  useEffect(() => {
+    if (gameState.gameComplete && onComplete) {
+      onComplete();
+    }
+  }, [gameState.gameComplete, onComplete]);
   
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-[#0a0a0f]">
@@ -143,4 +155,4 @@ const Game: React.FC = () => {
   );
 };
 
-export default Game;
+export default Game3;

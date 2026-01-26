@@ -456,6 +456,18 @@ const PlayerGame = () => {
                     </CardContent>
                   )}
                   
+                  {challenge.id === 3 && !isCompleted && (
+                    <CardContent className="pt-2">
+                      <Button 
+                        onClick={() => navigate(`/game3/${roomCode}`)}
+                        disabled={room.status !== 'playing' || isCompleted}
+                        className="w-full font-cinzel"
+                      >
+                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Kingswood Challenge' : 'Waiting for Game Master...'}
+                      </Button>
+                    </CardContent>
+                  )}
+                  
                   {challenge.id === 4 && !isCompleted && (
                     <CardContent className="pt-2">
                       <Button 
@@ -468,7 +480,7 @@ const PlayerGame = () => {
                     </CardContent>
                   )}
                   
-                  {challenge.id !== 2 && challenge.id !== 4 && !isCompleted && (
+                  {challenge.id !== 2 && challenge.id !== 3 && challenge.id !== 4 && !isCompleted && (
                     <CardContent className="pt-2">
                       <Button 
                         onClick={() => handleCompleteChallenge(challenge.id)}

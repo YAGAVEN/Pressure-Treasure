@@ -16,6 +16,7 @@ import PlayerJoin from "./pages/PlayerJoin";
 import PlayerGame from "./pages/PlayerGame";
 import RiddlePage from "./pages/RiddlePage";
 import Game4Page from "./pages/Game4Page";
+import Game3Page from "./pages/Game3Page";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
                 <Route path="/game/:roomCode" element={<PlayerGame />} />
                 <Route path="/riddle/:roomCode" element={<RiddlePage />} />
                 <Route path="/game4/:roomCode" element={<Game4Page />} />
+                <Route path="/game3/:roomCode" element={<Game3Page />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
