@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import PlayerJoin from "./pages/PlayerJoin";
 import PlayerGame from "./pages/PlayerGame";
 import RiddlePage from "./pages/RiddlePage";
+import Game1Page from "./pages/Game1Page";
 import Game4Page from "./pages/Game4Page";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/join" element={<PlayerJoin />} />
                 <Route path="/game/:roomCode" element={<PlayerGame />} />
+                <Route path="/game1/:roomCode" element={<Game1Page />} />
                 <Route path="/riddle/:roomCode" element={<RiddlePage />} />
                 <Route path="/game4/:roomCode" element={<Game4Page />} />
                 <Route path="*" element={<NotFound />} />
