@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown, Users, Shield, Volume2, VolumeX } from 'lucide-react';
+import Game3 from '../game3/pages/Index';
 
 const Index = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -149,6 +150,17 @@ const Index = () => {
                 </Link>
               </CardContent>
             </Card>
+          </div>
+        </div>
+
+        {/* Game 3 Link - Center Bottom */}
+        <div className="flex justify-center px-4 pb-8 md:pb-12">
+          <div className="w-full max-w-xs">
+            <Link to="/game3">
+              <Button size="sm" className="w-full bg-blue-500 font-cinzel text-white shadow-lg hover:bg-blue-400">
+                Play Game 3
+              </Button>
+            </Link>
           </div>
         </div>
 
