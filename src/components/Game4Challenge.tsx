@@ -1,0 +1,262 @@
+import { useState, useEffect } from 'react';
+import { compareTwoStrings } from 'string-similarity';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sword, Crown, Lightbulb, ChevronRight, Flame } from 'lucide-react';
+import { game4Levels, type Game4Level } from '@/data/game4Levels';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
+
+interface Game4ChallengeProps {
+  onComplete: () => void;
+  onCancel?: () => void;
+}
+
+const AccuracyMeter = ({ accuracy }: { accuracy: number }) => {
+  const [displayAccuracy, setDisplayAccuracy] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDisplayAccuracy(accuracy);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [accuracy]);
+
+  const getFeedbackMessage = () => {
+    if (accuracy < 30) return "The night is dark and full of terrors...";
+    if (accuracy < 50) return "You know nothing, Jon Snow.";
+    if (accuracy < 70) return "A mind needs books like a sword needs a whetstone.";
+    if (accuracy < 80) return "Winter is coming... but so are you.";
+    return "The old gods favor you!";
+  };
+
+  const getBarColor = () => {
+    if (accuracy < 50) return 'bg-red-600';
+    if (accuracy < 80) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Accuracy</span>
+        <span className="text-sm font-bold text-primary">
+          {Math.round(displayAccuracy)}%
+        </span>
+      </div>
+      
+      <div className="relative h-6 bg-muted rounded-full overflow-hidden border-2">
+        <div
+          className={`h-full transition-all duration-500 ease-out ${getBarColor()} relative`}
+          style={{ width: `${displayAccuracy}%` }}
+        >
+          {accuracy >= 80 && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Flame className="w-4 h-4 text-white animate-pulse" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p className="text-xs text-center italic text-muted-foreground">
+        {getFeedbackMessage()}
+      </p>
+    </div>
+  );
+};
+
+export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) => {
+  const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
+  const [userInput, setUserInput] = useState('');
+  const [accuracy, setAccuracy] = useState(0);
+  const [showHint, setShowHint] = useState(false);
+  const [canProceed, setCanProceed] = useState(false);
+
+  const currentLevel: Game4Level = game4Levels[currentLevelIndex];
+  const totalLevels = game4Levels.length;
+
+  useEffect(() => {
+    if (userInput.trim()) {
+      const similarity = compareTwoStrings(
+        userInput.toLowerCase().trim(),
+        currentLevel.target.toLowerCase().trim()
+      );
+      const accuracyPercent = similarity * 100;
+      setAccuracy(accuracyPercent);
+      setCanProceed(accuracyPercent > 80);
+    } else {
+      setAccuracy(0);
+      setCanProceed(false);
+    }
+  }, [userInput, currentLevel.target]);
+
+  const handleNextLevel = () => {
+    if (!canProceed) return;
+
+    if (currentLevelIndex < totalLevels - 1) {
+      setCurrentLevelIndex(currentLevelIndex + 1);
+      setUserInput('');
+      setAccuracy(0);
+      setShowHint(false);
+      setCanProceed(false);
+    } else {
+      // Completed all levels
+      onComplete();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-medieval-pattern flex items-center justify-center p-4">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentLevel.id}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -50 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-4xl"
+        >
+          <Card className="border-2">
+            <CardHeader>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Sword className="w-6 h-6 text-primary" />
+                  <CardTitle className="font-cinzel text-2xl">The Maester's Trial</CardTitle>
+                </div>
+                <span className="text-lg font-cinzel text-muted-foreground">
+                  Level {currentLevel.id} of {totalLevels}
+                </span>
+              </div>
+              <Progress value={(currentLevelIndex / totalLevels) * 100} className="h-2" />
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Image */}
+              <div className="relative rounded-lg overflow-hidden border-4 border-border">
+                <img
+                  src={currentLevel.image}
+                  alt={`Level ${currentLevel.id}`}
+                  className="w-full h-auto max-h-96 object-cover"
+                  onError={(e) => {
+                    // Fallback if image doesn't load
+                    (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiNhYWEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBQbGFjZWhvbGRlcjwvdGV4dD48L3N2Zz4=';
+                  }}
+                />
+              </div>
+
+              {/* Hint Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowHint(!showHint)}
+                className="gap-2"
+              >
+                <Lightbulb className="w-4 h-4" />
+                {showHint ? 'Hide Hint' : 'Show Hint'}
+              </Button>
+
+              {/* Hint */}
+              {showHint && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <Card className="bg-muted/50 border-2">
+                    <CardContent className="pt-6">
+                      <p className="text-sm italic text-muted-foreground">
+                        "{currentLevel.hint}"
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Input */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium">
+                  Describe what you see:
+                </label>
+                <textarea
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="Begin your description here..."
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg border-2 bg-background
+                    focus:outline-none focus:ring-2 focus:ring-primary
+                    transition-all resize-none"
+                />
+
+                {/* Accuracy Meter */}
+                {userInput && <AccuracyMeter accuracy={accuracy} />}
+
+                {/* Feedback Message */}
+                {accuracy >= 80 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center text-lg font-cinzel text-green-600 dark:text-green-400"
+                  >
+                    ✓ The old gods favor you. Proceed, Maester.
+                  </motion.div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  {onCancel && (
+                    <Button
+                      variant="outline"
+                      onClick={onCancel}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleNextLevel}
+                    disabled={!canProceed}
+                    className={cn(
+                      'flex-1 font-cinzel gap-2',
+                      !canProceed && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    {currentLevelIndex < totalLevels - 1 ? 'Next Trial' : 'Complete Quest'}
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Victory Modal - shown after last level */}
+          {currentLevelIndex === totalLevels - 1 && accuracy >= 80 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            >
+              <Card className="max-w-md text-center border-2 border-primary">
+                <CardContent className="pt-6 space-y-6">
+                  <Crown className="w-24 h-24 mx-auto text-primary animate-pulse" />
+                  <CardTitle className="text-4xl font-cinzel">
+                    Knight of the Seven Kingdoms
+                  </CardTitle>
+                  <CardDescription className="text-lg">
+                    You have proven your worth, Maester. The realm is in your debt.
+                  </CardDescription>
+                  <Button
+                    onClick={onComplete}
+                    className="w-full font-cinzel text-lg py-6"
+                  >
+                    Complete Challenge
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+};

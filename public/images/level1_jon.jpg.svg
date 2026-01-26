@@ -1,0 +1,6 @@
+<svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="450" fill="#1a1a2e"/>
+  <text x="400" y="200" font-family="serif" font-size="24" fill="#c9a961" text-anchor="middle">Level 1</text>
+  <text x="400" y="250" font-family="serif" font-size="18" fill="#888" text-anchor="middle">Jon Snow on the Battlefield</text>
+  <text x="400" y="280" font-family="serif" font-size="14" fill="#666" text-anchor="middle">(Image placeholder - Add actual image)</text>
+</svg>
