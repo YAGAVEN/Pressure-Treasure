@@ -80,29 +80,40 @@ const PlayerJoin = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-medieval-pattern">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur">
-        <div className="container mx-auto flex items-center gap-4 px-4 py-4">
-          <Link to="/" className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm">Back to Home</span>
-          </Link>
-        </div>
-      </header>
+    <div className="relative flex min-h-screen flex-col overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/images/background.jpg')" }}
+      />
+      
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
+      
+      {/* Content */}
+      <div className="relative z-10 flex min-h-screen flex-col">
+        {/* Header */}
+        <header className="border-b border-border/50 bg-black/30 backdrop-blur">
+          <div className="container mx-auto flex items-center gap-4 px-4 py-4">
+            <Link to="/" className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="text-sm">Back to Home</span>
+            </Link>
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto flex flex-1 items-center justify-center px-4 py-8">
-        <Card className="w-full max-w-md border-2 border-primary/20 bg-card/80 backdrop-blur">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20">
-              <Users className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="font-cinzel text-2xl">Join the Hunt</CardTitle>
-            <CardDescription>
-              Enter your room code and choose a name to begin your quest
-            </CardDescription>
-          </CardHeader>
+        {/* Main Content */}
+        <main className="container mx-auto flex flex-1 items-center justify-center px-4 py-8">
+          <Card className="w-full max-w-md border-2 border-primary/20 bg-card/50 backdrop-blur-xl">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20">
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="font-cinzel text-2xl">Join the Hunt</CardTitle>
+              <CardDescription>
+                Enter your room code and choose a name to begin your quest
+              </CardDescription>
+            </CardHeader>
           
           <CardContent>
             <form onSubmit={handleJoin} className="space-y-6">
@@ -152,6 +163,7 @@ const PlayerJoin = () => {
           </CardContent>
         </Card>
       </main>
+      </div>
     </div>
   );
 };

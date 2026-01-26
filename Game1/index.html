@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Card Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 
+        Main HTML Structure
+        This file defines the basic layout and structure of the memory card game.
+        It includes containers for game information, the card grid, and game controls.
+    -->
+    <!-- LEVEL INTRO SCREEN -->
+  <div id="level-intro" class="level-intro">
+    <div class="intro-overlay"></div>
+
+    <div class="intro-content">
+      <h1>LEVEL I</h1>
+      <h2>Beyond the Pale Snow</h2>
+
+      <p class="intro-text">
+        Prove your memory and logic to proceed.
+      </p>
+
+      <button id="begin-btn" class="intro-btn">
+        BEGIN CHALLENGE
+      </button>
+
+      <p class="quote">“Winter is Coming”</p>
+    </div>
+  </div>
+    <div class="smoke-layer"></div>
+
+    <div class="game-container">
+        <!-- Game Header: Displays game information like level, stage, score, etc. -->
+        <header class="game-header">
+            <h1>Memory Card Game</h1>
+            <div class="game-info">
+                <div class="info-item">
+                    <span class="label">Stage:</span>
+                    <span id="level-display">1</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Level:</span>
+                    <span id="stage-display">1</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Score:</span>
+                    <span id="score-display">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Moves:</span>
+                    <span id="moves-display">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Game Board: Container for the card grid -->
+        <main class="game-board">
+            <div id="card-grid" class="card-grid">
+                <!-- Cards will be dynamically generated here -->
+            </div>
+        </main>
+
+        <!-- Game Controls: Buttons for game actions -->
+        <footer class="game-controls">
+            <button id="start-btn" class="btn btn-primary">Start Game</button>
+            <button id="reset-btn" class="btn btn-secondary" disabled>Reset</button>
+            <button id="next-level-btn" class="btn btn-success" disabled>Next Level</button>
+        </footer>
+
+        <!-- Game Messages: Display win/lose messages, instructions, etc. -->
+        <div id="game-message" class="game-message hidden"></div>
+        
+        <!-- Stage-1 Completion Screen -->
+       <div id="stage1-completion" class="stage-completion hidden">
+        <div class="completion-overlay"></div>
+
+        <div class="completion-content cinematic">
+            <div class="trophy">🏆</div>
+
+            <h1 class="completion-title">BEYOND THE PALE SNOW</h1>
+
+            <div class="completion-badge">
+            ❄️ SEASON OF WINTER ~ COMPLETED ❄️
+            </div>
+
+            <p class="completion-quote">
+            Shadows lengthen when the sun sets, yet even darkness cannot hide the dawn.
+            </p>
+
+            <button id="proceed-stage2-btn" class="completion-btn">
+            CONTINUE JOURNEY
+            </button>
+        </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript: Game logic and interactivity -->
+    <script src="game.js"></script>
+</body>
+</html>
+
