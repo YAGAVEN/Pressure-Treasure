@@ -1,10 +1,10 @@
 [
   {
-    "id": 1,
-    "riddle": "I exist without air, survive without water, speak without a mouth, and tell the truth without a heart. What am I?",
-    "answer": "ECHO",
-    "hint": "Sound travels..."
-  },
+  "id": 1,
+  "riddle": "Neural networks are inspired by which human body part?",
+  "answer": "BRAIN",
+  "hint": "That one body part ppls in love lacks?."
+},
   {
     "id": 2,
     "riddle": "I am the brain's invisible friend, holding memories in ordered rows. Delete me and chaos unfolds. What am I?",
@@ -13,7 +13,7 @@
   },
   {
     "id": 3,
-    "riddle": "Born from trees, I become a memory. Pages turn but I never forget. In ancient halls I store the world's wisdom. What am I?",
+    "riddle": "I store only the recent/ frequently accessed data. What am I?",
     "answer": "CACHE",
     "hint": "Fast storage"
   },
@@ -39,7 +39,7 @@
     "id": 7,
     "riddle": "I branch like a tree but have no leaves. My roots spread data, my nodes hold keys. Search me wisely. What am I?",
     "answer": "GRAPH",
-    "hint": "Nodes & edges"
+    "hint": "I have Nodes & edges"
   },
   {
     "id": 8,
@@ -51,7 +51,7 @@
     "id": 9,
     "riddle": "I connect the disconnected, bridging worlds apart. Click a path and I'll transport you through hyperspace. What am I?",
     "answer": "LINK",
-    "hint": "Web navigation"
+    "hint": "People often as in instagram comments"
   },
   {
     "id": 10,
@@ -61,15 +61,15 @@
   },
   {
     "id": 11,
-    "riddle": "Born from chaos, I bring order through comparison. I rearrange the scattered into perfect harmony. What am I?",
-    "answer": "SORT",
+    "riddle": "I help to arrange the data. What am I?",
+    "answer": "SORTING",
     "hint": "Organizing data"
   },
   {
     "id": 12,
-    "riddle": "A invisible thread connecting parent to child. Break me and the family tree crumbles. What am I?",
+    "riddle": "I store the address of a data. What am I?",
     "answer": "POINTER",
-    "hint": "Memory address"
+    "hint": "Memory address & used to define by * in c/c++"
   },
   {
     "id": 13,
@@ -87,7 +87,7 @@
     "id": 15,
     "riddle": "I convert the human tongue to machine language, translating dreams into reality, one line at a time. What am I?",
     "answer": "COMPILER",
-    "hint": "Code translator"
+    "hint": "Turbo C++ is a ??"
   },
   {
     "id": 35,
@@ -187,15 +187,15 @@
   },
   {
     "id": 31,
-    "riddle": "I’m a collection that grows dynamically. What am I?",
-    "answer": "ARRAYLIST",
-    "hint": "Resizable array..."
+    "riddle": "Im the volatile memory type?",
+    "answer": "RAM",
+    "hint": "Temporary storage..."
   },
   {
     "id": 32,
-    "riddle": "I power the internet, connecting machines worldwide. What am I?",
-    "answer": "TCP/IP",
-    "hint": "Network protocol..."
+    "riddle": "Starting computer proccess is called as?",
+    "answer": "BOOTING",
+    "hint": "System startup..."
   },
   {
     "id": 33,
@@ -208,5 +208,169 @@
     "riddle": "I optimize queries in databases. What am I?",
     "answer": "INDEX",
     "hint": "Fast search..."
-  }
+  },
+  {
+  "id": 35,
+  "riddle": "I am a programming language that is easy to learn. I use indentation for blocks. I am named after a creature in wildlife. What am I?",
+  "answer": "PYTHON",
+  "hint": "I start with 'P' and am very beginner-friendly."
+},
+{
+  "id": 36,
+  "riddle": "I repeat code multiple times. I can count from 1 to 10. Users can control how many times I run. What am I?",
+  "answer": "LOOP",
+  "hint": "I help avoid writing the same code over and over."
+},
+{
+  "id": 37,
+  "riddle": "I am a process where systems learn patterns from examples and improve without being explicitly programmed. What am I?",
+  "answer": "MACHINE LEARNING",
+  "hint": "It's about learning from data."
+},
+{
+  "id": 38,
+  "riddle": "Im the most used OS in the world right now?",
+  "answer": "WINDOWS",
+  "hint": "Microsoft's operating system."
+},
+{
+  "id": 39,
+  "riddle": "I am inspired by how the human brain works and consist of connected units. What am I?",
+  "answer": "NEURAL NETWORK",
+  "hint": "Inspired by biological brains."
+},
+{
+  "id": 40,
+  "riddle": "I use many layers to learn complex patterns from data. What am I?",
+  "answer": "DEEP LEARNING",
+  "hint": "Multiple processing layers."
+},
+{
+  "id": 41,
+  "riddle": "I help machines understand human language and power chatbots and translators. What am I?",
+  "answer": "NLP",
+  "hint": "Natural language processing."
+},
+{
+  "id": 42,
+  "riddle": "I convert words into numbers while preserving meaning. What am I?",
+  "answer": "EMBEDDING",
+  "hint": "Words become vectors."
+},
+{
+  "id": 43,
+  "riddle": "Im the open source OS?",
+  "answer": "LINUX",
+  "hint": "Popular in servers and desktops."
+},
+{
+  "id": 44,
+  "riddle": "I group similar items together without labels. What am I?",
+  "answer": "CLUSTERING",
+  "hint": "Unsupervised grouping."
+},
+{
+  "id": 45,
+  "riddle": "I make machines act smart and intelligent. What am I?",
+  "answer": "AI",
+  "hint": "Rapidly growing field?"},
+{
+  "id": 46,
+  "riddle": "I predict numerical values like price or temperature. What am I?",
+  "answer": "REGRESSION",
+  "hint": "Predicting continuous values."
+},
+{
+  "id": 47,
+  "riddle": "I used to delete the previous character. What am I?",
+  "answer": "BACKSPACE",
+  "hint": "I'm in your keyboard."
+},
+{
+  "id": 48,
+  "riddle": "Physical components of a computer. What am I?",
+  "answer": "HARDWARE",
+  "hint": "Physical parts of a computer."
+},
+{
+  "id": 49,
+  "riddle": "I describe data like images, audio, and videos that don’t fit into tables. What am I?",
+  "answer": "UNSTRUCTURED DATA",
+  "hint": "Not rows and columns."
+},
+{
+  "id": 50,
+  "riddle": "Learning with labeled data is called what?",
+  "answer": "SUPERVISED LEARNING",
+  "hint": "Answers are provided during training."
+},
+{
+  "id": 51,
+  "riddle": "AI that talks like humans and answers questions is called what?",
+  "answer": "CHATBOT",
+  "hint": "ChatGPT is one."
+},
+{
+  "id": 52,
+  "riddle": "A neural network that learns from past or sequential data is called what?",
+  "answer": "RECURRENT NEURAL NETWORK",
+  "hint": "RNN stands for?"
+},
+{
+  "id": 53,
+  "riddle": "Neural networks are inspired by which human body part?",
+  "answer": "BRAIN",
+  "hint": "Controls thinking."
+},
+{
+  "id": 54,
+  "riddle": "1024 bytes make up what unit of digital information?",
+  "answer": "KILOBYTE",
+  "hint": "1000 grams are also called by the same name."
+},
+{
+  "id": 55,
+  "riddle": "I'm the Web Protocol?",
+  "answer": "HTTP",
+  "hint": "You can see me in the 1st few letters of link in browser."
+},
+{
+  "id": 56,
+  "riddle": "I'm the error in the code?",
+  "answer": "BUG",
+  "hint": "People often say that I can fly."
+},
+{
+  "id": 57,
+  "riddle": "I'm the query language for databases?",
+  "answer": "SQL",
+  "hint": "Used to manage data in RDBMS."
+},
+{
+  "id": 58,
+  "riddle": "I'm the computer memory that can be read and changed?",
+  "answer": "RAM",
+  "hint": "Volatile memory."
+},{
+  "id": 59,
+  "riddle": "I'm the non-volatile memory that stores data permanently?",
+  "answer": "HARD DRIVE",
+  "hint": "Long-term storage."
+},{
+  "id": 60,
+  "riddle": "I'm the language used to style web pages?",
+  "answer": "CSS",
+  "hint": "Used in HTML to style."
+},{
+  "id": 61,
+  "riddle": "I'm the Malicious software?",
+  "answer": "VIRUS",
+  "hint": "Even humans can get me."
+},
+{
+  "id": 62,
+  "riddle": "I'm the Protecting software?",
+  "answer": "Antivirus",
+  "hint": "Protects against viruses."
+}
 ]
