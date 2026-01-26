@@ -3,7 +3,7 @@
   "id": 1,
   "riddle": "Neural networks are inspired by which human body part?",
   "answer": "BRAIN",
-  "hint": "Controls thinking."
+  "hint": "That one body part ppls in love lacks?."
 },
   {
     "id": 2,
@@ -13,7 +13,7 @@
   },
   {
     "id": 3,
-    "riddle": "Born from trees, I become a memory. Pages turn but I never forget. In ancient halls I store the world's wisdom. What am I?",
+    "riddle": "I store only the recent/ frequently accessed data. What am I?",
     "answer": "CACHE",
     "hint": "Fast storage"
   },
@@ -39,7 +39,7 @@
     "id": 7,
     "riddle": "I branch like a tree but have no leaves. My roots spread data, my nodes hold keys. Search me wisely. What am I?",
     "answer": "GRAPH",
-    "hint": "Nodes & edges"
+    "hint": "I have Nodes & edges"
   },
   {
     "id": 8,
@@ -51,7 +51,7 @@
     "id": 9,
     "riddle": "I connect the disconnected, bridging worlds apart. Click a path and I'll transport you through hyperspace. What am I?",
     "answer": "LINK",
-    "hint": "Web navigation"
+    "hint": "People often as in instagram comments"
   },
   {
     "id": 10,
@@ -61,15 +61,15 @@
   },
   {
     "id": 11,
-    "riddle": "Born from chaos, I bring order through comparison. I rearrange the scattered into perfect harmony. What am I?",
-    "answer": "SORT",
+    "riddle": "I help to arrange the data. What am I?",
+    "answer": "SORTING",
     "hint": "Organizing data"
   },
   {
     "id": 12,
-    "riddle": "A invisible thread connecting parent to child. Break me and the family tree crumbles. What am I?",
+    "riddle": "I store the address of a data. What am I?",
     "answer": "POINTER",
-    "hint": "Memory address"
+    "hint": "Memory address & used to define by * in c/c++"
   },
   {
     "id": 13,
@@ -87,7 +87,7 @@
     "id": 15,
     "riddle": "I convert the human tongue to machine language, translating dreams into reality, one line at a time. What am I?",
     "answer": "COMPILER",
-    "hint": "Code translator"
+    "hint": "Turbo C++ is a ??"
   },
   {
     "id": 35,
@@ -187,15 +187,15 @@
   },
   {
     "id": 31,
-    "riddle": "I’m a collection that grows dynamically. What am I?",
-    "answer": "ARRAYLIST",
-    "hint": "Resizable array..."
+    "riddle": "Im the volatile memory type?",
+    "answer": "RAM",
+    "hint": "Temporary storage..."
   },
   {
     "id": 32,
-    "riddle": "I power the internet, connecting machines worldwide. What am I?",
-    "answer": "TCP/IP",
-    "hint": "Network protocol..."
+    "riddle": "Starting computer proccess is called as?",
+    "answer": "BOOTING",
+    "hint": "System startup..."
   },
   {
     "id": 33,
@@ -229,9 +229,9 @@
 },
 {
   "id": 38,
-  "riddle": "I help computers understand images and videos, detecting objects and faces. What am I?",
-  "answer": "COMPUTER VISION",
-  "hint": "It's about seeing and understanding visuals."
+  "riddle": "Im the most used OS in the world right now?",
+  "answer": "WINDOWS",
+  "hint": "Microsoft's operating system."
 },
 {
   "id": 39,
@@ -259,9 +259,9 @@
 },
 {
   "id": 43,
-  "riddle": "I assign items into predefined categories like spam or not spam. What am I?",
-  "answer": "CLASSIFICATION",
-  "hint": "Putting things into groups."
+  "riddle": "Im the open source OS?",
+  "answer": "LINUX",
+  "hint": "Popular in servers and desktops."
 },
 {
   "id": 44,
@@ -272,9 +272,8 @@
 {
   "id": 45,
   "riddle": "I make machines act smart and intelligent. What am I?",
-  "answer": "ARTIFICIAL INTELLIGENCE",
-  "hint": "AI stands for?"
-},
+  "answer": "AI",
+  "hint": "Rapidly growing field?"},
 {
   "id": 46,
   "riddle": "I predict numerical values like price or temperature. What am I?",
@@ -283,15 +282,15 @@
 },
 {
   "id": 47,
-  "riddle": "I make decisions using yes/no questions and look like an upside-down tree. What am I?",
-  "answer": "DECISION TREE",
-  "hint": "A tree that makes decisions."
+  "riddle": "I used to delete the previous character. What am I?",
+  "answer": "BACKSPACE",
+  "hint": "I'm in your keyboard."
 },
 {
   "id": 48,
-  "riddle": "I measure how many predictions are correct out of all predictions. What am I?",
-  "answer": "ACCURACY",
-  "hint": "Overall correctness."
+  "riddle": "Physical components of a computer. What am I?",
+  "answer": "HARDWARE",
+  "hint": "Physical parts of a computer."
 },
 {
   "id": 49,
@@ -322,5 +321,56 @@
   "riddle": "Neural networks are inspired by which human body part?",
   "answer": "BRAIN",
   "hint": "Controls thinking."
+},
+{
+  "id": 54,
+  "riddle": "1024 bytes make up what unit of digital information?",
+  "answer": "KILOBYTE",
+  "hint": "1000 grams are also called by the same name."
+},
+{
+  "id": 55,
+  "riddle": "I'm the Web Protocol?",
+  "answer": "HTTP",
+  "hint": "You can see me in the 1st few letters of link in browser."
+},
+{
+  "id": 56,
+  "riddle": "I'm the error in the code?",
+  "answer": "BUG",
+  "hint": "People often say that I can fly."
+},
+{
+  "id": 57,
+  "riddle": "I'm the query language for databases?",
+  "answer": "SQL",
+  "hint": "Used to manage data in RDBMS."
+},
+{
+  "id": 58,
+  "riddle": "I'm the computer memory that can be read and changed?",
+  "answer": "RAM",
+  "hint": "Volatile memory."
+},{
+  "id": 59,
+  "riddle": "I'm the non-volatile memory that stores data permanently?",
+  "answer": "HARD DRIVE",
+  "hint": "Long-term storage."
+},{
+  "id": 60,
+  "riddle": "I'm the language used to style web pages?",
+  "answer": "CSS",
+  "hint": "Used in HTML to style."
+},{
+  "id": 61,
+  "riddle": "I'm the Malicious software?",
+  "answer": "VIRUS",
+  "hint": "Even humans can get me."
+},
+{
+  "id": 62,
+  "riddle": "I'm the Protecting software?",
+  "answer": "Antivirus",
+  "hint": "Protects against viruses."
 }
 ]
