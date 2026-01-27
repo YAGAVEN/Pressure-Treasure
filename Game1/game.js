@@ -306,7 +306,7 @@ function createCardElement(card) {
     // ===== ICON RENDER (SINGLE SOURCE OF TRUTH) =====
     if (card.isFixed) {
         // Fixed block
-        cardFront.textContent = '🧩';
+        cardFront.textContent = '👻';
     } else {
         const DEFAULT_ICON =
             'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/code.svg';
@@ -569,8 +569,8 @@ function generateCards(gridSize) {
     if (hasFixedCard) {
         const fixedCard = {
             id: cardId++,
-            iconSrc: '🧩', // Keep emoji for fixed card
-            isFlipped: false,
+            iconSrc: '👻', // Keep emoji for fixed card
+            isFlipped: true,
             isMatched: false,
             isFixed: true
         };
@@ -585,9 +585,6 @@ function generateCards(gridSize) {
     
     return cards;
 }
-
-// ===== MEMORY BOOST LOGIC =====
-
 
 
 // ===== MEMORY BOOST LOGIC =====

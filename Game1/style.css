@@ -333,19 +333,19 @@ img.card-icon {
 
 /* Fixed card styling - visually distinct */
 .card.fixed {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-    border: 3px solid #ffb300;
+    background: linear-gradient(135deg, #3a4fa5 0%, #3a4fa5 100%);
+    border: 3px solid #0800ff;
     cursor: not-allowed;
 }
 
 .card.fixed .card-back {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-    border: 3px solid #ffb300;
+    background: linear-gradient(135deg, #3a4fa5 0%, #3a4fa5 100%);
+    border: 3px solid #3a4fa5;
 }
 
 .card.fixed .card-front {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-    border: 3px solid #ffb300;
+    background: linear-gradient(135deg, #3a4fa5 0%, #3a4fa5 100%);
+    border: 3px solid #3a4fa5;
 }
 
 /* Matched card styling */
