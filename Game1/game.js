@@ -517,8 +517,8 @@ function generateCards(gridSize) {
   'mysql','postgresql','mongodb','redis','sqlite','mariadb','apachecassandra','elasticsearch',
 
   // Cloud / DevOps
-  'docker','kubernetes','terraform','ansible','jenkins','git','github','gitlab','bitbucket',
-  'nginx','apache','hashicorpvault','consul',
+  'docker','kubernetes','terraform','ansible','jenkins','git','github','gitlab','apache',
+
 
   // AI / ML
   'tensorflow','pytorch','pandas','numpy','scikitlearn','jupyter','opencv','huggingface',
@@ -534,7 +534,10 @@ function generateCards(gridSize) {
     );
     
     // Select icons for pairs (take first totalPairs icons from pool)
-    const selectedIcons = iconPool.slice(0, totalPairs);
+    // const selectedIcons = iconPool.slice(0, totalPairs);
+    const shuffledIcons = shuffleArray(iconPool);
+    const selectedIcons = shuffledIcons.slice(0, totalPairs);
+
     
     // Create pairs of cards
     const pairCards = [];
@@ -582,7 +585,7 @@ function generateCards(gridSize) {
     } else {
         cards = shuffledPairCards;
     }
-    
+    cards = cards.slice(0, totalCards);
     return cards;
 }
 
