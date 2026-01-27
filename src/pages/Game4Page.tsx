@@ -3,6 +3,7 @@ import { Game4Challenge } from '@/components/Game4Challenge';
 import { useGame } from '@/contexts/GameContext';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import LevelAnimation from '@/components/LevelAnimation';
 
 const Game4Page = () => {
   const { roomCode } = useParams<{ roomCode: string }>();

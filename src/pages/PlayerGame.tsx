@@ -289,46 +289,47 @@ const PlayerGame = () => {
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Crown className="h-5 w-5 text-primary" />
+    <div className="min-h-screen bg-background">
+      <div>
+        {/* Header */}
+        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
+          <div className="container mx-auto flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Crown className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-cinzel font-semibold">{room.name}</p>
+                <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-cinzel font-semibold">{room.name}</p>
-              <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
+
+            <div className="flex items-center gap-3">
+              {/* Player Name */}
+              <div className="hidden sm:flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{currentPlayer.username}</span>
+              </div>
+              
+              {/* Timer */}
+              <div className={cn(
+                "flex items-center gap-2 rounded-lg px-3 py-1",
+                roomStatus === 'playing' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                <Clock className="h-4 w-4" />
+                <span className="font-mono text-lg font-bold">{formatTime(roomTimer)}</span>
+              </div>
+              
+              <Button variant="ghost" size="icon" onClick={handleLeave}>
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-3">
-            {/* Player Name */}
-            <div className="hidden sm:flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{currentPlayer.username}</span>
-            </div>
-            
-            {/* Timer */}
-            <div className={cn(
-              "flex items-center gap-2 rounded-lg px-3 py-1",
-              roomStatus === 'playing' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-            )}>
-              <Clock className="h-4 w-4" />
-              <span className="font-mono text-lg font-bold">{formatTime(roomTimer)}</span>
-            </div>
-            
-            <Button variant="ghost" size="icon" onClick={handleLeave}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-6">
-        {/* Main Content - Challenges */}
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <main className="container mx-auto px-4 py-6">
+          {/* Main Content - Challenges */}
+          <div className="space-y-6 max-w-4xl mx-auto">
           {/* Status Banner */}
 
           {room.status === 'finished' && (
@@ -479,8 +480,20 @@ const PlayerGame = () => {
                       </Button>
                     </CardContent>
                   )}
-                  
-                  {challenge.id !== 2 && challenge.id !== 3 && challenge.id !== 4 && !isCompleted && (
+
+                  {challenge.id === 5 && !isCompleted && (
+                    <CardContent className="pt-2">
+                      <Button 
+                        onClick={() => navigate(`/game5/${roomCode}`)}
+                        disabled={room.status !== 'playing' || isCompleted}
+                        className="w-full font-cinzel"
+                      >
+                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Iron Throne Ascension' : 'Waiting for Game Master...'}
+                      </Button>
+                    </CardContent>
+                  )}
+                   
+                  {challenge.id !== 2 && challenge.id !== 3 && challenge.id !== 4 && challenge.id !== 5 && !isCompleted && (
                     <CardContent className="pt-2">
                       <Button 
                         onClick={() => handleCompleteChallenge(challenge.id)}
@@ -501,8 +514,9 @@ const PlayerGame = () => {
               );
             })}
           </div>
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

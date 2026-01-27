@@ -5,6 +5,7 @@ import { RiddleChallenge } from '@/components/RiddleChallenge';
 import { useGame } from '@/contexts/GameContext';
 import { ArrowLeft, Crown } from 'lucide-react';
 import { HOUSE_NAMES } from '@/types/game';
+import LevelAnimation from '@/components/LevelAnimation';
 
 const RiddlePage = () => {
   const { roomCode } = useParams<{ roomCode: string }>();
@@ -31,23 +32,31 @@ const RiddlePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={handleBack}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Crown className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="font-cinzel font-semibold">{room.name}</p>
-              <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
+    <div className="min-h-screen relative">
+      {/* Background Animation */}
+      <LevelAnimation 
+        houseTheme={room.houseTheme}
+        challengeId={2}
+      />
+      
+      {/* Main Content */}
+      <div className="relative z-10">
+        {/* Header */}
+        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
+          <div className="container mx-auto flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={handleBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Crown className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-cinzel font-semibold">{room.name}</p>
+                <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
+              </div>
             </div>
           </div>
-        </div>
       </header>
 
       {/* Main Content */}
@@ -82,6 +91,7 @@ const RiddlePage = () => {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 };

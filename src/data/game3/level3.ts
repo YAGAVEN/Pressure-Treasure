@@ -1,5 +1,5 @@
-import { Level } from '../types';
-import { TILE_SIZE, COLORS, GAME_HEIGHT } from '../constants';
+import { Level } from '@/types/game3Types';
+import { TILE_SIZE, COLORS, GAME_HEIGHT } from '@/data/game3Constants';
 
 // Level 3: Dragonstone - The Fire Trial
 // Fire theme with lava platforms, fire bursts, disappearing platforms, screen shake

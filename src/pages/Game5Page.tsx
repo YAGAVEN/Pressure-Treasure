@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import Game3 from '@/components/Game3';
+import { useEffect } from 'react';
 import { useGame } from '@/contexts/GameContext';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
 import LevelAnimation from '@/components/LevelAnimation';
+import { Game5Challenge } from '@/components/Game5Challenge';
 
-const Game3Page = () => {
+const Game5Page = () => {
   const { roomCode } = useParams<{ roomCode: string }>();
   const navigate = useNavigate();
   const { currentPlayer, completeChallenge, getRoom } = useGame();
@@ -18,7 +18,6 @@ const Game3Page = () => {
       return;
     }
 
-    // Check if game is playing
     if (room.status !== 'playing') {
       toast({
         title: "Game Not Active",
@@ -30,10 +29,10 @@ const Game3Page = () => {
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {
-    completeChallenge(3); // Challenge 3
+    completeChallenge(5);
     toast({
       title: "Challenge Complete!",
-      description: "You've conquered The Iron Path!",
+      description: "You've claimed the Iron Throne and completed the hunt!",
     });
     navigate(`/game/${roomCode}`);
   };
@@ -48,18 +47,12 @@ const Game3Page = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Background Animation */}
-      <LevelAnimation 
-        houseTheme={room.houseTheme}
-        challengeId={3}
-      />
-      
-      {/* Main Content */}
+      <LevelAnimation houseTheme={room.houseTheme} challengeId={5} />
       <div className="relative z-10">
-        <Game3 onComplete={handleComplete} onCancel={handleCancel} />
+        <Game5Challenge onComplete={handleComplete} onCancel={handleCancel} />
       </div>
     </div>
   );
 };
 
-export default Game3Page;
+export default Game5Page;

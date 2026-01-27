@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { useGameEngine } from '../game3/hooks';
-import { GAME_WIDTH, GAME_HEIGHT, LEVEL_NAMES } from '../game3/constants';
+import { useGameEngine } from '@/hooks/useGameEngine';
+import { GAME_WIDTH, GAME_HEIGHT, LEVEL_NAMES } from '@/data/game3Constants';
 import { Button } from '@/components/ui/button';
 
 interface Game3Props {
