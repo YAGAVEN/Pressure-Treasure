@@ -8,11 +8,7 @@ import { DoorOpeningAnimation } from '@/components/DoorOpeningAnimation';
 import { useGame } from '@/contexts/GameContext';
 import { ArrowLeft, Crown } from 'lucide-react';
 import { HOUSE_NAMES } from '@/types/game';
-<<<<<<< HEAD
-import LevelAnimation from '@/components/LevelAnimation';
-=======
 import './RiddlePage.css';
->>>>>>> 62a6928ccc446d75896ac8a59658d65f18f550b1
 
 const RiddlePage = () => {
   const { roomCode } = useParams<{ roomCode: string }>();
@@ -47,31 +43,6 @@ const RiddlePage = () => {
   };
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen relative">
-      {/* Background Animation */}
-      <LevelAnimation 
-        houseTheme={room.houseTheme}
-        challengeId={2}
-      />
-      
-      {/* Main Content */}
-      <div className="relative z-10">
-        {/* Header */}
-        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
-          <div className="container mx-auto flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={handleBack}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <Crown className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-cinzel font-semibold">{room.name}</p>
-                <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
-              </div>
-=======
     <div 
       className="min-h-screen w-full flex flex-col bg-cover bg-center bg-fixed bg-no-repeat relative overflow-hidden"
       style={{
@@ -118,9 +89,9 @@ const RiddlePage = () => {
             <div>
               <p className="font-cinzel font-semibold text-white">{room.name}</p>
               <p className="text-xs text-blue-300">{HOUSE_NAMES[room.houseTheme]}</p>
->>>>>>> 62a6928ccc446d75896ac8a59658d65f18f550b1
             </div>
           </div>
+        </div>
       </header>
 
       {/* Main Content - Full Page Layout */}
@@ -155,7 +126,6 @@ const RiddlePage = () => {
           </div>
         </div>
       </main>
-      </div>
     </div>
   );
 };
