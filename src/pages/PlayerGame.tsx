@@ -445,17 +445,29 @@ const PlayerGame = () => {
                     </div>
                   </CardHeader>
                   
-                  {challenge.id === 2 && !isCompleted && (
-                    <CardContent className="pt-2">
-                      <Button 
-                        onClick={() => navigate(`/riddle/${roomCode}`)}
-                        disabled={room.status !== 'playing' || isCompleted}
-                        className="w-full font-cinzel"
-                      >
-                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Riddle Challenge' : 'Waiting for Game Master...'}
-                      </Button>
-                    </CardContent>
-                  )}
+                   {challenge.id === 1 && !isCompleted && (
+                     <CardContent className="pt-2">
+                       <Button 
+                         onClick={() => navigate(`/game1/${roomCode}`)}
+                         disabled={room.status !== 'playing' || isCompleted}
+                         className="w-full font-cinzel"
+                       >
+                         {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Trial of the First Men' : 'Waiting for Game Master...'}
+                       </Button>
+                     </CardContent>
+                   )}
+                   
+                   {challenge.id === 2 && !isCompleted && (
+                     <CardContent className="pt-2">
+                       <Button 
+                         onClick={() => navigate(`/riddle/${roomCode}`)}
+                         disabled={room.status !== 'playing' || isCompleted}
+                         className="w-full font-cinzel"
+                       >
+                         {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Riddle Challenge' : 'Waiting for Game Master...'}
+                       </Button>
+                     </CardContent>
+                   )}
                   
                   {challenge.id === 3 && !isCompleted && (
                     <CardContent className="pt-2">
