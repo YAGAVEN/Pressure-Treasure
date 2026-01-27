@@ -16,10 +16,11 @@ interface Question {
 interface RiddleChallengeProps {
   onComplete: () => void;
   disabled?: boolean;
+  preloadedQuestions?: Question[];
 }
 
-export const RiddleChallenge = ({ onComplete, disabled = false }: RiddleChallengeProps) => {
-  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
+export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestions }: RiddleChallengeProps) => {
+  const [allQuestions, setAllQuestions] = useState<Question[]>(preloadedQuestions || []);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -28,15 +29,22 @@ export const RiddleChallenge = ({ onComplete, disabled = false }: RiddleChalleng
   const [completed, setCompleted] = useState(0);
 
   useEffect(() => {
-    fetch('/questions.json')
-      .then(res => res.json())
-      .then((questions: Question[]) => {
-        setAllQuestions(questions);
-        const shuffled = [...questions].sort(() => Math.random() - 0.5);
-        setSelectedQuestions(shuffled.slice(0, 10));
-      })
-      .catch(err => console.error('Failed to load questions:', err));
-  }, []);
+    // Only fetch if questions weren't preloaded
+    if (preloadedQuestions && preloadedQuestions.length > 0) {
+      setAllQuestions(preloadedQuestions);
+      const shuffled = [...preloadedQuestions].sort(() => Math.random() - 0.5);
+      setSelectedQuestions(shuffled.slice(0, 10));
+    } else {
+      fetch('/questions.json')
+        .then(res => res.json())
+        .then((questions: Question[]) => {
+          setAllQuestions(questions);
+          const shuffled = [...questions].sort(() => Math.random() - 0.5);
+          setSelectedQuestions(shuffled.slice(0, 10));
+        })
+        .catch(err => console.error('Failed to load questions:', err));
+    }
+  }, [preloadedQuestions]);
 
   const currentQuestion = selectedQuestions[currentIndex];
 

@@ -57,13 +57,13 @@
 .door-left {
   width: 50%;
   left: 0;
-  animation: doorLeftClose 2.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: doorLeftClose 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 .door-right {
   width: 50%;
   right: 0;
-  animation: doorRightClose 2.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: doorRightClose 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 @keyframes doorLeftClose {

@@ -12,7 +12,7 @@ export const DoorClosingAnimation = ({ onAnimationComplete }: DoorClosingAnimati
     const timer = setTimeout(() => {
       setIsAnimating(false);
       onAnimationComplete();
-    }, 3000); // Animation duration
+    }, 1200); // Match CSS animation: 1.2s
 
     return () => clearTimeout(timer);
   }, [onAnimationComplete]);

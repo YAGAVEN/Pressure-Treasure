@@ -10,10 +10,10 @@ export const DoorOpeningAnimation = ({ onAnimationComplete, moveFurther = false 
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    // Wait 2 seconds before starting the animation
+    // Wait 500ms before starting the animation (reduced from 2000ms)
     const delayTimer = setTimeout(() => {
       setIsAnimating(true);
-    }, 2000);
+    }, 500);
 
     return () => clearTimeout(delayTimer);
   }, []);
@@ -21,18 +21,18 @@ export const DoorOpeningAnimation = ({ onAnimationComplete, moveFurther = false 
   useEffect(() => {
     if (!isAnimating) return;
 
-    // 5 second animation duration
+    // 2 second animation duration (match CSS animation)
     const animationTimer = setTimeout(() => {
       if (moveFurther) {
-        // If moving further, wait 2 more seconds then complete
+        // If moving further, wait 1 more second then complete
         const moveTimer = setTimeout(() => {
           onAnimationComplete();
-        }, 2000);
+        }, 1000);
         return () => clearTimeout(moveTimer);
       } else {
         onAnimationComplete();
       }
-    }, 5000);
+    }, 2000);
 
     return () => clearTimeout(animationTimer);
   }, [isAnimating, onAnimationComplete, moveFurther]);
