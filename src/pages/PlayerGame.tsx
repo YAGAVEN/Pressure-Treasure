@@ -504,18 +504,6 @@ const PlayerGame = () => {
                       </Button>
                     </CardContent>
                   )}
-                   
-                  {challenge.id !== 2 && challenge.id !== 3 && challenge.id !== 4 && challenge.id !== 5 && !isCompleted && (
-                    <CardContent className="pt-2">
-                      <Button 
-                        onClick={() => handleCompleteChallenge(challenge.id)}
-                        disabled={room.status !== 'playing' || isCompleted}
-                        className="w-full font-cinzel"
-                      >
-                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Complete Challenge' : 'Waiting for Game Master...'}
-                      </Button>
-                    </CardContent>
-                  )}
                   
                   {isCompleted && (
                     <CardContent className="pt-2 text-sm text-muted-foreground">

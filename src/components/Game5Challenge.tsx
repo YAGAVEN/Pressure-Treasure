@@ -36,7 +36,15 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern flex items-center justify-center p-4">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        backgroundImage: 'url(/images/background2.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key="game5"
