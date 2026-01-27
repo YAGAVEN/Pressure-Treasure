@@ -1,4 +1,4 @@
-// Game types and interfaces
+// Game 3 Types and Interfaces
 
 export interface Vector2D {
   x: number;

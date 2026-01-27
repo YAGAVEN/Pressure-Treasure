@@ -1,5 +1,5 @@
-import { Level } from '../types';
-import { TILE_SIZE, COLORS, GAME_HEIGHT } from '../constants';
+import { Level } from '@/types/game3Types';
+import { TILE_SIZE, COLORS, GAME_HEIGHT } from '@/data/game3Constants';
 
 // Level 1: The North - Frozen Path
 // Ice theme with slippery platforms, floor spikes, freeze zones, and collapsing platforms

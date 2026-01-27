@@ -1,4 +1,4 @@
-import { Rectangle, Vector2D } from './types';
+import { Rectangle, Vector2D } from '@/types/game3Types';
 
 // Collision detection
 export function rectanglesIntersect(a: Rectangle, b: Rectangle): boolean {

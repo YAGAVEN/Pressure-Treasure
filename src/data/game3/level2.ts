@@ -1,5 +1,5 @@
-import { Level } from '../types';
-import { TILE_SIZE, COLORS, GAME_HEIGHT } from '../constants';
+import { Level } from '@/types/game3Types';
+import { TILE_SIZE, COLORS, GAME_HEIGHT } from '@/data/game3Constants';
 
 // Level 2: King's Landing - Castle of Blades
 // Castle theme with swinging blades, guillotines, narrow platforms, wall spikes

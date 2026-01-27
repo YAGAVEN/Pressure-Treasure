@@ -13,7 +13,7 @@ import {
   COLORS,
   COLLAPSE_DELAY,
   DISAPPEAR_DELAY,
-} from '../constants';
+} from '@/data/game3Constants';
 import { 
   PlayerState, 
   GameState, 
@@ -22,7 +22,7 @@ import {
   Trap, 
   Camera,
   Particle,
-} from '../types';
+} from '@/types/game3Types';
 import { 
   rectanglesIntersect, 
   lerp, 
@@ -32,8 +32,8 @@ import {
   drawPlayer,
   createParticles,
   distance,
-} from '../utils';
-import { levels } from '../levels';
+} from '@/lib/game3Utils';
+import { levels } from '@/data/game3';
 
 interface GameEngineState {
   player: PlayerState;
@@ -582,15 +582,19 @@ export function useGameEngine() {
           continue;
         }
         
-        let baseColor = COLORS[theme].platform;
-        let highlightColor = COLORS[theme].platformHighlight;
+        let baseColor = COLORS[theme as keyof typeof COLORS] as any;
+        if (!baseColor || typeof baseColor !== 'object' || !('platform' in baseColor)) {
+          baseColor = { platform: '#4a4a4a', platformHighlight: '#6a6a6a' };
+        }
+        
+        let highlightColor = baseColor.platformHighlight || '#6a6a6a';
         
         if (platform.type === 'ice') {
           baseColor = COLORS.ice.platform;
           highlightColor = COLORS.ice.platformHighlight;
         } else if (platform.type === 'lava') {
-          baseColor = COLORS.fire.lava;
-          highlightColor = COLORS.fire.fire;
+          baseColor = (COLORS.fire as any).lava || '#ff4500';
+          highlightColor = (COLORS.fire as any).fire || '#ff8c00';
         }
         
         // Collapsing platform shake
@@ -606,7 +610,9 @@ export function useGameEngine() {
         }
         
         ctx.globalAlpha = alpha;
-        drawPlatform(ctx, platform.x + offsetX, platform.y, platform.width, platform.height, baseColor, highlightColor);
+        drawPlatform(ctx, platform.x + offsetX, platform.y, platform.width, platform.height, 
+          typeof baseColor === 'string' ? baseColor : '#4a4a4a', 
+          typeof highlightColor === 'string' ? highlightColor : '#6a6a6a');
         ctx.globalAlpha = 1;
       }
       
@@ -615,7 +621,8 @@ export function useGameEngine() {
         if (trap.isHidden) continue;
         
         if (trap.type === 'floor_spike' || trap.type === 'ceiling_spike' || trap.type === 'wall_spike' || trap.type === 'falling_spike') {
-          const spikeColor = theme === 'fire' ? COLORS.fire.accent : 
+          const themeColors = COLORS[theme as keyof typeof COLORS] as any;
+          const spikeColor = theme === 'fire' ? (COLORS.fire as any).accent : 
                             theme === 'ice' ? COLORS.ice.spike : 
                             COLORS.castle.spike;
           
