@@ -89,7 +89,7 @@ export const CHALLENGES: Omit<Challenge, 'completed'>[] = [
   {
     id: 5,
     name: "Iron Throne Ascension",
-    description: "Complete the final challenge and claim your right to rule the Seven Kingdoms."
+    description: "Weave the final tale and claim the Iron Throne."
   }
 ];
 

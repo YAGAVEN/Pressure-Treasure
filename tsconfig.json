@@ -4,7 +4,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@game3/*": ["./src/game3/*"]
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,

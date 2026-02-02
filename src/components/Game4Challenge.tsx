@@ -78,18 +78,28 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
 
   useEffect(() => {
     if (userInput.trim()) {
-      const similarity = compareTwoStrings(
-        userInput.toLowerCase().trim(),
-        currentLevel.target.toLowerCase().trim()
+      const userText = userInput.toLowerCase().trim();
+      
+      // Calculate points-based bag of words score
+      const userWords = userText.split(/\s+/);
+      const bagOfWordsLower = currentLevel.bagOfWords.map(w => w.toLowerCase());
+      
+      // Count matched words - each word gives 5 points
+      const matchedWords = userWords.filter(word => 
+        bagOfWordsLower.includes(word)
       );
-      const accuracyPercent = similarity * 100;
+      
+      const pointsEarned = matchedWords.length * 5;
+      const maxPoints = 100; // Cap at 100 points
+      const accuracyPercent = Math.min(pointsEarned, maxPoints);
+      
       setAccuracy(accuracyPercent);
-      setCanProceed(accuracyPercent > 80);
+      setCanProceed(accuracyPercent >= 80);
     } else {
       setAccuracy(0);
       setCanProceed(false);
     }
-  }, [userInput, currentLevel.target]);
+  }, [userInput, currentLevel.bagOfWords]);
 
   const handleNextLevel = () => {
     if (!canProceed) return;

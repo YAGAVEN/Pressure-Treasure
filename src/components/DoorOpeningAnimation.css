@@ -23,7 +23,7 @@
     rgba(100, 200, 255, 0.3) 0%,
     rgba(50, 150, 200, 0.2) 50%,
     rgba(10, 20, 40, 0.8) 100%);
-  animation: overlayFadeOut 5s ease-in forwards;
+  animation: overlayFadeOut 2s ease-in forwards;
 }
 
 @keyframes overlayFadeOut {
@@ -42,14 +42,14 @@
   position: absolute;
   width: 50%;
   left: 0;
-  animation: doorLeftOpen 4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: doorLeftOpen 2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 .door-opening-right {
   position: absolute;
   width: 50%;
   right: 0;
-  animation: doorRightOpen 4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: doorRightOpen 2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
 @keyframes doorLeftOpen {
