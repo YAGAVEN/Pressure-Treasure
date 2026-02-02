@@ -393,7 +393,7 @@ const RiddlePage = () => {
   const { getRoom, currentPlayer, completeChallenge } = useGame();
   const { toast } = useToast();
   const [selectedQuestions] = useState(() => getRandomQuestions());
-  const [showDoorClosingAnimation, setShowDoorClosingAnimation] = useState(true);
+  const [showDoorClosingAnimation, setShowDoorClosingAnimation] = useState(false);
   const [showDoorOpeningAnimation, setShowDoorOpeningAnimation] = useState(false);
   
   const room = roomCode ? getRoom(roomCode) : undefined;
@@ -430,17 +430,11 @@ const RiddlePage = () => {
   }
 
   const handleComplete = () => {
-    // Show door opening animation to exit
-    setShowDoorOpeningAnimation(true);
-    
     // Complete challenge #2
     completeChallenge(2);
     
-    // Navigate back to the game when door animation completes
-    // 2 seconds opening animation
-    setTimeout(() => {
-      navigate(`/game/${roomCode}`);
-    }, 2000);
+    // Navigate back to the game immediately
+    navigate(`/game/${roomCode}`);
   };
 
   const handleBack = () => {
