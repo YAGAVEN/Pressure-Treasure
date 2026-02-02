@@ -23,8 +23,20 @@ const Game1Page = () => {
         description: 'The game must be active to play this challenge.',
         variant: 'destructive',
       });
-      navigate(`/game/${roomCode}`);
+      navigate(`/game/${roomCode}`);      return;
     }
+
+    // Check if challenge is locked
+    if (currentPlayer.currentChallenge > 1 || currentPlayer.completedChallenges.includes(1)) {
+      // Challenge already completed or player moved past it
+      if (!currentPlayer.completedChallenges.includes(1) && currentPlayer.currentChallenge !== 1) {
+        toast({
+          title: "Challenge Locked",
+          description: "Complete previous challenges first.",
+          variant: "destructive",
+        });
+        navigate(`/game/${roomCode}`);
+      }    }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {

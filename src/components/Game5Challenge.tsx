@@ -121,6 +121,12 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
                 <Input
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSubmit(e as any);
+                    }
+                  }}
                   placeholder="Enter your answer..."
                   className={cn(
                     "text-xl py-6 px-5 bg-slate-700 text-white border-2 border-amber-500/50 placeholder:text-slate-400 focus:border-amber-400",
@@ -144,17 +150,29 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
 
                 <div className="flex gap-4 mt-6">
                   {onCancel && (
-                    <Button variant="outline" onClick={onCancel} className="flex-1 text-lg py-6 border-2 border-amber-400 text-amber-100 hover:bg-slate-700">
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      onClick={onCancel} 
+                      className="flex-1 text-lg py-6 border-2 border-amber-400 text-amber-100 hover:bg-slate-700"
+                    >
                       Cancel
                     </Button>
                   )}
                   {feedback === 'correct' ? (
-                    <Button onClick={handleContinue} className="flex-1 font-cinzel gap-2 text-lg py-6 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800">
+                    <Button 
+                      type="button"
+                      onClick={handleContinue} 
+                      className="flex-1 font-cinzel gap-2 text-lg py-6 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800"
+                    >
                       Continue to Victory
                       <Flame className="w-6 h-6" />
                     </Button>
                   ) : (
-                    <Button type="submit" className="flex-1 font-cinzel gap-2 text-lg py-6 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800">
+                    <Button 
+                      type="submit" 
+                      className="flex-1 font-cinzel gap-2 text-lg py-6 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800"
+                    >
                       Claim the Throne
                       <Flame className="w-6 h-6" />
                     </Button>

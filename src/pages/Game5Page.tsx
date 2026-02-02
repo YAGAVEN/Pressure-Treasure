@@ -25,6 +25,17 @@ const Game5Page = () => {
         variant: "destructive",
       });
       navigate(`/game/${roomCode}`);
+      return;
+    }
+
+    // Check if challenge is locked (challenge 5 requires challenge 4 to be completed)
+    if (currentPlayer.currentChallenge < 5) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
     }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
@@ -34,7 +45,8 @@ const Game5Page = () => {
       title: "Challenge Complete!",
       description: "You've claimed the Iron Throne and completed the hunt!",
     });
-    navigate(`/game/${roomCode}`);
+    // Navigate to winner page after completing final challenge
+    navigate(`/winner/${roomCode}`);
   };
 
   const handleCancel = () => {

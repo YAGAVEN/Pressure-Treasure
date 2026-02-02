@@ -26,6 +26,17 @@ const Game4Page = () => {
         variant: "destructive",
       });
       navigate(`/game/${roomCode}`);
+      return;
+    }
+
+    // Check if challenge is locked (challenge 4 requires challenge 3 to be completed)
+    if (currentPlayer.currentChallenge < 4) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
     }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 

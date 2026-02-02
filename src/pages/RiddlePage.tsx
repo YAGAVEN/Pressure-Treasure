@@ -1,11 +1,12 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RiddleChallenge } from '@/components/RiddleChallenge';
 import { DoorClosingAnimation } from '@/components/DoorClosingAnimation';
 import { DoorOpeningAnimation } from '@/components/DoorOpeningAnimation';
 import { useGame } from '@/contexts/GameContext';
+import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Crown } from 'lucide-react';
 import { HOUSE_NAMES } from '@/types/game';
 import './RiddlePage.css';
@@ -389,15 +390,42 @@ const getRandomQuestions = () => {
 const RiddlePage = () => {
   const { roomCode } = useParams<{ roomCode: string }>();
   const navigate = useNavigate();
-  const { getRoom, completeChallenge } = useGame();
+  const { getRoom, currentPlayer, completeChallenge } = useGame();
+  const { toast } = useToast();
   const [selectedQuestions] = useState(() => getRandomQuestions());
   const [showDoorClosingAnimation, setShowDoorClosingAnimation] = useState(true);
   const [showDoorOpeningAnimation, setShowDoorOpeningAnimation] = useState(false);
   
   const room = roomCode ? getRoom(roomCode) : undefined;
 
-  if (!room) {
-    navigate('/join');
+  useEffect(() => {
+    if (!room || !currentPlayer) {
+      navigate('/join');
+      return;
+    }
+
+    if (room.status !== 'playing') {
+      toast({
+        title: "Game Not Active",
+        description: "The game must be active to play this challenge.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
+      return;
+    }
+
+    // Check if challenge is locked (challenge 2 requires challenge 1 to be completed)
+    if (currentPlayer.currentChallenge < 2) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete challenge 1 first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
+    }
+  }, [room, currentPlayer, navigate, roomCode, toast]);
+
+  if (!room || !currentPlayer) {
     return null;
   }
 
