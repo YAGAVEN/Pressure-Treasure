@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -63,6 +63,11 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
       if (event.data?.type !== 'game1Completed' || completedRef.current) {
         return;
       }
+      // Only accept completion if the player is in fullscreen
+      if (!document.fullscreenElement) {
+        // Ignore completion events while not fullscreen
+        return;
+      }
       completedRef.current = true;
       onComplete();
     };
@@ -72,6 +77,26 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
       window.removeEventListener('message', handleMessage);
     };
   }, [onComplete]);
+
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!(typeof document !== 'undefined' && document.fullscreenElement));
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const enterFullscreen = async () => {
+    const el = document.documentElement;
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if ((el as any).mozRequestFullScreen) await (el as any).mozRequestFullScreen();
+      else if ((el as any).webkitRequestFullscreen) await (el as any).webkitRequestFullscreen();
+      else if ((el as any).msRequestFullscreen) await (el as any).msRequestFullscreen();
+    } catch (err) {
+      // If user gesture is required, the caller can click the button; nothing further here.
+    }
+  };
 
   return (
     <div className="min-h-screen bg-medieval-pattern">
@@ -115,9 +140,22 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
               srcDoc={srcDoc}
               ref={frameRef}
               className={cn(
-                'game1-surface h-[720px] w-full rounded-lg border-0'
+                'game1-surface h-[720px] w-full rounded-lg border-0',
+                !isFullscreen && 'pointer-events-none'
               )}
             />
+
+            {!isFullscreen && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-background/90 backdrop-blur">
+                <div className="text-center space-y-4 p-6">
+                  <p className="font-semibold text-lg">Fullscreen Required</p>
+                  <p className="text-sm text-muted-foreground">You must be in fullscreen to play. Click the button below to enter fullscreen.</p>
+                  <div className="mt-2">
+                    <Button onClick={enterFullscreen}>Enter Fullscreen</Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

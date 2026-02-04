@@ -73,6 +73,24 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
   const [showHint, setShowHint] = useState(false);
   const [canProceed, setCanProceed] = useState(false);
 
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!(typeof document !== 'undefined' && document.fullscreenElement));
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const enterFullscreen = async () => {
+    const el = document.documentElement;
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if ((el as any).mozRequestFullScreen) await (el as any).mozRequestFullScreen();
+      else if ((el as any).webkitRequestFullscreen) await (el as any).webkitRequestFullscreen();
+      else if ((el as any).msRequestFullscreen) await (el as any).msRequestFullscreen();
+    } catch (err) {}
+  };
+
   const currentLevel: Game4Level = game4Levels[currentLevelIndex];
   const totalLevels = game4Levels.length;
 
@@ -112,7 +130,8 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
       setCanProceed(false);
     } else {
       // Completed all levels
-      onComplete();
+      if (isFullscreen) onComplete();
+      // otherwise ignore completion until fullscreen
     }
   };
 
@@ -125,8 +144,20 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -50 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-4xl"
+          className={"w-full max-w-4xl" + (!isFullscreen ? ' pointer-events-none' : '')}
         >
+
+        {!isFullscreen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="max-w-md w-full rounded-xl bg-background/95 backdrop-blur border border-border p-6 text-center">
+              <p className="font-semibold text-lg">Fullscreen Required</p>
+              <p className="text-sm text-muted-foreground mt-2">You must enter fullscreen to play this trial. Click below to enter fullscreen.</p>
+              <div className="mt-4">
+                <Button onClick={enterFullscreen}>Enter Fullscreen</Button>
+              </div>
+            </div>
+          </div>
+        )}
           <Card className="border-2">
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
