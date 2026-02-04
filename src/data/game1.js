@@ -301,8 +301,34 @@ function createCardElement(card) {
 
     // ===== ICON RENDER (SINGLE SOURCE OF TRUTH) =====
     if (card.isFixed) {
-        // Fixed block
-        cardFront.textContent = '👻';
+        // Fixed block - use background-image so it fills the card (edge-to-edge).
+        const setFixedBackground = (src) => {
+            cardFront.style.backgroundImage = `url('${src}')`;
+            cardFront.style.backgroundSize = 'cover';
+            cardFront.style.backgroundPosition = 'center';
+            cardFront.style.backgroundRepeat = 'no-repeat';
+            cardFront.classList.add('fixed-image');
+        };
+
+        const initialSrc = card.iconSrc || '/assets/GameofThrones.png';
+        setFixedBackground(initialSrc);
+
+        // Preload to detect error and fallback gracefully (no emoji fallback)
+        const probe = new Image();
+        probe.onload = () => {};
+        probe.onerror = () => {
+            if (probe.src && probe.src.endsWith('GameofThrones.png')) {
+                // try secondary fallback (existing public image)
+                setFixedBackground('/images/level3_throne.jpg');
+                probe.src = '/images/level3_throne.jpg';
+            } else {
+                // Final fallback: remove image and keep fixed styling (no emoji)
+                probe.onerror = null;
+                cardFront.style.backgroundImage = '';
+                cardFront.classList.remove('fixed-image');
+            }
+        };
+        probe.src = initialSrc;
     } else {
         const DEFAULT_ICON =
             'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/code.svg';
@@ -367,16 +393,47 @@ function updateCardDisplay(cardId) {
     // Update icon display
     const cardFront = cardElement.querySelector('.card-front');
     if (cardFront) {
-        // Clear existing content
+        // Clear existing content and clear any background styles
         cardFront.innerHTML = '';
+        cardFront.style.backgroundImage = '';
+        cardFront.classList.remove('fixed-image');
         
-        // Check if iconSrc is an emoji (fixed card) or an image URL
-        if (card.iconSrc.startsWith('http') || card.iconSrc.endsWith('.svg') || card.iconSrc.endsWith('.png')) {
+        // If the card is fixed, use background image to fill the card (no emoji fallback)
+        if (card.isFixed) {
+            const src = card.iconSrc || '/assets/GameofThrones.png';
+            cardFront.style.backgroundImage = `url('${src}')`;
+            cardFront.style.backgroundSize = 'cover';
+            cardFront.style.backgroundPosition = 'center';
+            cardFront.style.backgroundRepeat = 'no-repeat';
+            cardFront.classList.add('fixed-image');
+            // Preload to detect errors and fallback to secondary image
+            const probe = new Image();
+            probe.onload = () => {};
+            probe.onerror = () => {
+                if (probe.src && probe.src.endsWith('GameofThrones.png')) {
+                    cardFront.style.backgroundImage = `url('/images/level3_throne.jpg')`;
+                    probe.src = '/images/level3_throne.jpg';
+                } else {
+                    probe.onerror = null;
+                    cardFront.style.backgroundImage = '';
+                    cardFront.classList.remove('fixed-image');
+                }
+            };
+            probe.src = src;
+        } else if (card.iconSrc.startsWith('http') || card.iconSrc.endsWith('.svg') || card.iconSrc.endsWith('.png')) {
             // It's an image URL - create img element
             const iconImg = document.createElement('img');
             iconImg.src = card.iconSrc;
             iconImg.alt = '';
-            iconImg.onerror = () => iconImg.remove();
+            // Try a fallback image first, then remove if all fails (no emoji fallback)
+            iconImg.onerror = () => {
+                iconImg.onerror = null;
+                if (iconImg.src && iconImg.src.endsWith('myImage.png')) {
+                    iconImg.src = '/images/level3_throne.jpg';
+                } else {
+                    iconImg.remove();
+                }
+            };
             iconImg.className = 'card-icon';
             cardFront.appendChild(iconImg);
         } else {
@@ -566,7 +623,8 @@ function generateCards(gridSize) {
     if (hasFixedCard) {
         const fixedCard = {
             id: cardId++,
-            iconSrc: '👻', // Keep emoji for fixed card
+            // Use asset image for fixed center card (no emoji)
+            iconSrc: '/assets/GameofThrones.png',
             isFlipped: true,
             isMatched: false,
             isFixed: true
