@@ -289,46 +289,47 @@ const PlayerGame = () => {
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <Crown className="h-5 w-5 text-primary" />
+    <div className="min-h-screen bg-background">
+      <div>
+        {/* Header */}
+        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
+          <div className="container mx-auto flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Crown className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-cinzel font-semibold">{room.name}</p>
+                <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-cinzel font-semibold">{room.name}</p>
-              <p className="text-xs text-muted-foreground">{HOUSE_NAMES[room.houseTheme]}</p>
+
+            <div className="flex items-center gap-3">
+              {/* Player Name */}
+              <div className="hidden sm:flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{currentPlayer.username}</span>
+              </div>
+              
+              {/* Timer */}
+              <div className={cn(
+                "flex items-center gap-2 rounded-lg px-3 py-1",
+                roomStatus === 'playing' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              )}>
+                <Clock className="h-4 w-4" />
+                <span className="font-mono text-lg font-bold">{formatTime(roomTimer)}</span>
+              </div>
+              
+              <Button variant="ghost" size="icon" onClick={handleLeave}>
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-3">
-            {/* Player Name */}
-            <div className="hidden sm:flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{currentPlayer.username}</span>
-            </div>
-            
-            {/* Timer */}
-            <div className={cn(
-              "flex items-center gap-2 rounded-lg px-3 py-1",
-              roomStatus === 'playing' ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-            )}>
-              <Clock className="h-4 w-4" />
-              <span className="font-mono text-lg font-bold">{formatTime(roomTimer)}</span>
-            </div>
-            
-            <Button variant="ghost" size="icon" onClick={handleLeave}>
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-6">
-        {/* Main Content - Challenges */}
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <main className="container mx-auto px-4 py-6">
+          {/* Main Content - Challenges */}
+          <div className="space-y-6 max-w-4xl mx-auto">
           {/* Status Banner */}
 
           {room.status === 'finished' && (
@@ -413,7 +414,8 @@ const PlayerGame = () => {
             {CHALLENGES.map((challenge, index) => {
               const isCompleted = currentPlayer.completedChallenges.includes(challenge.id);
               const isCurrent = currentPlayer.currentChallenge === challenge.id;
-              const isLocked = false; // All challenges unlocked for testing
+              // Lock challenges that haven't been unlocked yet
+              const isLocked = challenge.id > currentPlayer.currentChallenge;
               
               return (
                 <Card 
@@ -422,24 +424,36 @@ const PlayerGame = () => {
                     "transition-all",
                     isCompleted && "border-primary/50 bg-primary/5",
                     isCurrent && "border-primary ring-2 ring-primary/20",
-                    isLocked && "opacity-50"
+                    isLocked && "opacity-50 border-muted"
                   )}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-start gap-3">
                       <div className={cn(
                         "mt-0.5 flex h-8 w-8 items-center justify-center rounded-full",
-                        isCompleted ? "bg-primary text-primary-foreground" : "bg-muted"
+                        isCompleted ? "bg-primary text-primary-foreground" : 
+                        isLocked ? "bg-muted/50 text-muted-foreground" : "bg-muted"
                       )}>
                         {isCompleted ? (
                           <CheckCircle2 className="h-5 w-5" />
+                        ) : isLocked ? (
+                          <Circle className="h-5 w-5" />
                         ) : (
                           <span className="font-bold">{challenge.id}</span>
                         )}
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="font-cinzel text-lg">{challenge.name}</CardTitle>
-                        <CardDescription className="mt-1">{challenge.description}</CardDescription>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="font-cinzel text-lg">{challenge.name}</CardTitle>
+                          {isLocked && (
+                            <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full font-semibold">
+                              Locked
+                            </span>
+                          )}
+                        </div>
+                        <CardDescription className="mt-1">
+                          {isLocked ? "Complete previous challenges to unlock" : challenge.description}
+                        </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -448,10 +462,12 @@ const PlayerGame = () => {
                      <CardContent className="pt-2">
                        <Button 
                          onClick={() => navigate(`/game1/${roomCode}`)}
-                         disabled={room.status !== 'playing' || isCompleted}
+                         disabled={room.status !== 'playing' || isCompleted || isLocked}
                          className="w-full font-cinzel"
                        >
-                         {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Trial of the First Men' : 'Waiting for Game Master...'}
+                         {isCompleted ? '✓ Completed' : 
+                          isLocked ? '🔒 Locked' :
+                          room.status === 'playing' ? 'Start Trial of the First Men' : 'Waiting for Game Master...'}
                        </Button>
                      </CardContent>
                    )}
@@ -460,34 +476,54 @@ const PlayerGame = () => {
                      <CardContent className="pt-2">
                        <Button 
                          onClick={() => navigate(`/riddle/${roomCode}`)}
-                         disabled={room.status !== 'playing' || isCompleted}
+                         disabled={room.status !== 'playing' || isCompleted || isLocked}
                          className="w-full font-cinzel"
                        >
-                         {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Riddle Challenge' : 'Waiting for Game Master...'}
+                         {isCompleted ? '✓ Completed' : 
+                          isLocked ? '🔒 Locked' :
+                          room.status === 'playing' ? 'Start Riddle Challenge' : 'Waiting for Game Master...'}
                        </Button>
                      </CardContent>
                    )}
+                  
+                  {challenge.id === 3 && !isCompleted && (
+                    <CardContent className="pt-2">
+                      <Button 
+                        onClick={() => navigate(`/game3/${roomCode}`)}
+                        disabled={room.status !== 'playing' || isCompleted || isLocked}
+                        className="w-full font-cinzel"
+                      >
+                        {isCompleted ? '✓ Completed' : 
+                         isLocked ? '🔒 Locked' :
+                         room.status === 'playing' ? 'Start Kingswood Challenge' : 'Waiting for Game Master...'}
+                      </Button>
+                    </CardContent>
+                  )}
                   
                   {challenge.id === 4 && !isCompleted && (
                     <CardContent className="pt-2">
                       <Button 
                         onClick={() => navigate(`/game4/${roomCode}`)}
-                        disabled={room.status !== 'playing' || isCompleted}
+                        disabled={room.status !== 'playing' || isCompleted || isLocked}
                         className="w-full font-cinzel"
                       >
-                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Start Maester\'s Trial' : 'Waiting for Game Master...'}
+                        {isCompleted ? '✓ Completed' : 
+                         isLocked ? '🔒 Locked' :
+                         room.status === 'playing' ? 'Start Maester\'s Trial' : 'Waiting for Game Master...'}
                       </Button>
                     </CardContent>
                   )}
-                  
-                   {challenge.id !== 1 && challenge.id !== 2 && challenge.id !== 4 && !isCompleted && (
-                     <CardContent className="pt-2">
-                       <Button 
-                         onClick={() => handleCompleteChallenge(challenge.id)}
-                         disabled={room.status !== 'playing' || isCompleted}
+
+                  {challenge.id === 5 && !isCompleted && (
+                    <CardContent className="pt-2">
+                      <Button 
+                        onClick={() => navigate(`/game5/${roomCode}`)}
+                        disabled={room.status !== 'playing' || isCompleted || isLocked}
                         className="w-full font-cinzel"
                       >
-                        {isCompleted ? '✓ Completed' : room.status === 'playing' ? 'Complete Challenge' : 'Waiting for Game Master...'}
+                        {isCompleted ? '✓ Completed' : 
+                         isLocked ? '🔒 Locked' :
+                         room.status === 'playing' ? 'Start Iron Throne Ascension' : 'Waiting for Game Master...'}
                       </Button>
                     </CardContent>
                   )}
@@ -501,8 +537,9 @@ const PlayerGame = () => {
               );
             })}
           </div>
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

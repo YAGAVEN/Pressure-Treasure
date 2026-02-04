@@ -194,7 +194,6 @@ const elements = {
     stageDisplay: document.getElementById('stage-display'),
     scoreDisplay: document.getElementById('score-display'),
     movesDisplay: document.getElementById('moves-display'),
-    startBtn: document.getElementById('start-btn'),
     resetBtn: document.getElementById('reset-btn'),
     nextLevelBtn: document.getElementById('next-level-btn'),
     gameMessage: document.getElementById('game-message'),
@@ -218,9 +217,6 @@ function init() {
 // ===== EVENT LISTENERS =====
 // Set up all event listeners for user interactions
 function setupEventListeners() {
-    // Start button - begins a new game
-    elements.startBtn.addEventListener('click', startGame);
-    
     // Reset button - resets current game
     elements.resetBtn.addEventListener('click', resetGame);
     
@@ -431,7 +427,6 @@ function startGame() {
     
     // Update game state
     stage1State.isGameActive = true;
-    elements.startBtn.disabled = true;
     elements.resetBtn.disabled = false;
     
     // Update display
@@ -457,7 +452,6 @@ function resetGame() {
     updateDisplay();
     
     // Reset buttons
-    elements.startBtn.disabled = true;
     elements.resetBtn.disabled = false;
     elements.nextLevelBtn.disabled = true;
 }

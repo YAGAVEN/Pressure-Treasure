@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import gameHtml from '../../Game1/index.html?raw';
-import gameCss from '../../Game1/style.css?raw';
-import gameJs from '../../Game1/game.js?raw';
+import gameHtml from '@/data/game1.html?raw';
+import gameCss from '@/data/game1.css?raw';
+import gameJs from '@/data/game1.js?raw';
 
 interface Game1ChallengeProps {
   onComplete: () => void;

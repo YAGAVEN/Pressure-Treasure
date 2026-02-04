@@ -16,10 +16,11 @@ interface Question {
 interface RiddleChallengeProps {
   onComplete: () => void;
   disabled?: boolean;
+  preloadedQuestions?: Question[];
 }
 
-export const RiddleChallenge = ({ onComplete, disabled = false }: RiddleChallengeProps) => {
-  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
+export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestions }: RiddleChallengeProps) => {
+  const [allQuestions, setAllQuestions] = useState<Question[]>(preloadedQuestions || []);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -28,15 +29,22 @@ export const RiddleChallenge = ({ onComplete, disabled = false }: RiddleChalleng
   const [completed, setCompleted] = useState(0);
 
   useEffect(() => {
-    fetch('/questions.json')
-      .then(res => res.json())
-      .then((questions: Question[]) => {
-        setAllQuestions(questions);
-        const shuffled = [...questions].sort(() => Math.random() - 0.5);
-        setSelectedQuestions(shuffled.slice(0, 10));
-      })
-      .catch(err => console.error('Failed to load questions:', err));
-  }, []);
+    // Only fetch if questions weren't preloaded
+    if (preloadedQuestions && preloadedQuestions.length > 0) {
+      setAllQuestions(preloadedQuestions);
+      const shuffled = [...preloadedQuestions].sort(() => Math.random() - 0.5);
+      setSelectedQuestions(shuffled.slice(0, 10));
+    } else {
+      fetch('/questions.json')
+        .then(res => res.json())
+        .then((questions: Question[]) => {
+          setAllQuestions(questions);
+          const shuffled = [...questions].sort(() => Math.random() - 0.5);
+          setSelectedQuestions(shuffled.slice(0, 10));
+        })
+        .catch(err => console.error('Failed to load questions:', err));
+    }
+  }, [preloadedQuestions]);
 
   const currentQuestion = selectedQuestions[currentIndex];
 
@@ -81,43 +89,42 @@ export const RiddleChallenge = ({ onComplete, disabled = false }: RiddleChalleng
   const answerLength = currentQuestion.answer.length;
 
   return (
-    <Card className="border-2">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-primary" />
-            <CardTitle className="font-cinzel">Riddle of the Maester</CardTitle>
+    <Card className="w-full border-2 border-cyan-400/50 bg-gradient-to-br from-slate-900/40 via-blue-900/30 to-slate-900/40 backdrop-blur-xl shadow-2xl shadow-cyan-500/30">
+      <CardHeader className="pb-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <Brain className="h-5 w-5 text-cyan-400" />
+            <CardTitle className="font-cinzel text-white drop-shadow-lg">Riddle of the Maester</CardTitle>
           </div>
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="bg-cyan-600/70 text-white border-cyan-400/50 font-cinzel">
             {completed} / {selectedQuestions.length}
           </Badge>
         </div>
-        <CardDescription>
+        <CardDescription className="text-cyan-300">
           Solve the ancient riddles of computer science
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {/* Progress Bar */}
-        <div className="h-2 w-full rounded-full bg-muted">
+        <div className="h-3 w-full rounded-full bg-slate-700/60">
           <div 
-            className="h-full rounded-full bg-primary transition-all duration-300"
+            className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 shadow-lg shadow-cyan-400/60"
             style={{ width: `${progress}%` }}
           />
         </div>
 
         {/* Riddle */}
-        <div className="rounded-lg bg-muted/50 p-4">
-          <p className="font-medium leading-relaxed">{currentQuestion.riddle}</p>
+        <div className="rounded-xl bg-gradient-to-br from-slate-800/70 to-blue-900/60 border-2 border-cyan-400/30 p-6 backdrop-blur-md">
+          <p className="font-medium leading-relaxed text-blue-50 text-xl">{currentQuestion.riddle}</p>
         </div>
 
         {/* Hint Button */}
         {!showHint && (
           <Button
-            variant="outline"
             size="sm"
             onClick={() => setShowHint(true)}
-            className="w-full"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white border-0 shadow-lg shadow-cyan-500/40 rounded-lg font-semibold"
           >
             <Lightbulb className="mr-2 h-4 w-4" />
             Show Hint
@@ -126,28 +133,28 @@ export const RiddleChallenge = ({ onComplete, disabled = false }: RiddleChalleng
 
         {/* Hint */}
         {showHint && (
-          <div className="rounded-lg border border-primary/50 bg-primary/5 p-3">
-            <p className="text-sm">
-              <span className="font-semibold">Hint:</span> {currentQuestion.hint}
+          <div className="rounded-xl border-2 border-cyan-400/50 bg-gradient-to-r from-cyan-900/50 to-blue-900/50 p-5 backdrop-blur-md">
+            <p className="text-sm text-cyan-100">
+              <span className="font-semibold text-cyan-300">Hint:</span> {currentQuestion.hint}
             </p>
           </div>
         )}
 
         {/* Answer Form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Your Answer ({answerLength} letters)</span>
-              <span className="font-mono">{userAnswer.length} / {answerLength}</span>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm text-cyan-300">
+              <span className="font-medium">Your Answer ({answerLength} letters)</span>
+              <span className="font-mono font-semibold">{userAnswer.length} / {answerLength}</span>
             </div>
             <Input
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value.toUpperCase())}
-              placeholder="Type your answer..."
+              placeholder="TYPE YOUR ANSWER..."
               className={cn(
-                "font-mono text-lg tracking-wider text-center uppercase",
-                feedback === 'correct' && "border-green-500 bg-green-50",
-                feedback === 'incorrect' && "border-red-500 bg-red-50"
+                "font-mono tracking-widest text-center uppercase py-4 bg-slate-900/80 border-2 border-cyan-500/60 text-cyan-100 placeholder-cyan-600/70 backdrop-blur-md rounded-xl focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/60 transition-all shadow-md",
+                feedback === 'correct' && "border-green-500/80 bg-gradient-to-r from-green-900/80 to-emerald-900/80 text-green-100 focus:border-green-400 focus:ring-green-500/50",
+                feedback === 'incorrect' && "border-red-500/80 bg-gradient-to-r from-red-900/80 to-rose-900/80 text-red-100 focus:border-red-400 focus:ring-red-500/50"
               )}
               disabled={disabled || feedback === 'correct'}
               maxLength={20}
@@ -157,21 +164,21 @@ export const RiddleChallenge = ({ onComplete, disabled = false }: RiddleChalleng
 
           {/* Feedback */}
           {feedback === 'correct' && (
-            <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-green-700">
-              <CheckCircle2 className="h-5 w-5" />
-              <span className="font-semibold">Correct! Moving to next riddle...</span>
+            <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-green-900/70 to-emerald-900/70 border-2 border-green-500/60 p-4 text-green-100 backdrop-blur-md shadow-lg">
+              <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
+              <span className="font-semibold text-sm">Correct! Moving to next riddle...</span>
             </div>
           )}
           
           {feedback === 'incorrect' && (
-            <div className="rounded-lg bg-red-50 p-3 text-red-700">
-              <span className="font-semibold">Not quite. Try again!</span>
+            <div className="rounded-xl bg-gradient-to-r from-red-900/70 to-rose-900/70 border-2 border-red-500/60 p-4 text-red-100 backdrop-blur-md shadow-lg">
+              <span className="font-semibold text-sm">You know Nothing, Jon Snow!!</span>
             </div>
           )}
 
           <Button
             type="submit"
-            className="w-full font-cinzel"
+            className="w-full font-cinzel bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white border-0 shadow-lg shadow-cyan-500/40 rounded-lg font-bold"
             disabled={disabled || !userAnswer.trim() || feedback === 'correct'}
           >
             Submit Answer

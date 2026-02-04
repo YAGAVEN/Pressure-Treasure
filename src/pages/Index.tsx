@@ -6,7 +6,7 @@ import { Crown, Users, Shield, Volume2, VolumeX } from 'lucide-react';
 
 const Index = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
 
   const toggleMute = () => {
@@ -42,7 +42,7 @@ const Index = () => {
         ref={videoRef}
         autoPlay 
         loop 
-        muted 
+        muted={isMuted}
         playsInline
         className="absolute inset-0 h-full w-full object-cover"
       >
