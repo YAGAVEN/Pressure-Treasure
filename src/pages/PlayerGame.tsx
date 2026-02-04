@@ -414,8 +414,8 @@ const PlayerGame = () => {
             {CHALLENGES.map((challenge, index) => {
               const isCompleted = currentPlayer.completedChallenges.includes(challenge.id);
               const isCurrent = currentPlayer.currentChallenge === challenge.id;
-              // Lock challenges that haven't been unlocked yet
-              const isLocked = challenge.id > currentPlayer.currentChallenge;
+              // All stages unlocked
+              const isLocked = false;
               
               return (
                 <Card 
