@@ -7,7 +7,7 @@ export const TILE_SIZE = 32;
 // Physics
 export const GRAVITY = 0.6;
 export const MAX_FALL_SPEED = 15;
-export const PLAYER_SPEED = 5;
+export const PLAYER_SPEED = 4.5;
 export const PLAYER_JUMP_FORCE = -14;
 export const ICE_FRICTION = 0.98;
 export const NORMAL_FRICTION = 0.85;
