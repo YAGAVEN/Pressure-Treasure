@@ -29,7 +29,15 @@ const Game3Page = () => {
       return;
     }
 
-    // All challenges unlocked - no lock checking
+    // Check if challenge is locked (challenge 3 requires challenge 2 to be completed)
+    if (currentPlayer.currentChallenge < 3) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
+    }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {
