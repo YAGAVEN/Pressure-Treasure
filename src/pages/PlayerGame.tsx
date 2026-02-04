@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { useGame } from '@/contexts/GameContext';
 import { CHALLENGES, HOUSE_NAMES, HOUSE_MOTTOS } from '@/types/game';
-import { formatTime } from '@/lib/gameUtils';
+import { formatTime, calculateProgress } from '@/lib/gameUtils';
 import { supabase } from '@/lib/supabase';
 import * as roomService from '@/lib/roomService';
 import { 
@@ -254,9 +254,41 @@ const PlayerGame = () => {
   }
 
   const topWinners = room.winners || [];
-  const currentPlayerWinner = topWinners.find(w => w.playerId === currentPlayer.id);
-  const isWinner = currentPlayerWinner !== undefined;
-  const winnerRank = currentPlayerWinner?.rank;
+  
+  // Calculate current player's actual rank dynamically (even if not in top 3)
+  const allPlayersRanked = [...players].sort((a, b) => {
+    const aProgress = calculateProgress(a.completedChallenges);
+    const bProgress = calculateProgress(b.completedChallenges);
+    
+    if (aProgress === 100 && bProgress === 100) {
+      if (a.completedAt && b.completedAt) {
+        return a.completedAt - b.completedAt;
+      }
+      if (a.completedAt) return -1;
+      if (b.completedAt) return 1;
+      return (a.progressUpdatedAt || a.joinedAt) - (b.progressUpdatedAt || b.joinedAt);
+    }
+    
+    if (bProgress !== aProgress) {
+      return bProgress - aProgress;
+    }
+    
+    const aTime = a.progressUpdatedAt || a.joinedAt;
+    const bTime = b.progressUpdatedAt || b.joinedAt;
+    return aTime - bTime;
+  });
+  
+  const currentPlayerRankIndex = allPlayersRanked.findIndex(p => p.id === currentPlayer.id);
+  const currentPlayerActualRank = currentPlayerRankIndex >= 0 ? currentPlayerRankIndex + 1 : null;
+  const isInTop3 = currentPlayerActualRank !== null && currentPlayerActualRank <= 3;
+  const winnerRank = currentPlayerActualRank;
+  
+  // Helper function to get ordinal suffix
+  const getOrdinal = (n: number): string => {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
 
   const handleLeave = () => {
     leaveRoom();
@@ -335,16 +367,16 @@ const PlayerGame = () => {
           {room.status === 'finished' && (
             <Card className={cn(
               "border-2",
-              isWinner ? "border-primary bg-primary/10" : "border-accent/50 bg-accent/10"
+              isInTop3 ? "border-primary bg-primary/10" : "border-accent/50 bg-accent/10"
             )}>
               <CardContent className="space-y-4 py-6">
                 <div className="flex items-center gap-4">
                   <Trophy className={cn(
                     "h-10 w-10",
-                    isWinner ? "text-primary" : "text-accent"
+                    isInTop3 ? "text-primary" : "text-accent"
                   )} />
                   <div className="flex-1">
-                    {isWinner ? (
+                    {winnerRank !== null && winnerRank <= 3 ? (
                       <>
                         <p className="font-cinzel text-xl font-bold text-primary">
                           {winnerRank === 1 && "🥇 1st Place Victory!"}
@@ -352,6 +384,11 @@ const PlayerGame = () => {
                           {winnerRank === 3 && "🥉 3rd Place Podium!"}
                         </p>
                         <p className="text-muted-foreground">You've earned a place on the podium!</p>
+                      </>
+                    ) : winnerRank !== null ? (
+                      <>
+                        <p className="font-cinzel text-xl font-bold">You finished in {getOrdinal(winnerRank)} place</p>
+                        <p className="text-muted-foreground">Great effort! The hunt has ended.</p>
                       </>
                     ) : (
                       <>
@@ -414,8 +451,8 @@ const PlayerGame = () => {
             {CHALLENGES.map((challenge, index) => {
               const isCompleted = currentPlayer.completedChallenges.includes(challenge.id);
               const isCurrent = currentPlayer.currentChallenge === challenge.id;
-              // All stages unlocked
-              const isLocked = false;
+              // Lock challenges that haven't been unlocked yet
+              const isLocked = challenge.id > currentPlayer.currentChallenge;
               
               return (
                 <Card 
