@@ -1,7 +1,7 @@
 // Game 3 Constants
 
-export const GAME_WIDTH = 800;
-export const GAME_HEIGHT = 600;
+export const GAME_WIDTH = 1200;
+export const GAME_HEIGHT = 800;
 export const TILE_SIZE = 32;
 
 // Physics
