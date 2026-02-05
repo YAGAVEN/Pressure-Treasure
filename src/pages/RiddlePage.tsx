@@ -476,15 +476,15 @@ const RiddlePage = () => {
       return;
     }
 
-    // Check if challenge is locked (challenge 2 requires challenge 1 to be completed)
-    if (currentPlayer.currentChallenge < 2) {
-      toast({
-        title: "Challenge Locked",
-        description: "Complete challenge 1 first.",
-        variant: "destructive",
-      });
-      navigate(`/game/${roomCode}`);
-    }
+    // Check if challenge is locked (challenge 2 requires challenge 1 to be completed) - DISABLED FOR TESTING
+    // if (currentPlayer.currentChallenge < 2) {
+    //   toast({
+    //     title: "Challenge Locked",
+    //     description: "Complete challenge 1 first.",
+    //     variant: "destructive",
+    //   });
+    //   navigate(`/game/${roomCode}`);
+    // }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   if (!room || !currentPlayer) {

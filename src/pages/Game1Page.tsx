@@ -26,18 +26,18 @@ const Game1Page = () => {
       navigate(`/game/${roomCode}`);      return;
     }
 
-    // Check if challenge is locked
-    if (currentPlayer.currentChallenge > 1 || currentPlayer.completedChallenges.includes(1)) {
-      // Challenge already completed or player moved past it
-      if (!currentPlayer.completedChallenges.includes(1) && currentPlayer.currentChallenge !== 1) {
-        toast({
-          title: "Challenge Locked",
-          description: "Complete previous challenges first.",
-          variant: "destructive",
-        });
-        navigate(`/game/${roomCode}`);
-      }
-    }
+    // Check if challenge is locked - DISABLED FOR TESTING
+    // if (currentPlayer.currentChallenge > 1 || currentPlayer.completedChallenges.includes(1)) {
+    //   // Already completed or passed, allow access
+    //   if (!currentPlayer.completedChallenges.includes(1) && currentPlayer.currentChallenge !== 1) {
+    //     toast({
+    //       title: "Challenge Locked",
+    //       description: "Complete previous challenges first.",
+    //       variant: "destructive",
+    //     });
+    //     navigate(`/game/${roomCode}`);
+    //   }
+    // }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {
