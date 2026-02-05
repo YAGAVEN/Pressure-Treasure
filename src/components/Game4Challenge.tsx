@@ -94,6 +94,18 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
   const currentLevel: Game4Level = game4Levels[currentLevelIndex];
   const totalLevels = game4Levels.length;
 
+  // Stopwords to exclude from scoring
+  const stopwords = new Set([
+    'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+    'of', 'with', 'by', 'from', 'as', 'is', 'are', 'was', 'were', 'be',
+    'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will',
+    'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that',
+    'these', 'those', 'it', 'its', 'his', 'her', 'their', 'them', 'he',
+    'she', 'they', 'we', 'you', 'i', 'me', 'my', 'your', 'our', 'who',
+    'what', 'where', 'when', 'why', 'how', 'which', 'while', 'against',
+    'made', 'sitting', 'showing'
+  ]);
+
   useEffect(() => {
     if (userInput.trim()) {
       const userText = userInput.toLowerCase().trim();
@@ -102,8 +114,11 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
       const userWords = userText.split(/\s+/);
       const bagOfWordsLower = currentLevel.bagOfWords.map(w => w.toLowerCase());
       
-      // Count matched words - each word gives 5 points
-      const matchedWords = userWords.filter(word => 
+      // Filter out stopwords and get unique words only
+      const uniqueUserWords = [...new Set(userWords)].filter(word => !stopwords.has(word));
+      
+      // Count matched words - each unique word gives 5 points
+      const matchedWords = uniqueUserWords.filter(word => 
         bagOfWordsLower.includes(word)
       );
       
