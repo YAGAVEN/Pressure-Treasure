@@ -122,7 +122,7 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
         bagOfWordsLower.includes(word)
       );
       
-      const pointsEarned = matchedWords.length * 5;
+      const pointsEarned = matchedWords.length * 10;
       const maxPoints = 100; // Cap at 100 points
       const accuracyPercent = Math.min(pointsEarned, maxPoints);
       
