@@ -26,13 +26,20 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
   }, []);
 
   const enterFullscreen = async () => {
-    const el = document.documentElement;
     try {
-      if (el.requestFullscreen) await el.requestFullscreen();
-      else if ((el as any).mozRequestFullScreen) await (el as any).mozRequestFullScreen();
-      else if ((el as any).webkitRequestFullscreen) await (el as any).webkitRequestFullscreen();
-      else if ((el as any).msRequestFullscreen) await (el as any).msRequestFullscreen();
-    } catch (err) {}
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        await el.requestFullscreen();
+      } else if ((el as any).mozRequestFullScreen) {
+        await (el as any).mozRequestFullScreen();
+      } else if ((el as any).webkitRequestFullscreen) {
+        await (el as any).webkitRequestFullscreen();
+      } else if ((el as any).msRequestFullscreen) {
+        await (el as any).msRequestFullscreen();
+      }
+    } catch (err) {
+      console.error('Fullscreen request failed:', err);
+    }
   };
 
   // Select a random story once when component mounts
