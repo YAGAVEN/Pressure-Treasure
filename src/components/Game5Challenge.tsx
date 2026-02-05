@@ -17,6 +17,24 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
   const [showHint, setShowHint] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!(typeof document !== 'undefined' && document.fullscreenElement));
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const enterFullscreen = async () => {
+    const el = document.documentElement;
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if ((el as any).mozRequestFullScreen) await (el as any).mozRequestFullScreen();
+      else if ((el as any).webkitRequestFullscreen) await (el as any).webkitRequestFullscreen();
+      else if ((el as any).msRequestFullscreen) await (el as any).msRequestFullscreen();
+    } catch (err) {}
+  };
+
   // Select a random story once when component mounts
   const game5Story = useMemo(
     () => game5Stories[Math.floor(Math.random() * game5Stories.length)],
@@ -42,7 +60,8 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
 
   const handleContinue = () => {
     if (feedback === 'correct') {
-      onComplete();
+      if (document.fullscreenElement) onComplete();
+      // otherwise ignore until fullscreen
     }
   };
 
@@ -63,8 +82,20 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -30 }}
           transition={{ duration: 0.4 }}
-          className="w-full max-w-6xl"
+          className={"w-full max-w-6xl" + (!isFullscreen ? ' pointer-events-none' : '')}
         >
+
+        {!isFullscreen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="max-w-md w-full rounded-xl bg-background/95 backdrop-blur border border-border p-6 text-center">
+              <p className="font-semibold text-lg">Fullscreen Required</p>
+              <p className="text-sm text-muted-foreground mt-2">You must enter fullscreen to play this final challenge. Click below to enter fullscreen.</p>
+              <div className="mt-4">
+                <Button onClick={enterFullscreen}>Enter Fullscreen</Button>
+              </div>
+            </div>
+          </div>
+        )}
           <Card className="border-4 border-primary shadow-2xl bg-gradient-to-br from-slate-900 to-slate-800">
             <CardHeader className="pb-6">
               <div className="flex items-center justify-between">

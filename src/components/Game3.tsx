@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameEngine } from '@/hooks/useGameEngine';
 import { GAME_WIDTH, GAME_HEIGHT, LEVEL_NAMES } from '@/data/game3Constants';
 import { Button } from '@/components/ui/button';
@@ -12,15 +12,37 @@ const Game3: React.FC<Game3Props> = ({ onComplete, onCancel }) => {
   const { canvasRef, engineState, startGame, nextLevel, restartGame } = useGameEngine();
   const { gameState } = engineState;
 
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!(typeof document !== 'undefined' && document.fullscreenElement));
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const enterFullscreen = async () => {
+    const el = document.documentElement;
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen();
+      else if ((el as any).mozRequestFullScreen) await (el as any).mozRequestFullScreen();
+      else if ((el as any).webkitRequestFullscreen) await (el as any).webkitRequestFullscreen();
+      else if ((el as any).msRequestFullscreen) await (el as any).msRequestFullscreen();
+    } catch (err) {}
+  };
+
   // Handle game completion
   useEffect(() => {
     if (gameState.gameComplete && onComplete) {
-      onComplete();
+      if (document.fullscreenElement) {
+        onComplete();
+      } else {
+        // ignore completion until fullscreen is active
+      }
     }
   }, [gameState.gameComplete, onComplete]);
   
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-[#0a0a0f]">
+    <div className={"relative flex items-center justify-center min-h-screen bg-[#0a0a0f]" + (!isFullscreen ? ' pointer-events-none' : '')}>
       {/* Game Canvas */}
       <div className="relative">
         <canvas
@@ -30,6 +52,18 @@ const Game3: React.FC<Game3Props> = ({ onComplete, onCancel }) => {
           className="border-4 border-[#3a3a4a] rounded-lg shadow-2xl"
           style={{ imageRendering: 'pixelated' }}
         />
+
+        {!isFullscreen && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center rounded-lg bg-black/80">
+            <div className="text-center space-y-4 p-6">
+              <p className="font-semibold text-2xl text-white">Fullscreen Required</p>
+              <p className="text-sm text-muted-foreground">You must be in fullscreen to play. Click below to enter fullscreen.</p>
+              <div className="mt-2">
+                <Button onClick={enterFullscreen}>Enter Fullscreen</Button>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* HUD */}
         {gameState.isPlaying && !gameState.levelComplete && !gameState.gameComplete && (
@@ -73,10 +107,10 @@ const Game3: React.FC<Game3Props> = ({ onComplete, onCancel }) => {
               </div>
               
               <Button 
-                onClick={startGame}
+                onClick={() => isFullscreen ? startGame() : enterFullscreen()}
                 className="bg-[#8b0000] hover:bg-[#a00000] text-white px-8 py-3 text-lg font-serif border-2 border-[#c9a959]"
               >
-                BEGIN YOUR TRIAL
+                {isFullscreen ? 'BEGIN YOUR TRIAL' : 'Enter Fullscreen to Begin'}
               </Button>
             </div>
           </div>
