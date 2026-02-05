@@ -300,7 +300,7 @@ body::before {
 }
 
 .card-back {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: url('/src/assets/GameofThrones.png') center/cover no-repeat;
     border: 3px solid #5568d3;
 }
 

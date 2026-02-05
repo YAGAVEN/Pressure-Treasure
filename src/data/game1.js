@@ -1,7 +1,7 @@
 const stage1State = {
     // Grid configuration
-    currentGridSize: '3x3',           // Current grid size: '3x3', '4x4', or '5x5'
-    currentLevelIndex: 0,              // Current level index: 0 (3x3), 1 (4x4), 2 (5x5), 3 (maze)
+    currentGridSize: '4x4',           // Current grid size: '4x4', '6x6', or '8x8'
+    currentLevelIndex: 0,              // Current level index: 0 (4x4), 1 (6x6), 2 (8x8), 3 (maze)
     
      cards: [],
     
@@ -41,7 +41,7 @@ const stage1State = {
 
 
 function resetStage1State() {
-    stage1State.currentGridSize = '3x3';
+    stage1State.currentGridSize = '4x4';
     stage1State.currentLevelIndex = 0;
     stage1State.cards = [];
     stage1State.flippedCards = [];
@@ -74,7 +74,7 @@ function resetStage1GridState(levelIndex) {
     }
     
     // Map level index to grid size
-    const gridSizes = ['3x3', '4x4', '5x5'];
+    const gridSizes = ['4x4', '6x6', '8x8'];
     stage1State.currentLevelIndex = levelIndex;
     stage1State.currentGridSize = gridSizes[levelIndex];
     
@@ -133,31 +133,26 @@ function getTotalPairsForCurrentGrid() {
     const gridSize = stage1State.currentGridSize;
     const totalCards = parseInt(gridSize) * parseInt(gridSize);
     
-    // For 3x3 and 5x5, subtract 1 for the fixed block
-    if (gridSize === '3x3' || gridSize === '5x5') {
-        return (totalCards - 1) / 2;
-    }
-    
-    // For 4x4, all cards are pairs
+    // All cards are in pairs
     return totalCards / 2;
 }
 
 /**
  * Check if current level is complete
- * Checks if all non-fixed cards are matched
- * @returns {boolean} - True if all non-fixed cards are matched
+ * Checks if all cards are matched
+ * @returns {boolean} - True if all cards are matched
  */
 function isCurrentLevelComplete() {
     if (!stage1State.cards || stage1State.cards.length === 0) {
         return false;
     }
     
-    // Check if all non-fixed cards are matched
-    const allNonFixedMatched = stage1State.cards.every(
-        card => card.isFixed || card.isMatched
+    // Check if all cards are matched
+    const allMatched = stage1State.cards.every(
+        card => card.isMatched
     );
     
-    return allNonFixedMatched;
+    return allMatched;
 }
 
 // ===== GAME CONFIGURATION =====
@@ -283,7 +278,6 @@ function createCardElement(card) {
     cardDiv.dataset.cardId = card.id;
 
     // State classes
-    if (card.isFixed) cardDiv.classList.add('fixed');
     if (card.isMatched) cardDiv.classList.add('matched');
     if (card.isFlipped) cardDiv.classList.add('flipped');
 
@@ -300,52 +294,21 @@ function createCardElement(card) {
     cardFront.className = 'card-face card-front';
 
     // ===== ICON RENDER (SINGLE SOURCE OF TRUTH) =====
-    if (card.isFixed) {
-        // Fixed block - use background-image so it fills the card (edge-to-edge).
-        const setFixedBackground = (src) => {
-            cardFront.style.backgroundImage = `url('${src}')`;
-            cardFront.style.backgroundSize = 'cover';
-            cardFront.style.backgroundPosition = 'center';
-            cardFront.style.backgroundRepeat = 'no-repeat';
-            cardFront.classList.add('fixed-image');
-        };
+    const DEFAULT_ICON =
+        'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/code.svg';
 
-        const initialSrc = card.iconSrc || '/assets/GameofThrones.png';
-        setFixedBackground(initialSrc);
+    const iconImg = document.createElement('img');
+    iconImg.src = card.iconSrc;
+    iconImg.alt = ''; // VERY IMPORTANT
+    iconImg.className = 'card-icon';
 
-        // Preload to detect error and fallback gracefully (no emoji fallback)
-        const probe = new Image();
-        probe.onload = () => {};
-        probe.onerror = () => {
-            if (probe.src && probe.src.endsWith('GameofThrones.png')) {
-                // try secondary fallback (existing public image)
-                setFixedBackground('/images/level3_throne.jpg');
-                probe.src = '/images/level3_throne.jpg';
-            } else {
-                // Final fallback: remove image and keep fixed styling (no emoji)
-                probe.onerror = null;
-                cardFront.style.backgroundImage = '';
-                cardFront.classList.remove('fixed-image');
-            }
-        };
-        probe.src = initialSrc;
-    } else {
-        const DEFAULT_ICON =
-            'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/code.svg';
+    // Fallback if icon URL fails
+    iconImg.onerror = () => {
+        iconImg.onerror = null;
+        iconImg.src = DEFAULT_ICON;
+    };
 
-        const iconImg = document.createElement('img');
-        iconImg.src = card.iconSrc;
-        iconImg.alt = ''; // VERY IMPORTANT
-        iconImg.className = 'card-icon';
-
-        // Fallback if icon URL fails
-        iconImg.onerror = () => {
-            iconImg.onerror = null;
-            iconImg.src = DEFAULT_ICON;
-        };
-
-        cardFront.appendChild(iconImg);
-    }
+    cardFront.appendChild(iconImg);
 
     // Assemble card
     cardInner.appendChild(cardBack);
@@ -354,7 +317,7 @@ function createCardElement(card) {
 
     // Click handler
     cardDiv.addEventListener('click', () => {
-        if (stage1State.isGameActive && !card.isFixed && !card.isMatched) {
+        if (stage1State.isGameActive && !card.isMatched) {
             flipCard(card.id);
             updateCardDisplay(card.id);
         }
@@ -398,46 +361,21 @@ function updateCardDisplay(cardId) {
         cardFront.style.backgroundImage = '';
         cardFront.classList.remove('fixed-image');
         
-        // If the card is fixed, use background image to fill the card (no emoji fallback)
-        if (card.isFixed) {
-            const src = card.iconSrc || '/assets/GameofThrones.png';
-            cardFront.style.backgroundImage = `url('${src}')`;
-            cardFront.style.backgroundSize = 'cover';
-            cardFront.style.backgroundPosition = 'center';
-            cardFront.style.backgroundRepeat = 'no-repeat';
-            cardFront.classList.add('fixed-image');
-            // Preload to detect errors and fallback to secondary image
-            const probe = new Image();
-            probe.onload = () => {};
-            probe.onerror = () => {
-                if (probe.src && probe.src.endsWith('GameofThrones.png')) {
-                    cardFront.style.backgroundImage = `url('/images/level3_throne.jpg')`;
-                    probe.src = '/images/level3_throne.jpg';
-                } else {
-                    probe.onerror = null;
-                    cardFront.style.backgroundImage = '';
-                    cardFront.classList.remove('fixed-image');
-                }
-            };
-            probe.src = src;
-        } else if (card.iconSrc.startsWith('http') || card.iconSrc.endsWith('.svg') || card.iconSrc.endsWith('.png')) {
+        // All cards use images
+        if (card.iconSrc.startsWith('http') || card.iconSrc.endsWith('.svg') || card.iconSrc.endsWith('.png')) {
             // It's an image URL - create img element
             const iconImg = document.createElement('img');
             iconImg.src = card.iconSrc;
             iconImg.alt = '';
-            // Try a fallback image first, then remove if all fails (no emoji fallback)
+            // Remove image if it fails to load
             iconImg.onerror = () => {
                 iconImg.onerror = null;
-                if (iconImg.src && iconImg.src.endsWith('myImage.png')) {
-                    iconImg.src = '/images/level3_throne.jpg';
-                } else {
-                    iconImg.remove();
-                }
+                iconImg.remove();
             };
             iconImg.className = 'card-icon';
             cardFront.appendChild(iconImg);
         } else {
-            // It's an emoji (for fixed cards)
+            // It's an emoji fallback
             cardFront.textContent = card.iconSrc;
         }
     }
@@ -473,8 +411,8 @@ function startGame() {
     // Reset Stage-1 state
     resetStage1State();
     
-    // Generate cards for initial grid (3x3)
-    stage1State.cards = generateCards('3x3');
+    // Generate cards for initial grid (4x4)
+    stage1State.cards = generateCards('4x4');
     
     // Render the card grid
     renderCardGrid();
@@ -534,24 +472,23 @@ function nextLevel() {
 
 /**
  * Generate cards based on grid size
- * For 3x3 and 5x5: creates one fixed card (🧩) and pairs for remaining cards
- * For 4x4: creates pairs for all cards
- * Only non-fixed cards are shuffled
- * @param {string} gridSize - Grid size: '3x3', '4x4', or '5x5'
- * @returns {Array} - Flat array of card objects with id, icon, isFlipped, isMatched, isFixed
+ * Creates pairs of cards for all grids: 4x4, 6x6, and 8x8
+ * Each card has exactly one matching pair
+ * Cards are shuffled randomly
+ * @param {string} gridSize - Grid size: '4x4', '6x6', or '8x8'
+ * @returns {Array} - Flat array of card objects with id, iconSrc, isFlipped, isMatched, isFixed
  */
 function generateCards(gridSize) {
     // Validate grid size
-    if (!['3x3', '4x4', '5x5'].includes(gridSize)) {
-        throw new Error('Grid size must be "3x3", "4x4", or "5x5"');
+    if (!['4x4', '6x6', '8x8'].includes(gridSize)) {
+        throw new Error('Grid size must be "4x4", "6x6", or "8x8"');
     }
     
     const size = parseInt(gridSize);
     const totalCards = size * size;
-    const hasFixedCard = gridSize === '3x3' || gridSize === '5x5';
     
     // Calculate number of pairs needed
-    const totalPairs = hasFixedCard ? (totalCards - 1) / 2 : totalCards / 2;
+    const totalPairs = totalCards / 2;
     
     // Pool of tech stack icons for card pairs
     // Using recognizable technology stack icons from simple-icons CDN
@@ -615,30 +552,11 @@ function generateCards(gridSize) {
         );
     }
     
-    // Shuffle only the pair cards (non-fixed cards)
+    // Shuffle only the pair cards
     const shuffledPairCards = shuffleArray(pairCards);
     
-    // Create fixed card if needed
-    let cards = [];
-    if (hasFixedCard) {
-        const fixedCard = {
-            id: cardId++,
-            // Use asset image for fixed center card (no emoji)
-            iconSrc: '/assets/GameofThrones.png',
-            isFlipped: true,
-            isMatched: false,
-            isFixed: true
-        };
-        
-        // Insert fixed card at random position
-        const fixedPosition = Math.floor(Math.random() * (shuffledPairCards.length + 1));
-        cards = [...shuffledPairCards];
-        cards.splice(fixedPosition, 0, fixedCard);
-    } else {
-        cards = shuffledPairCards;
-    }
-    cards = cards.slice(0, totalCards);
-    return cards;
+    // Return all pair cards
+    return shuffledPairCards;
 }
 
 
@@ -697,7 +615,7 @@ function flipAllNonFixedCards(flipped) {
 }
 
 /**
- * Flip all non-fixed cards back face-down, unless they are already matched
+ * Flip all unmatched cards back face-down
  * Pure logic function that updates card state only
  * Does not affect counters or penalties
  */
@@ -707,8 +625,8 @@ function flipAllNonFixedCardsBack() {
     }
     
     stage1State.cards.forEach(card => {
-        // Only flip back non-fixed, unmatched cards
-        if (!card.isFixed && !card.isMatched) {
+        // Only flip back unmatched cards
+        if (!card.isMatched) {
             card.isFlipped = false;
         }
     });
@@ -737,11 +655,6 @@ function flipCard(cardId) {
     
     // Ignore if card not found
     if (!card) {
-        return false;
-    }
-    
-    // Ignore clicks on fixed cards
-    if (card.isFixed) {
         return false;
     }
     
@@ -948,9 +861,9 @@ function triggerGhostShuffle() {
     // Mark penalty as active
     stage1State.penaltyActive = true;
     
-    // Get all non-fixed, non-matched cards
+    // Get all unmatched cards
     const shuffleableCards = stage1State.cards.filter(
-        card => !card.isFixed && !card.isMatched
+        card => !card.isMatched
     );
     
     // If no cards to shuffle, skip penalty
@@ -1103,7 +1016,7 @@ function checkAndTriggerBonusPair() {
 function triggerBonusPair() {
     // Get all unmatched, non-fixed cards
     const unmatchedCards = stage1State.cards.filter(
-        card => !card.isFixed && !card.isMatched
+        card => !card.isMatched
     );
     
     // Need at least 2 cards to form a pair
