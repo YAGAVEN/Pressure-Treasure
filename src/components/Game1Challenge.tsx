@@ -69,7 +69,10 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
         return;
       }
       completedRef.current = true;
-      onComplete();
+      setTimeout(() => {
+          onComplete();
+        }, 1200);
+      // onComplete();
     };
 
     window.addEventListener('message', handleMessage);

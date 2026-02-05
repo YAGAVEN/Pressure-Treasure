@@ -8,6 +8,7 @@ import { CHALLENGES, HOUSE_NAMES, HOUSE_MOTTOS } from '@/types/game';
 import { formatTime, calculateProgress } from '@/lib/gameUtils';
 import { supabase } from '@/lib/supabase';
 import * as roomService from '@/lib/roomService';
+import LevelMap from '@/components/LevelMap';
 import { 
   Crown, Clock, Users, CheckCircle2, Circle, Trophy,
   ArrowLeft, LogOut
@@ -387,6 +388,40 @@ const PlayerGame = () => {
     }
   };
 
+  const handleLevelClick = (challengeId: number) => {
+    if (room.status !== 'playing') {
+      toast({
+        title: "Game Not Active",
+        description: "Wait for the Game Master to start the hunt.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const isLocked = challengeId > currentPlayer.currentChallenge;
+    if (isLocked) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Navigate to appropriate challenge page
+    const challengeRoutes: { [key: number]: string } = {
+      1: `/game1/${roomCode}`,
+      2: `/riddle/${roomCode}`,
+      3: `/game3/${roomCode}`,
+      4: `/game4/${roomCode}`,
+      5: `/game5/${roomCode}`,
+    };
+
+    if (challengeRoutes[challengeId]) {
+      navigate(challengeRoutes[challengeId]);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {!isFullscreen && (
@@ -449,221 +484,89 @@ const PlayerGame = () => {
         </header>
 
         <main className="container mx-auto px-4 py-6">
-          {/* Main Content - Challenges */}
-          <div className="space-y-6 max-w-4xl mx-auto">
-          {/* Status Banner */}
-
+          {/* Game Finished - Show Results Overlay */}
           {room.status === 'finished' && (
-            <Card className={cn(
-              "border-2",
-              isInTop3 ? "border-primary bg-primary/10" : "border-accent/50 bg-accent/10"
-            )}>
-              <CardContent className="space-y-4 py-6">
-                <div className="flex items-center gap-4">
-                  <Trophy className={cn(
-                    "h-10 w-10",
-                    isInTop3 ? "text-primary" : "text-accent"
-                  )} />
-                  <div className="flex-1">
+            <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-background/95 backdrop-blur">
+              <Card className={cn(
+                "border-2 max-w-md w-full",
+                isInTop3 ? "border-primary bg-primary/5" : "border-accent/50 bg-accent/5"
+              )}>
+                <CardContent className="space-y-6 py-8">
+                  <div className="text-center">
+                    <Trophy className={cn(
+                      "h-16 w-16 mx-auto mb-4",
+                      isInTop3 ? "text-primary" : "text-accent"
+                    )} />
+                    
                     {winnerRank !== null && winnerRank <= 3 ? (
                       <>
-                        <p className="font-cinzel text-xl font-bold text-primary">
-                          {winnerRank === 1 && "🥇 1st Place Victory!"}
-                          {winnerRank === 2 && "🥈 2nd Place Finish!"}
-                          {winnerRank === 3 && "🥉 3rd Place Podium!"}
+                        <p className="font-cinzel text-3xl font-bold text-primary mb-2">
+                          {winnerRank === 1 && "🥇 1st Place!"}
+                          {winnerRank === 2 && "🥈 2nd Place!"}
+                          {winnerRank === 3 && "🥉 3rd Place!"}
                         </p>
-                        <p className="text-muted-foreground">You've earned a place on the podium!</p>
+                        <p className="text-muted-foreground mb-4">You've earned a place on the podium!</p>
                       </>
                     ) : winnerRank !== null ? (
                       <>
-                        <p className="font-cinzel text-xl font-bold">You finished in {getOrdinal(winnerRank)} place</p>
-                        <p className="text-muted-foreground">Great effort! The hunt has ended.</p>
+                        <p className="font-cinzel text-2xl font-bold mb-2">You finished in {getOrdinal(winnerRank)} place</p>
+                        <p className="text-muted-foreground mb-4">Great effort! The hunt has ended.</p>
                       </>
                     ) : (
                       <>
-                        <p className="font-cinzel text-xl font-bold">Game Over</p>
-                        <p className="text-muted-foreground">The hunt has ended.</p>
+                        <p className="font-cinzel text-2xl font-bold mb-2">Game Over</p>
+                        <p className="text-muted-foreground mb-4">The hunt has ended.</p>
                       </>
                     )}
                   </div>
-                </div>
-                
-                {/* Top 3 Winners Podium */}
-                {topWinners.length > 0 && (
-                  <div className="border-t pt-4">
-                    <p className="text-sm font-medium mb-3">Final Podium:</p>
-                    <div className="space-y-2">
-                      {topWinners.map((winner) => {
-                        const winnerPlayer = players.find(p => p.id === winner.playerId);
-                        if (!winnerPlayer) return null;
-                        return (
-                          <div key={winner.playerId} className="flex items-center gap-3 p-2 rounded-lg bg-background/50">
-                            <span className="text-2xl">
-                              {winner.rank === 1 && "🥇"}
-                              {winner.rank === 2 && "🥈"}
-                              {winner.rank === 3 && "🥉"}
-                            </span>
-                            <div className="flex-1">
-                              <p className="font-medium">{winnerPlayer.username}</p>
+                  
+                  {/* Top 3 Winners Podium */}
+                  {topWinners.length > 0 && (
+                    <div className="border-t pt-4">
+                      <p className="text-sm font-medium mb-3 text-center">Final Podium:</p>
+                      <div className="space-y-2">
+                        {topWinners.map((winner) => {
+                          const winnerPlayer = players.find(p => p.id === winner.playerId);
+                          if (!winnerPlayer) return null;
+                          return (
+                            <div key={winner.playerId} className="flex items-center gap-3 p-2 rounded-lg bg-background/50">
+                              <span className="text-2xl">
+                                {winner.rank === 1 && "🥇"}
+                                {winner.rank === 2 && "🥈"}
+                                {winner.rank === 3 && "🥉"}
+                              </span>
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{winnerPlayer.username}</p>
+                              </div>
+                              <span className="text-sm font-bold">{winner.progress}%</span>
                             </div>
-                            <span className="text-sm font-bold">{winner.progress}%</span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                  
+                  <Button 
+                    onClick={handleLeave}
+                    className="w-full font-cinzel"
+                  >
+                    Back to Home
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
-          {/* Progress Overview */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="font-cinzel text-lg">Your Progress</CardTitle>
-                <span className="text-2xl font-bold text-primary">{currentPlayer.progress}%</span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Progress value={currentPlayer.progress} className="h-3" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                {currentPlayer.completedChallenges.length} of {CHALLENGES.length} challenges complete
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Challenges List */}
-          <div className="space-y-4">
-            <h2 className="font-cinzel text-xl font-semibold">Challenges</h2>
-            
-            {CHALLENGES.map((challenge, index) => {
-              const isCompleted = currentPlayer.completedChallenges.includes(challenge.id);
-              const isCurrent = currentPlayer.currentChallenge === challenge.id;
-              // Lock challenges that haven't been unlocked yet - DISABLED FOR TESTING
-              const isLocked = false; // challenge.id > currentPlayer.currentChallenge;
-              
-              return (
-                <Card 
-                  key={challenge.id}
-                  className={cn(
-                    "transition-all",
-                    isCompleted && "border-primary/50 bg-primary/5",
-                    isCurrent && "border-primary ring-2 ring-primary/20",
-                    isLocked && "opacity-50 border-muted"
-                  )}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "mt-0.5 flex h-8 w-8 items-center justify-center rounded-full",
-                        isCompleted ? "bg-primary text-primary-foreground" : 
-                        isLocked ? "bg-muted/50 text-muted-foreground" : "bg-muted"
-                      )}>
-                        {isCompleted ? (
-                          <CheckCircle2 className="h-5 w-5" />
-                        ) : isLocked ? (
-                          <Circle className="h-5 w-5" />
-                        ) : (
-                          <span className="font-bold">{challenge.id}</span>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="font-cinzel text-lg">{challenge.name}</CardTitle>
-                          {isLocked && (
-                            <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full font-semibold">
-                              Locked
-                            </span>
-                          )}
-                        </div>
-                        <CardDescription className="mt-1">
-                          {isLocked ? "Complete previous challenges to unlock" : challenge.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                   {challenge.id === 1 && !isCompleted && (
-                     <CardContent className="pt-2">
-                       <Button 
-                         onClick={() => navigate(`/game1/${roomCode}`)}
-                         disabled={room.status !== 'playing' || isCompleted || isLocked}
-                         className="w-full font-cinzel"
-                       >
-                         {isCompleted ? '✓ Completed' : 
-                          isLocked ? '🔒 Locked' :
-                          room.status === 'playing' ? 'Start Trial of the First Men' : 'Waiting for Game Master...'}
-                       </Button>
-                     </CardContent>
-                   )}
-                   
-                   {challenge.id === 2 && !isCompleted && (
-                     <CardContent className="pt-2">
-                       <Button 
-                         onClick={() => navigate(`/riddle/${roomCode}`)}
-                         disabled={room.status !== 'playing' || isCompleted || isLocked}
-                         className="w-full font-cinzel"
-                       >
-                         {isCompleted ? '✓ Completed' : 
-                          isLocked ? '🔒 Locked' :
-                          room.status === 'playing' ? 'Start Riddle Challenge' : 'Waiting for Game Master...'}
-                       </Button>
-                     </CardContent>
-                   )}
-                  
-                  {challenge.id === 3 && !isCompleted && (
-                    <CardContent className="pt-2">
-                      <Button 
-                        onClick={() => navigate(`/game3/${roomCode}`)}
-                        disabled={room.status !== 'playing' || isCompleted || isLocked}
-                        className="w-full font-cinzel"
-                      >
-                        {isCompleted ? '✓ Completed' : 
-                         isLocked ? '🔒 Locked' :
-                         room.status === 'playing' ? 'Start Kingswood Challenge' : 'Waiting for Game Master...'}
-                      </Button>
-                    </CardContent>
-                  )}
-                  
-                  {challenge.id === 4 && !isCompleted && (
-                    <CardContent className="pt-2">
-                      <Button 
-                        onClick={() => navigate(`/game4/${roomCode}`)}
-                        disabled={room.status !== 'playing' || isCompleted || isLocked}
-                        className="w-full font-cinzel"
-                      >
-                        {isCompleted ? '✓ Completed' : 
-                         isLocked ? '🔒 Locked' :
-                         room.status === 'playing' ? 'Start Maester\'s Trial' : 'Waiting for Game Master...'}
-                      </Button>
-                    </CardContent>
-                  )}
-
-                  {challenge.id === 5 && !isCompleted && (
-                    <CardContent className="pt-2">
-                      <Button 
-                        onClick={() => navigate(`/game5/${roomCode}`)}
-                        disabled={room.status !== 'playing' || isCompleted || isLocked}
-                        className="w-full font-cinzel"
-                      >
-                        {isCompleted ? '✓ Completed' : 
-                         isLocked ? '🔒 Locked' :
-                         room.status === 'playing' ? 'Start Iron Throne Ascension' : 'Waiting for Game Master...'}
-                      </Button>
-                    </CardContent>
-                  )}
-                  
-                  {isCompleted && (
-                    <CardContent className="pt-2 text-sm text-muted-foreground">
-                      <p>✓ Challenge completed</p>
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
-          </div>
+          {/* Level Map - Candy Crush Style */}
+          {room.status !== 'finished' && (
+            <LevelMap
+              challenges={CHALLENGES}
+              completedChallenges={currentPlayer.completedChallenges}
+              currentChallenge={currentPlayer.currentChallenge}
+              onLevelClick={handleLevelClick}
+              isGamePlaying={room.status === 'playing'}
+            />
+          )}
         </main>
       </div>
     </div>
