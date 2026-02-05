@@ -11,40 +11,140 @@ interface Question {
   riddle: string;
   answer: string;
   hint: string;
+  options?: string[];
 }
 
 interface RiddleChallengeProps {
   onComplete: () => void;
   disabled?: boolean;
   preloadedQuestions?: Question[];
+  allAvailableQuestions?: Question[];
 }
 
-export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestions }: RiddleChallengeProps) => {
+export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestions, allAvailableQuestions }: RiddleChallengeProps) => {
   const [allQuestions, setAllQuestions] = useState<Question[]>(preloadedQuestions || []);
-  const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
+  const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(preloadedQuestions || []);
+  const [usedQuestionIds, setUsedQuestionIds] = useState<Set<number>>(
+    new Set(preloadedQuestions?.map(q => q.id) || [])
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [completed, setCompleted] = useState(0);
+  const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [isInPenalty, setIsInPenalty] = useState(false);
+  const [penaltyTimeLeft, setPenaltyTimeLeft] = useState(0);
+
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!(typeof document !== 'undefined' && document.fullscreenElement));
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const enterFullscreen = async () => {
+    try {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        await el.requestFullscreen();
+      } else if ((el as any).mozRequestFullScreen) {
+        await (el as any).mozRequestFullScreen();
+      } else if ((el as any).webkitRequestFullscreen) {
+        await (el as any).webkitRequestFullscreen();
+      } else if ((el as any).msRequestFullscreen) {
+        await (el as any).msRequestFullscreen();
+      }
+    } catch (err) {
+      console.error('Fullscreen request failed:', err);
+    }
+  };
+
+  // Handle penalty timer countdown
+  useEffect(() => {
+    if (!isInPenalty || penaltyTimeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setPenaltyTimeLeft(prev => {
+        const newTime = prev - 1;
+        if (newTime <= 0) {
+          setIsInPenalty(false);
+          // Move to next question after penalty expires
+          if (currentIndex + 1 < selectedQuestions.length) {
+            setCurrentIndex(prev => prev + 1);
+            setUserAnswer('');
+            setShowHint(false);
+            setFeedback(null);
+            setWrongAttempts(0);
+          } else {
+            onComplete();
+          }
+          return 0;
+        }
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isInPenalty, penaltyTimeLeft, currentIndex, selectedQuestions.length, onComplete]);
 
   useEffect(() => {
     // Only fetch if questions weren't preloaded
     if (preloadedQuestions && preloadedQuestions.length > 0) {
       setAllQuestions(preloadedQuestions);
-      const shuffled = [...preloadedQuestions].sort(() => Math.random() - 0.5);
-      setSelectedQuestions(shuffled.slice(0, 10));
+      setSelectedQuestions(preloadedQuestions);
+      setUsedQuestionIds(new Set(preloadedQuestions.map(q => q.id)));
     } else {
       fetch('/questions.json')
         .then(res => res.json())
         .then((questions: Question[]) => {
           setAllQuestions(questions);
           const shuffled = [...questions].sort(() => Math.random() - 0.5);
-          setSelectedQuestions(shuffled.slice(0, 10));
+          const selected = shuffled.slice(0, 10);
+          setSelectedQuestions(selected);
+          setUsedQuestionIds(new Set(selected.map(q => q.id)));
         })
         .catch(err => console.error('Failed to load questions:', err));
     }
   }, [preloadedQuestions]);
+
+  // Helper function to get a random question from unused questions
+  const getRandomUnusedQuestion = (): Question | null => {
+    const availablePool = allAvailableQuestions || allQuestions;
+    const unusedQuestions = availablePool.filter(q => !usedQuestionIds.has(q.id));
+    
+    if (unusedQuestions.length === 0) return null;
+    
+    const randomQuestion = unusedQuestions[Math.floor(Math.random() * unusedQuestions.length)];
+    return randomQuestion;
+  };
+
+  // Helper function to replace a question with a new random one
+  const replaceQuestionAtIndex = (indexToReplace: number) => {
+    const newQuestion = getRandomUnusedQuestion();
+    if (!newQuestion) return; // No more unused questions available
+
+    // Update the question at the current index
+    const updated = [...selectedQuestions];
+    const oldQuestionId = updated[indexToReplace].id;
+    
+    // Remove old question ID from used set and add new one
+    const newUsedIds = new Set(usedQuestionIds);
+    newUsedIds.delete(oldQuestionId);
+    newUsedIds.add(newQuestion.id);
+    
+    // Shuffle options for the new question
+    const questionWithShuffledOptions = {
+      ...newQuestion,
+      options: newQuestion.options ? [...newQuestion.options].sort(() => Math.random() - 0.5) : []
+    };
+    
+    updated[indexToReplace] = questionWithShuffledOptions;
+    
+    setSelectedQuestions(updated);
+    setUsedQuestionIds(newUsedIds);
+  };
 
   const currentQuestion = selectedQuestions[currentIndex];
 
@@ -67,11 +167,63 @@ export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestio
           setUserAnswer('');
           setShowHint(false);
           setFeedback(null);
+          setWrongAttempts(0);
         }
       }, 1500);
     } else {
       setFeedback('incorrect');
       setTimeout(() => setFeedback(null), 1500);
+    }
+  };
+
+  const handleOptionClick = (option: string) => {
+    if (feedback || disabled || isInPenalty) return;
+    
+    const isCorrect = option.toUpperCase() === currentQuestion.answer.toUpperCase();
+    setUserAnswer(option);
+    
+    if (isCorrect) {
+      setFeedback('correct');
+      setCompleted(prev => prev + 1);
+      
+      setTimeout(() => {
+        if (currentIndex + 1 >= selectedQuestions.length) {
+          onComplete();
+        } else {
+          setCurrentIndex(prev => prev + 1);
+          setUserAnswer('');
+          setShowHint(false);
+          setFeedback(null);
+          setWrongAttempts(0); // Reset counter only on correct answer
+        }
+      }, 1500);
+    } else {
+      // User clicked wrong option
+      const newWrongAttempts = wrongAttempts + 1;
+      setWrongAttempts(newWrongAttempts);
+      
+      if (newWrongAttempts >= 4) {
+        // 4 wrong attempts - show 10-second penalty timer
+        setFeedback('incorrect');
+        setIsInPenalty(true);
+        setPenaltyTimeLeft(10);
+      } else if (newWrongAttempts === 2) {
+        // 2 wrong attempts - replace this question with a new one from unused pool
+        // IMPORTANT: Don't reset wrongAttempts here, let it accumulate to 4 for penalty
+        setFeedback('incorrect');
+        
+        setTimeout(() => {
+          replaceQuestionAtIndex(currentIndex);
+          setUserAnswer('');
+          setShowHint(false);
+          setFeedback(null);
+          // Do NOT reset wrongAttempts - it accumulates to trigger penalty at 4
+        }, 1500);
+      } else {
+        // 1st or 3rd wrong attempt - show feedback and let user retry
+        setFeedback('incorrect');
+        setTimeout(() => setFeedback(null), 1500);
+      }
     }
   };
 
@@ -86,7 +238,6 @@ export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestio
   }
 
   const progress = (completed / selectedQuestions.length) * 100;
-  const answerLength = currentQuestion.answer.length;
 
   return (
     <>
@@ -152,50 +303,71 @@ export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestio
           </div>
         )}
 
-        {/* Answer Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm text-cyan-300">
-              <span className="font-medium">Your Answer ({answerLength} letters)</span>
-              <span className="font-mono font-semibold">{userAnswer.length} / {answerLength}</span>
-            </div>
-            <Input
-              value={userAnswer}
-              onChange={(e) => setUserAnswer(e.target.value.toUpperCase())}
-              placeholder="TYPE YOUR ANSWER..."
-              className={cn(
-                "font-mono tracking-widest text-center uppercase py-4 bg-slate-900/80 border-2 border-cyan-500/60 text-cyan-100 placeholder-cyan-600/70 backdrop-blur-md rounded-xl focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/60 transition-all shadow-md",
-                feedback === 'correct' && "border-green-500/80 bg-gradient-to-r from-green-900/80 to-emerald-900/80 text-green-100 focus:border-green-400 focus:ring-green-500/50",
-                feedback === 'incorrect' && "border-red-500/80 bg-gradient-to-r from-red-900/80 to-rose-900/80 text-red-100 focus:border-red-400 focus:ring-red-500/50"
-              )}
-              disabled={disabled || feedback === 'correct'}
-              maxLength={20}
-              autoFocus
-            />
+        {/* Answer Options */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="font-medium text-cyan-300 text-sm">Choose the best answer:</p>
+            {wrongAttempts > 0 && wrongAttempts < 4 && (
+              <span className="text-xs font-semibold text-orange-400">
+                ⚠️ {wrongAttempts}/4 wrong attempts
+              </span>
+            )}
+            {wrongAttempts >= 4 && !isInPenalty && (
+              <span className="text-xs font-semibold text-red-500">
+                🚨 PENALTY TRIGGERED!
+              </span>
+            )}
+            {isInPenalty && penaltyTimeLeft > 0 && (
+              <span className="text-xs font-semibold text-red-400 animate-pulse">
+                ⏱️ Wait {penaltyTimeLeft} seconds
+              </span>
+            )}
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {currentQuestion.options && currentQuestion.options.map((option) => (
+              <button
+                key={option}
+                onClick={() => handleOptionClick(option)}
+                disabled={disabled || feedback !== null || isInPenalty}
+                className={cn(
+                  "p-4 rounded-xl font-semibold text-sm transition-all border-2 backdrop-blur-md",
+                  isInPenalty ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:scale-105 active:scale-95",
+                  userAnswer === option
+                    ? feedback === 'correct'
+                      ? "border-green-500/80 bg-gradient-to-r from-green-900/80 to-emerald-900/80 text-green-100 shadow-lg shadow-green-500/50"
+                      : feedback === 'incorrect'
+                      ? "border-red-500/80 bg-gradient-to-r from-red-900/80 to-rose-900/80 text-red-100 shadow-lg shadow-red-500/50"
+                      : "border-cyan-400/80 bg-gradient-to-r from-cyan-600/80 to-blue-600/80 text-white shadow-lg shadow-cyan-500/60"
+                    : "border-cyan-400/30 bg-slate-800/40 text-cyan-100 hover:border-cyan-400/60 hover:bg-slate-800/60"
+                )}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {/* Feedback */}
-          {feedback === 'correct' && (
-            <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-green-900/70 to-emerald-900/70 border-2 border-green-500/60 p-4 text-green-100 backdrop-blur-md shadow-lg">
-              <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
-              <span className="font-semibold text-sm">Correct! Moving to next riddle...</span>
-            </div>
-          )}
-          
-          {feedback === 'incorrect' && (
-            <div className="rounded-xl bg-gradient-to-r from-red-900/70 to-rose-900/70 border-2 border-red-500/60 p-4 text-red-100 backdrop-blur-md shadow-lg">
-              <span className="font-semibold text-sm">You know Nothing, Jon Snow!!</span>
-            </div>
-          )}
+        {/* Feedback */}
+        {feedback === 'correct' && (
+          <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-green-900/70 to-emerald-900/70 border-2 border-green-500/60 p-4 text-green-100 backdrop-blur-md shadow-lg">
+            <CheckCircle2 className="h-5 w-5 text-green-400 flex-shrink-0" />
+            <span className="font-semibold text-sm">Correct! Moving to next riddle...</span>
+          </div>
+        )}
+        
+        {feedback === 'incorrect' && !isInPenalty && (
+          <div className="rounded-xl bg-gradient-to-r from-red-900/70 to-rose-900/70 border-2 border-red-500/60 p-4 text-red-100 backdrop-blur-md shadow-lg">
+            <span className="font-semibold text-sm">You know Nothing, Jon Snow!!</span>
+          </div>
+        )}
 
-          <Button
-            type="submit"
-            className="w-full font-cinzel bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white border-0 shadow-lg shadow-cyan-500/40 rounded-lg font-bold"
-            disabled={disabled || !userAnswer.trim() || feedback === 'correct'}
-          >
-            Submit Answer
-          </Button>
-        </form>
+        {isInPenalty && penaltyTimeLeft > 0 && (
+          <div className="rounded-xl bg-gradient-to-r from-red-900/80 to-rose-900/80 border-2 border-red-500/80 p-6 text-red-100 backdrop-blur-md shadow-lg text-center">
+            <p className="font-semibold text-lg mb-3">Skill Issue bro!!</p>
+            <p className="text-3xl font-bold text-yellow-300 animate-pulse">{penaltyTimeLeft}</p>
+            <p className="text-sm mt-3">Please wait before answering again...</p>
+          </div>
+        )}
       </CardContent>
       </Card>
     </>

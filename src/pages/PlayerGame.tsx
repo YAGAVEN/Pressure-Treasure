@@ -540,80 +540,8 @@ const PlayerGame = () => {
                               </div>
                               <span className="text-sm font-bold">{winner.progress}%</span>
                             </div>
-                            <span className="text-sm font-bold">{winner.progress}%</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Progress Overview */}
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="font-cinzel text-lg">Your Progress</CardTitle>
-                <span className="text-2xl font-bold text-primary">{currentPlayer.progress}%</span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Progress value={currentPlayer.progress} className="h-3" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                {currentPlayer.completedChallenges.length} of {CHALLENGES.length} challenges complete
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Challenges List */}
-          <div className="space-y-4">
-            <h2 className="font-cinzel text-xl font-semibold">Challenges</h2>
-            
-            {CHALLENGES.map((challenge, index) => {
-              const isCompleted = currentPlayer.completedChallenges.includes(challenge.id);
-              const isCurrent = currentPlayer.currentChallenge === challenge.id;
-              // Lock challenges that haven't been unlocked yet - DISABLED FOR TESTING
-              const isLocked = challenge.id > currentPlayer.currentChallenge;
-              
-              return (
-                <Card 
-                  key={challenge.id}
-                  className={cn(
-                    "transition-all",
-                    isCompleted && "border-primary/50 bg-primary/5",
-                    isCurrent && "border-primary ring-2 ring-primary/20",
-                    isLocked && "opacity-50 border-muted"
-                  )}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "mt-0.5 flex h-8 w-8 items-center justify-center rounded-full",
-                        isCompleted ? "bg-primary text-primary-foreground" : 
-                        isLocked ? "bg-muted/50 text-muted-foreground" : "bg-muted"
-                      )}>
-                        {isCompleted ? (
-                          <CheckCircle2 className="h-5 w-5" />
-                        ) : isLocked ? (
-                          <Circle className="h-5 w-5" />
-                        ) : (
-                          <span className="font-bold">{challenge.id}</span>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="font-cinzel text-lg">{challenge.name}</CardTitle>
-                          {isLocked && (
-                            <span className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full font-semibold">
-                              Locked
-                            </span>
-                          )}
-                        </div>
-                        <CardDescription className="mt-1">
-                          {isLocked ? "Complete previous challenges to unlock" : challenge.description}
-                        </CardDescription>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
