@@ -29,6 +29,7 @@ const PlayerGame = () => {
   } = useGame();
   const { toast } = useToast();
   const [, forceUpdate] = useState({});
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!(typeof document !== 'undefined' && document.fullscreenElement));
   
   // Define room and players early so they can be used in useEffects
   const room = roomCode ? getRoom(roomCode) : undefined;
@@ -54,6 +55,72 @@ const PlayerGame = () => {
 
     return () => clearInterval(interval);
   }, [roomStatus]);
+
+  // Track fullscreen state
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  // Enter fullscreen on mount and try to keep it
+  useEffect(() => {
+    if (!room || !currentPlayer) return;
+
+    let active = true;
+    let attempts = 0;
+    const maxAttempts = 8;
+    const retryDelay = 500;
+    const elem = document.documentElement;
+
+    const tryEnterFullscreen = async () => {
+      if (!active) return;
+      try {
+        if (document.fullscreenElement) return;
+        attempts++;
+        if (elem.requestFullscreen) await elem.requestFullscreen();
+        else if ((elem as any).mozRequestFullScreen) await (elem as any).mozRequestFullScreen();
+        else if ((elem as any).webkitRequestFullscreen) await (elem as any).webkitRequestFullscreen();
+        else if ((elem as any).msRequestFullscreen) await (elem as any).msRequestFullscreen();
+      } catch (err) {
+        if (attempts < maxAttempts) {
+          setTimeout(tryEnterFullscreen, retryDelay);
+        }
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      if (!active) return;
+      const isFull = !!document.fullscreenElement;
+      if (!isFull) {
+        // Don't aggressively re-enter, just update state
+        // Let the overlay show and user can click button
+      }
+    };
+
+    const keyHandler = (e: KeyboardEvent) => {
+      // Don't prevent Escape - let browser handle it naturally
+    };
+
+    const visibilityHandler = () => {
+      if (document.visibilityState === 'visible' && !document.fullscreenElement) {
+        // Only try once when page becomes visible
+        tryEnterFullscreen();
+      }
+    };
+
+    tryEnterFullscreen();
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('keydown', keyHandler);
+    document.addEventListener('visibilitychange', visibilityHandler);
+
+    return () => {
+      active = false;
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('keydown', keyHandler);
+      document.removeEventListener('visibilitychange', visibilityHandler);
+    };
+  }, [room, currentPlayer]);
 
   // Sync state with room data when room changes (initial load)
   useEffect(() => {
@@ -322,7 +389,29 @@ const PlayerGame = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div>
+      {!isFullscreen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur">
+          <div className="max-w-md w-full rounded-xl bg-background border border-border p-6 text-center">
+            <p className="font-semibold text-lg">Fullscreen Required</p>
+            <p className="text-sm text-muted-foreground mt-2">You must enter fullscreen to play. Click the button below to enter fullscreen.</p>
+            <div className="mt-4">
+              <Button 
+                onClick={() => {
+                  const elem = document.documentElement;
+                  if (elem.requestFullscreen) elem.requestFullscreen();
+                  else if ((elem as any).mozRequestFullScreen) (elem as any).mozRequestFullScreen();
+                  else if ((elem as any).webkitRequestFullscreen) (elem as any).webkitRequestFullscreen();
+                  else if ((elem as any).msRequestFullscreen) (elem as any).msRequestFullscreen();
+                }}
+                className="w-full"
+              >
+                Enter Fullscreen
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className={!isFullscreen ? 'pointer-events-none opacity-50' : ''}>
         {/* Header */}
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
           <div className="container mx-auto flex items-center justify-between px-4 py-3">

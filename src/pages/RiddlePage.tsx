@@ -487,6 +487,65 @@ const RiddlePage = () => {
     // }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
+  // Lock the screen in fullscreen while the game is playing (best-effort).
+  useEffect(() => {
+    if (!room || !currentPlayer) return;
+
+    let active = true;
+    let attempts = 0;
+    const maxAttempts = 8;
+    const retryDelay = 500;
+    const elem = document.documentElement;
+
+    const tryEnterFullscreen = async () => {
+      if (!active || room.status !== 'playing') return;
+      try {
+        if (document.fullscreenElement) return;
+        attempts++;
+        if (elem.requestFullscreen) await elem.requestFullscreen();
+        else if ((elem as any).mozRequestFullScreen) await (elem as any).mozRequestFullScreen();
+        else if ((elem as any).webkitRequestFullscreen) await (elem as any).webkitRequestFullscreen();
+        else if ((elem as any).msRequestFullscreen) await (elem as any).msRequestFullscreen();
+      } catch (err) {
+        if (attempts < maxAttempts) setTimeout(tryEnterFullscreen, retryDelay);
+      }
+    };
+
+    const handleFullscreenChange = () => {
+      if (!active) return;
+      const isFull = !!document.fullscreenElement;
+      if (!isFull && room.status === 'playing') {
+        setTimeout(tryEnterFullscreen, 200);
+      }
+    };
+
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && room.status === 'playing') {
+        e.preventDefault();
+        e.stopPropagation();
+        tryEnterFullscreen();
+      }
+    };
+
+    const visibilityHandler = () => {
+      if (document.visibilityState === 'visible' && room.status === 'playing') {
+        tryEnterFullscreen();
+      }
+    };
+
+    tryEnterFullscreen();
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('keydown', keyHandler);
+    document.addEventListener('visibilitychange', visibilityHandler);
+
+    return () => {
+      active = false;
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('keydown', keyHandler);
+      document.removeEventListener('visibilitychange', visibilityHandler);
+    };
+  }, [room]);
+
   if (!room || !currentPlayer) {
     return null;
   }
