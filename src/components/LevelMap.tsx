@@ -608,7 +608,7 @@ const LevelMap = ({
 
         const isCompleted = completedChallenges.includes(challenge.id);
         const isCurrent = currentChallenge === challenge.id;
-        const nextIsLocked = nextChallenge.id > currentChallenge;
+        const nextIsLocked = false; // DISABLED FOR TESTING: nextChallenge.id > currentChallenge;
 
         return (
           <PathConnector
@@ -632,7 +632,7 @@ const LevelMap = ({
           const position = levelPositions[index];
           const isCompleted = completedChallenges.includes(challenge.id);
           const isCurrent = currentChallenge === challenge.id;
-          const isLocked = challenge.id > currentChallenge;
+          const isLocked = false; // DISABLED FOR TESTING: challenge.id > currentChallenge;
           const isClickable = !isLocked && isGamePlaying;
 
           return (
