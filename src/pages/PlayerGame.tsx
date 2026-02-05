@@ -452,7 +452,7 @@ const PlayerGame = () => {
               const isCompleted = currentPlayer.completedChallenges.includes(challenge.id);
               const isCurrent = currentPlayer.currentChallenge === challenge.id;
               // Lock challenges that haven't been unlocked yet - DISABLED FOR TESTING
-              const isLocked = false; // challenge.id > currentPlayer.currentChallenge;
+              const isLocked = challenge.id > currentPlayer.currentChallenge;
               
               return (
                 <Card 
