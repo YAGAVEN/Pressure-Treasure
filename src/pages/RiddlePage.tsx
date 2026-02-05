@@ -487,64 +487,50 @@ const RiddlePage = () => {
     // }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
-  // Lock the screen in fullscreen while the game is playing (best-effort).
+  // Attempt to enter fullscreen when the game starts (best-effort, respects user/browser preferences)
   useEffect(() => {
-    if (!room || !currentPlayer) return;
+    if (!room || !currentPlayer || room.status !== 'playing') return;
 
-    let active = true;
-    let attempts = 0;
-    const maxAttempts = 8;
-    const retryDelay = 500;
+    let userExitedFullscreen = false;
     const elem = document.documentElement;
 
     const tryEnterFullscreen = async () => {
-      if (!active || room.status !== 'playing') return;
+      // Don't retry if user explicitly exited fullscreen
+      if (userExitedFullscreen || document.fullscreenElement) return;
+      
       try {
-        if (document.fullscreenElement) return;
-        attempts++;
-        if (elem.requestFullscreen) await elem.requestFullscreen();
-        else if ((elem as any).mozRequestFullScreen) await (elem as any).mozRequestFullScreen();
-        else if ((elem as any).webkitRequestFullscreen) await (elem as any).webkitRequestFullscreen();
-        else if ((elem as any).msRequestFullscreen) await (elem as any).msRequestFullscreen();
+        if (elem.requestFullscreen) {
+          await elem.requestFullscreen();
+        } else if ((elem as any).mozRequestFullScreen) {
+          await (elem as any).mozRequestFullScreen();
+        } else if ((elem as any).webkitRequestFullscreen) {
+          await (elem as any).webkitRequestFullscreen();
+        } else if ((elem as any).msRequestFullscreen) {
+          await (elem as any).msRequestFullscreen();
+        }
       } catch (err) {
-        if (attempts < maxAttempts) setTimeout(tryEnterFullscreen, retryDelay);
+        // Fullscreen request failed - respect browser/user preference
+        console.log('Fullscreen request declined');
       }
     };
 
     const handleFullscreenChange = () => {
-      if (!active) return;
-      const isFull = !!document.fullscreenElement;
-      if (!isFull && room.status === 'playing') {
-        setTimeout(tryEnterFullscreen, 200);
+      // If user exits fullscreen, respect their choice and don't force re-entry
+      if (!document.fullscreenElement) {
+        userExitedFullscreen = true;
       }
     };
 
-    const keyHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && room.status === 'playing') {
-        e.preventDefault();
-        e.stopPropagation();
-        tryEnterFullscreen();
-      }
-    };
-
-    const visibilityHandler = () => {
-      if (document.visibilityState === 'visible' && room.status === 'playing') {
-        tryEnterFullscreen();
-      }
-    };
-
+    // Try once when game starts playing
     tryEnterFullscreen();
+    
+    // Listen for fullscreen changes to track user preference
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('keydown', keyHandler);
-    document.addEventListener('visibilitychange', visibilityHandler);
 
     return () => {
-      active = false;
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('keydown', keyHandler);
-      document.removeEventListener('visibilitychange', visibilityHandler);
     };
-  }, [room]);
+  }, [room, currentPlayer]);
 
   if (!room || !currentPlayer) {
     return null;
