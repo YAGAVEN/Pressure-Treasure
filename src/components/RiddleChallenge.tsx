@@ -89,8 +89,20 @@ export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestio
   const answerLength = currentQuestion.answer.length;
 
   return (
-    <Card className="w-full border-2 border-cyan-400/50 bg-gradient-to-br from-slate-900/40 via-blue-900/30 to-slate-900/40 backdrop-blur-xl shadow-2xl shadow-cyan-500/30">
-      <CardHeader className="pb-6">
+    <>
+      {!isFullscreen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full rounded-xl bg-background/95 backdrop-blur border border-border p-6 text-center">
+            <p className="font-semibold text-lg">Fullscreen Required</p>
+            <p className="text-sm text-muted-foreground mt-2">You must enter fullscreen to play. Click below to enter fullscreen.</p>
+            <div className="mt-4">
+              <Button onClick={enterFullscreen}>Enter Fullscreen</Button>
+            </div>
+          </div>
+        </div>
+      )}
+      <Card className={cn("w-full border-2 border-cyan-400/50 bg-gradient-to-br from-slate-900/40 via-blue-900/30 to-slate-900/40 backdrop-blur-xl shadow-2xl shadow-cyan-500/30", !isFullscreen && 'pointer-events-none opacity-50')}>
+        <CardHeader className="pb-6">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <Brain className="h-5 w-5 text-cyan-400" />
@@ -185,6 +197,7 @@ export const RiddleChallenge = ({ onComplete, disabled = false, preloadedQuestio
           </Button>
         </form>
       </CardContent>
-    </Card>
+      </Card>
+    </>
   );
 };

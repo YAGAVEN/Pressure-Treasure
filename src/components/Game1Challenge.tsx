@@ -69,7 +69,10 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
         return;
       }
       completedRef.current = true;
-      onComplete();
+      setTimeout(() => {
+          onComplete();
+        }, 1200);
+      // onComplete();
     };
 
     window.addEventListener('message', handleMessage);
@@ -87,14 +90,20 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
   }, []);
 
   const enterFullscreen = async () => {
-    const el = document.documentElement;
     try {
-      if (el.requestFullscreen) await el.requestFullscreen();
-      else if ((el as any).mozRequestFullScreen) await (el as any).mozRequestFullScreen();
-      else if ((el as any).webkitRequestFullscreen) await (el as any).webkitRequestFullscreen();
-      else if ((el as any).msRequestFullscreen) await (el as any).msRequestFullscreen();
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        await el.requestFullscreen();
+      } else if ((el as any).mozRequestFullScreen) {
+        await (el as any).mozRequestFullScreen();
+      } else if ((el as any).webkitRequestFullscreen) {
+        await (el as any).webkitRequestFullscreen();
+      } else if ((el as any).msRequestFullscreen) {
+        await (el as any).msRequestFullscreen();
+      }
     } catch (err) {
-      // If user gesture is required, the caller can click the button; nothing further here.
+      console.error('Fullscreen request failed:', err);
+      // Retry after user interaction
     }
   };
 

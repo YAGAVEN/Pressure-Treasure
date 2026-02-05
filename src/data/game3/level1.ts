@@ -52,18 +52,6 @@ export const level1: Level = {
   
   traps: [
     // Floor spikes - hidden until player is close
-    {
-      id: 'spike1',
-      type: 'floor_spike',
-      x: 280,
-      y: GAME_HEIGHT - 100,
-      width: 40,
-      height: 20,
-      isActive: true,
-      isHidden: true,
-      triggerDistance: 80,
-      activationDelay: 200,
-    },
     
     // Freeze zone - slows player
     {
