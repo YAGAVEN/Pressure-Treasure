@@ -23,28 +23,26 @@ const Game1Page = () => {
     
     console.log('[GAME1PAGE] ✅ Room and player found, allowing access');
 
-    // DISABLED FOR TESTING - Allow access even when game not started
-    /* if (room.status !== 'playing') {
+    if (room.status !== 'playing') {
       toast({
         title: 'Game Not Active',
         description: 'The game must be active to play this challenge.',
         variant: 'destructive',
       });
-      navigate(`/game/${roomCode}`);      return;
-    } */
+      navigate(`/game/${roomCode}`);
+      return;
+    }
 
-    // Check if challenge is locked - DISABLED FOR TESTING
-    // if (currentPlayer.currentChallenge > 1 || currentPlayer.completedChallenges.includes(1)) {
-    //   // Already completed or passed, allow access
-    //   if (!currentPlayer.completedChallenges.includes(1) && currentPlayer.currentChallenge !== 1) {
-    //     toast({
-    //       title: "Challenge Locked",
-    //       description: "Complete previous challenges first.",
-    //       variant: "destructive",
-    //     });
-    //     navigate(`/game/${roomCode}`);
-    //   }
-    // }
+    // Check if challenge is locked
+    if (currentPlayer.currentChallenge !== 1 && !currentPlayer.completedChallenges.includes(1)) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
+      return;
+    }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {
@@ -69,11 +67,10 @@ const Game1Page = () => {
 
   console.log('[GAME1PAGE] Rendering Game1Challenge component');
 
-  // FULLSCREEN DISABLED FOR TESTING
   // Lock the screen in fullscreen while the game is playing (best-effort).
-// It will try to re-enter fullscreen if the user exits (e.g., presses Escape)
-// and will stop (and exit fullscreen) when the room status becomes 'finished'.
-/* useEffect(() => {
+  // It will try to re-enter fullscreen if the user exits (e.g., presses Escape)
+  // and will stop (and exit fullscreen) when the room status becomes 'finished'.
+  useEffect(() => {
   if (!room || !currentPlayer) return;
 
   let active = true;
@@ -157,10 +154,10 @@ const Game1Page = () => {
       exitFS();
     }
   };
-// Re-run when room status changes so we can stop when 'finished'
-}, [room, currentPlayer, toast]); */
+  // Re-run when room status changes so we can stop when 'finished'
+  }, [room, currentPlayer, toast]);
 
-return <Game1Challenge onComplete={handleComplete} onCancel={handleCancel} />;
+  return <Game1Challenge onComplete={handleComplete} onCancel={handleCancel} />;
 };
 
 export default Game1Page;

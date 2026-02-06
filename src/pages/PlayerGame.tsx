@@ -398,16 +398,16 @@ const PlayerGame = () => {
       return;
     }
 
-    // Lock challenges - DISABLED FOR TESTING
-    // const isLocked = challengeId > currentPlayer.currentChallenge;
-    // if (isLocked) {
-    //   toast({
-    //     title: "Challenge Locked",
-    //     description: "Complete previous challenges first.",
-    //     variant: "destructive",
-    //   });
-    //   return;
-    // }
+    // Lock challenges that haven't been reached yet
+    const isLocked = challengeId > currentPlayer.currentChallenge;
+    if (isLocked) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Navigate to appropriate challenge page
     const challengeRoutes: { [key: number]: string } = {

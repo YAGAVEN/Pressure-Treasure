@@ -720,7 +720,7 @@ const LevelMap = ({
 
         const isCompleted = completedChallenges.includes(challenge.id);
         const isCurrent = currentChallenge === challenge.id;
-        const nextIsLocked = false; // DISABLED FOR TESTING: nextChallenge.id > currentChallenge;
+        const nextIsLocked = nextChallenge.id > currentChallenge;
         const isTraveled = isCompleted; // Path is traveled if starting challenge is completed
 
         return (
@@ -749,13 +749,8 @@ const LevelMap = ({
           const position = levelPositions[index];
           const isCompleted = completedChallenges.includes(challenge.id);
           const isCurrent = currentChallenge === challenge.id;
-          const isLocked = false; // DISABLED FOR TESTING: challenge.id > currentChallenge;
-          const isClickable = true; // DISABLED FOR TESTING: !isLocked && isGamePlaying;
-
-          // Debug logging
-          if (index === 0) {
-            console.log('[LEVELMAP] Level 1 - isLocked:', isLocked, 'isGamePlaying:', isGamePlaying, 'isClickable:', isClickable);
-          }
+          const isLocked = challenge.id > currentChallenge;
+          const isClickable = !isLocked && isGamePlaying;
 
           return (
             <LevelNode
