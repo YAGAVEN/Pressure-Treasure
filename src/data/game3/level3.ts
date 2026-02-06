@@ -54,18 +54,6 @@ export const level3: Level = {
   
   traps: [
     // Floor spikes after first jump
-    {
-      id: 'spike1',
-      type: 'floor_spike',
-      x: 220,
-      y: GAME_HEIGHT - 105,
-      width: 40,
-      height: 25,
-      isActive: false,
-      isHidden: false,
-      triggerDistance: 60,
-      activationDelay: 150,
-    },
     
     // Fire bursts across jump paths
     {
@@ -92,18 +80,6 @@ export const level3: Level = {
     },
     
     // Hidden spikes on safe island
-    {
-      id: 'spike2',
-      type: 'floor_spike',
-      x: 620,
-      y: GAME_HEIGHT - 200,
-      width: 30,
-      height: 40,
-      isActive: false,
-      isHidden: false,
-      triggerDistance: 50,
-      activationDelay: 200,
-    },
     
     // Fire bursts in disappearing section
     {
@@ -137,8 +113,8 @@ export const level3: Level = {
       y: GAME_HEIGHT - 450,
       width: 30,
       height: 50,
-      isActive: false,
-      isHidden: false,
+      isActive: true,
+      isHidden: true,
       triggerDistance: 80,
       speed: 8,
     },
@@ -151,8 +127,8 @@ export const level3: Level = {
       y: GAME_HEIGHT - 400,
       width: 50,
       height: 130,
-      isActive: false,
-      isHidden: false,
+      isActive: true,
+      isHidden: true,
       timer: 0,
     },
     {
@@ -186,8 +162,8 @@ export const level3: Level = {
       y: GAME_HEIGHT - 280,
       width: 25,
       height: 60,
-      isActive: false,
-      isHidden: false,
+      isActive: true,
+      isHidden: true,
       triggerDistance: 70,
       activationDelay: 150,
       direction: 'right',
@@ -214,8 +190,8 @@ export const level3: Level = {
       y: GAME_HEIGHT - 280,
       width: 60,
       height: 50,
-      isActive: false,
-      isHidden: false,
+      isActive: true,
+      isHidden: true,
       triggerDistance: 50,
       activationDelay: 100,
     },

@@ -446,7 +446,7 @@ export function useGameEngine() {
           trap.y += trap.speed || 8;
         }
         
-        // Check trap collision
+        // Check trap collision - only if trap is active and NOT hidden
         if (trap.isActive && !trap.isHidden) {
           let trapRect = { x: trap.x, y: trap.y, width: trap.width, height: trap.height };
           
@@ -475,6 +475,15 @@ export function useGameEngine() {
             killPlayer();
             return;
           }
+        }
+        
+        // Ensure hidden traps never damage the player, even if accidentally marked as active
+        if (trap.isHidden && rectanglesIntersect(
+          { x: newPosition.x, y: newPosition.y, width: PLAYER_WIDTH, height: PLAYER_HEIGHT },
+          trap
+        )) {
+          // Do nothing - hidden traps should not harm the player
+          // This prevents edge cases where hidden status is not properly synchronized
         }
       }
       

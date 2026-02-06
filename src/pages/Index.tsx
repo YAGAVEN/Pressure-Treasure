@@ -157,7 +157,7 @@ const Index = () => {
         <footer className="border-t border-amber-400/20 bg-black/30 py-6 backdrop-blur-sm">
           <div className="container mx-auto flex items-center justify-center gap-6 px-4">
             <p className="text-center text-sm text-amber-200/80">
-              <span className="font-cinzel">Valar Morghulis</span> — All men must play
+              <span className="font-cinzel">Valar Morghulis</span> — All must play
             </p>
             <button
               onClick={toggleMute}

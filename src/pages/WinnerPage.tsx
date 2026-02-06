@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Trophy, Crown, Medal, Sparkles, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { calculateProgress } from '@/lib/gameUtils';
 
 const WinnerPage = () => {
   const { roomCode } = useParams<{ roomCode: string }>();
@@ -21,13 +22,31 @@ const WinnerPage = () => {
     }
   }, [room, currentPlayer, navigate]);
 
-  // Get top 3 winners sorted by completion time
-  const topWinners = players
-    .filter(p => p.completedAt !== null)
+  // Get top 3 winners using the same algorithm as AdminDashboard leaderboard
+  const topWinners = [...players]
     .sort((a, b) => {
-      if (a.completedAt === null) return 1;
-      if (b.completedAt === null) return -1;
-      return a.completedAt - b.completedAt;
+      const aProgress = calculateProgress(a.completedChallenges);
+      const bProgress = calculateProgress(b.completedChallenges);
+      
+      if (aProgress === 100 && bProgress === 100) {
+        // Both completed: use completedAt (who finished first)
+        if (a.completedAt && b.completedAt) {
+          return a.completedAt - b.completedAt; // Earlier time wins
+        }
+        if (a.completedAt) return -1;
+        if (b.completedAt) return 1;
+        return (a.progressUpdatedAt || a.joinedAt) - (b.progressUpdatedAt || b.joinedAt);
+      }
+      
+      // Different progress: higher is better
+      if (bProgress !== aProgress) {
+        return bProgress - aProgress;
+      }
+      
+      // Same progress (not 100%): who reached this level first wins
+      const aTime = a.progressUpdatedAt || a.joinedAt;
+      const bTime = b.progressUpdatedAt || b.joinedAt;
+      return aTime - bTime;
     })
     .slice(0, 3);
 
