@@ -21,28 +21,9 @@ const Game1Page = () => {
       return;
     }
     
-    console.log('[GAME1PAGE] ✅ Room and player found, allowing access');
-
-    if (room.status !== 'playing') {
-      toast({
-        title: 'Game Not Active',
-        description: 'The game must be active to play this challenge.',
-        variant: 'destructive',
-      });
-      navigate(`/game/${roomCode}`);
-      return;
-    }
-
-    // Check if challenge is locked
-    if (currentPlayer.currentChallenge !== 1 && !currentPlayer.completedChallenges.includes(1)) {
-      toast({
-        title: "Challenge Locked",
-        description: "Complete previous challenges first.",
-        variant: "destructive",
-      });
-      navigate(`/game/${roomCode}`);
-      return;
-    }
+    console.log('[GAME1PAGE] ✅ Room and player found - Game 1 is always accessible (first challenge)');
+    // Game 1 is the first challenge - always accessible to all players
+    // The fullscreen effect below will handle game state enforcement
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {

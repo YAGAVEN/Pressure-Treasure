@@ -398,8 +398,9 @@ const PlayerGame = () => {
       return;
     }
 
-    // Lock challenges that haven't been reached yet
-    const isLocked = challengeId > currentPlayer.currentChallenge;
+    // Game 1 is always accessible when game is playing (it's the first challenge)
+    // Other challenges are locked until the previous one is completed
+    const isLocked = challengeId > 1 && challengeId > currentPlayer.currentChallenge;
     if (isLocked) {
       toast({
         title: "Challenge Locked",

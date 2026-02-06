@@ -720,7 +720,8 @@ const LevelMap = ({
 
         const isCompleted = completedChallenges.includes(challenge.id);
         const isCurrent = currentChallenge === challenge.id;
-        const nextIsLocked = nextChallenge.id > currentChallenge;
+        // Path to next challenge: locked if next challenge is > 1 and > currentChallenge
+        const nextIsLocked = nextChallenge.id > 1 && nextChallenge.id > currentChallenge;
         const isTraveled = isCompleted; // Path is traveled if starting challenge is completed
 
         return (
@@ -749,7 +750,9 @@ const LevelMap = ({
           const position = levelPositions[index];
           const isCompleted = completedChallenges.includes(challenge.id);
           const isCurrent = currentChallenge === challenge.id;
-          const isLocked = challenge.id > currentChallenge;
+          // Game 1 is always unlocked when game is playing (first challenge)
+          // Other challenges are locked until reached
+          const isLocked = challenge.id > 1 && challenge.id > currentChallenge;
           const isClickable = !isLocked && isGamePlaying;
 
           return (
