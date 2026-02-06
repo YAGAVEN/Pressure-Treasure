@@ -303,13 +303,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Game Controls
   const startGame = useCallback((roomId: string) => {
     const room = rooms.find(r => r.id === roomId);
-    if (!room) return;
+    if (!room) {
+      console.error('[GAMECONTEXT] ❌ Room not found with id:', roomId);
+      return;
+    }
 
-    console.log('[GAMECONTEXT] Starting game for room:', room.code);
+    console.log('[GAMECONTEXT] 🎮 Starting game for room:', room.code, 'Duration:', room.timerDuration);
 
     // Update Supabase status to playing
-    roomService.updateRoomStatus(room.code, 'playing');
-    roomService.updateRoomTimer(room.code, room.timerDuration);
+    roomService.updateRoomStatus(room.code, 'playing').then(success => {
+      console.log('[GAMECONTEXT] Room status update to "playing":', success ? '✅ SUCCESS' : '❌ FAILED');
+    });
+    roomService.updateRoomTimer(room.code, room.timerDuration).then(success => {
+      console.log('[GAMECONTEXT] Timer reset to', room.timerDuration, ':', success ? '✅ SUCCESS' : '❌ FAILED');
+    });
 
     setRooms(prev => prev.map(r => {
       if (r.id === roomId) {
