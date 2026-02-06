@@ -11,15 +11,20 @@ interface Game1ChallengeProps {
   onCancel?: () => void;
 }
 
-const ASSET_REPLACEMENTS: Array<[RegExp, string]> = [
-  [/\bbackground\.png\b/g, '/images/background.jpg'],
-  [/\bcastle\.jpg\b/g, '/images/background2.jpg'],
-];
-
-const rewriteAssets = (content: string) =>
-  ASSET_REPLACEMENTS.reduce((updated, [pattern, replacement]) => {
+const rewriteAssets = (content: string) => {
+  // Get the base URL from the current window location
+  // This ensures images work both in dev and production, even in iframes
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  
+  const ASSET_REPLACEMENTS: Array<[RegExp, string]> = [
+    [/\bbackground\.png\b/g, `${baseUrl}/images/background.jpg`],
+    [/\bcastle\.jpg\b/g, `${baseUrl}/images/background2.jpg`],
+  ];
+  
+  return ASSET_REPLACEMENTS.reduce((updated, [pattern, replacement]) => {
     return updated.replace(pattern, replacement);
   }, content);
+};
 
 const extractBody = (html: string) => {
   const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
