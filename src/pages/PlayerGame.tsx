@@ -421,8 +421,12 @@ const PlayerGame = () => {
       5: `/game5/${roomCode}`,
     };
 
-    if (challengeRoutes[challengeId]) {
-      navigate(challengeRoutes[challengeId]);
+    const route = challengeRoutes[challengeId];
+    console.log('[PLAYER_GAME] Navigating to:', route);
+    if (route) {
+      navigate(route);
+    } else {
+      console.log('[PLAYER_GAME] ❌ No route found for challenge', challengeId);
     }
   };
 
