@@ -36,7 +36,7 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
   const scopedJs = useMemo(() => rewriteAssets(gameJs), []);
   const srcDoc = useMemo(() => {
     console.log('[GAME1CHALLENGE] Building srcDoc');
-    return `
+    const doc = `
       <!doctype html>
       <html lang="en">
         <head>
@@ -48,21 +48,28 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
           ${scopedBody}
           <script>${scopedJs}</script>
           <script>
+            console.log('[GAME1] Iframe loaded and initialized');
             window.addEventListener('proceedToStage2', () => {
+              console.log('[GAME1] proceedToStage2 event received');
               parent.postMessage({ type: 'game1Completed' }, '*');
             });
           </script>
         </body>
       </html>
     `;
+    console.log('[GAME1CHALLENGE] srcDoc built successfully');
+    return doc;
   }, [scopedCss, scopedBody, scopedJs]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      console.log('[GAME1CHALLENGE] Message received:', event.data, 'from:', event.origin);
       if (event.source !== frameRef.current?.contentWindow) {
+        console.log('[GAME1CHALLENGE] ❌ Message not from game iframe, ignoring');
         return;
       }
       if (event.data?.type !== 'game1Completed' || completedRef.current) {
+        console.log('[GAME1CHALLENGE] ❌ Not a completion message or already completed', event.data?.type, 'completed:', completedRef.current);
         return;
       }
       // DISABLED FOR TESTING - Accept completion even without fullscreen
@@ -70,6 +77,7 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
         // Ignore completion events while not fullscreen
         return;
       } */
+      console.log('[GAME1CHALLENGE] ✅ Game completed! Calling onComplete in 1.2s');
       completedRef.current = true;
       setTimeout(() => {
           onComplete();
@@ -77,8 +85,10 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
       // onComplete();
     };
 
+    console.log('[GAME1CHALLENGE] Setting up message listener');
     window.addEventListener('message', handleMessage);
     return () => {
+      console.log('[GAME1CHALLENGE] Removing message listener');
       window.removeEventListener('message', handleMessage);
     };
   }, [onComplete]);
@@ -150,6 +160,8 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
               title="Trial of the First Men"
               srcDoc={srcDoc}
               ref={frameRef}
+              onLoad={() => console.log('[GAME1CHALLENGE] ✅ Iframe loaded successfully')}
+              onError={(e) => console.error('[GAME1CHALLENGE] ❌ Iframe error:', e)}
               className={cn(
                 'game1-surface h-[720px] w-full rounded-lg border-0'
                 /* DISABLED FOR TESTING: !isFullscreen && 'pointer-events-none' */

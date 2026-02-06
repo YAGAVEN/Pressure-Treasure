@@ -15,11 +15,27 @@ const Game1Page = () => {
 
   useEffect(() => {
     console.log('[GAME1PAGE] useEffect - room:', room, 'currentPlayer:', currentPlayer);
-    if (!room || !currentPlayer) {
-      console.log('[GAME1PAGE] ❌ No room or player, redirecting to /join');
-      navigate('/join');
+    // Only redirect if we're sure there's no room/player after a delay
+    // This prevents premature redirects during navigation
+    const timeoutId = setTimeout(() => {
+      if (!room || !currentPlayer) {
+        console.log('[GAME1PAGE] ❌ No room or player after delay, redirecting to /join');
+        navigate('/join');
+      }
+    }, 500);
+
+    // Clear timeout if room/player become available
+    if (room && currentPlayer) {
+      clearTimeout(timeoutId);
       return;
     }
+
+    return () => clearTimeout(timeoutId);
+  }, [room, currentPlayer, navigate, roomCode]);
+
+  // Separate effect to check game status
+  useEffect(() => {
+    if (!room || !currentPlayer) return;
     
     console.log('[GAME1PAGE] ✅ Room and player found, allowing access');
 
@@ -45,7 +61,7 @@ const Game1Page = () => {
     //     navigate(`/game/${roomCode}`);
     //   }
     // }
-  }, [room, currentPlayer, navigate, roomCode, toast]);
+  }, [room, currentPlayer, roomCode, toast]);
 
   const handleComplete = () => {
     completeChallenge(1);

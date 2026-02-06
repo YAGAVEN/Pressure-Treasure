@@ -246,10 +246,13 @@ const LevelNode = ({
       {/* Main node button */}
       <motion.button
         onClick={() => {
-          console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable);
+          console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable, 'isLocked:', isLocked);
           if (isClickable) {
+            console.log('[LEVELNODE] ✅ Calling onClick handler for challenge', challenge.id);
             onBurst?.(position.x, position.y);
             onClick(challenge.id);
+          } else {
+            console.log('[LEVELNODE] ❌ Challenge is not clickable');
           }
         }}
         onMouseEnter={handleHover}

@@ -389,7 +389,18 @@ const PlayerGame = () => {
   };
 
   const handleLevelClick = (challengeId: number) => {
-    console.log('[PLAYER_GAME] Level clicked:', challengeId, 'Room status:', room.status);
+    console.log('[PLAYER_GAME] Level clicked:', challengeId, 'Room status:', room.status, 'Room code:', roomCode);
+    
+    // Ensure we have room and player data
+    if (!room || !currentPlayer) {
+      console.log('[PLAYER_GAME] ❌ No room or player data available');
+      toast({
+        title: "Error",
+        description: "Game data not available. Please refresh the page.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // DISABLED FOR TESTING - Allow clicking even when game is not playing
     /* if (room.status !== 'playing') {
@@ -422,11 +433,17 @@ const PlayerGame = () => {
     };
 
     const route = challengeRoutes[challengeId];
-    console.log('[PLAYER_GAME] Navigating to:', route);
+    console.log('[PLAYER_GAME] Navigating to:', route, 'for challenge', challengeId);
     if (route) {
+      console.log('[PLAYER_GAME] ✅ Navigation initiated');
       navigate(route);
     } else {
       console.log('[PLAYER_GAME] ❌ No route found for challenge', challengeId);
+      toast({
+        title: "Error",
+        description: "Challenge route not found. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
