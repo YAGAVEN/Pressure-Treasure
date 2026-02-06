@@ -144,6 +144,7 @@ const LevelNode = ({
   onHover,
   onLeave,
   onBurst,
+  onClick,
   index,
 }: {
   challenge: Challenge;
@@ -155,6 +156,7 @@ const LevelNode = ({
   onHover: (id: number) => void;
   onLeave: () => void;
   onBurst?: (x: number, y: number) => void;
+  onClick: (challengeId: number) => void;
   index: number;
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -243,7 +245,13 @@ const LevelNode = ({
 
       {/* Main node button */}
       <motion.button
-        onClick={() => isClickable && onBurst?.(position.x, position.y)}
+        onClick={() => {
+          console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable);
+          if (isClickable) {
+            onBurst?.(position.x, position.y);
+            onClick(challenge.id);
+          }
+        }}
         onMouseEnter={handleHover}
         onMouseLeave={onLeave}
         disabled={!isClickable}
@@ -713,6 +721,7 @@ const LevelMap = ({
         const isCompleted = completedChallenges.includes(challenge.id);
         const isCurrent = currentChallenge === challenge.id;
         const nextIsLocked = false; // DISABLED FOR TESTING: nextChallenge.id > currentChallenge;
+        const isTraveled = isCompleted; // Path is traveled if starting challenge is completed
 
         return (
           <PathConnector
@@ -740,8 +749,13 @@ const LevelMap = ({
           const position = levelPositions[index];
           const isCompleted = completedChallenges.includes(challenge.id);
           const isCurrent = currentChallenge === challenge.id;
-          const isLocked = challenge.id > currentChallenge;
-          const isClickable = !isLocked && isGamePlaying;
+          const isLocked = false; // DISABLED FOR TESTING: challenge.id > currentChallenge;
+          const isClickable = true; // DISABLED FOR TESTING: !isLocked && isGamePlaying;
+
+          // Debug logging
+          if (index === 0) {
+            console.log('[LEVELMAP] Level 1 - isLocked:', isLocked, 'isGamePlaying:', isGamePlaying, 'isClickable:', isClickable);
+          }
 
           return (
             <LevelNode
@@ -755,6 +769,7 @@ const LevelMap = ({
               onHover={setHoveredLevel}
               onLeave={() => setHoveredLevel(null)}
               onBurst={handleLevelBurst}
+              onClick={onLevelClick}
               index={index}
             />
           );

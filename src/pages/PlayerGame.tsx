@@ -389,14 +389,17 @@ const PlayerGame = () => {
   };
 
   const handleLevelClick = (challengeId: number) => {
-    if (room.status !== 'playing') {
+    console.log('[PLAYER_GAME] Level clicked:', challengeId, 'Room status:', room.status);
+    
+    // DISABLED FOR TESTING - Allow clicking even when game is not playing
+    /* if (room.status !== 'playing') {
       toast({
         title: "Game Not Active",
         description: "Wait for the Game Master to start the hunt.",
         variant: "destructive",
       });
       return;
-    }
+    } */
 
     // Lock challenges - DISABLED FOR TESTING
     // const isLocked = challengeId > currentPlayer.currentChallenge;
@@ -425,7 +428,8 @@ const PlayerGame = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {!isFullscreen && (
+      {/* FULLSCREEN REQUIREMENT DISABLED FOR TESTING */}
+      {/* {!isFullscreen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur">
           <div className="max-w-md w-full rounded-xl bg-background border border-border p-6 text-center">
             <p className="font-semibold text-lg">Fullscreen Required</p>
@@ -446,8 +450,8 @@ const PlayerGame = () => {
             </div>
           </div>
         </div>
-      )}
-      <div className={!isFullscreen ? 'pointer-events-none opacity-50' : ''}>
+      )} */}
+      <div className={/* !isFullscreen ? 'pointer-events-none opacity-50' : */ ''}>
         {/* Header */}
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
           <div className="container mx-auto flex items-center justify-between px-4 py-3">
