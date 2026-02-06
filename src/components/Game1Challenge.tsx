@@ -19,6 +19,7 @@ const rewriteAssets = (content: string) => {
   const ASSET_REPLACEMENTS: Array<[RegExp, string]> = [
     [/\bbackground\.png\b/g, `${baseUrl}/images/background.jpg`],
     [/\bcastle\.jpg\b/g, `${baseUrl}/images/background2.jpg`],
+    [/\/src\/assets\/GameofThrones\.png/g, `${baseUrl}/images/GameofThrones.png`],
   ];
   
   return ASSET_REPLACEMENTS.reduce((updated, [pattern, replacement]) => {
