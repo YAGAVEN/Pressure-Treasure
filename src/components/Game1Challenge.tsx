@@ -28,12 +28,14 @@ const extractBody = (html: string) => {
 };
 
 export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) => {
+  console.log('[GAME1CHALLENGE] Component rendering');
   const completedRef = useRef(false);
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const scopedCss = useMemo(() => rewriteAssets(gameCss), []);
   const scopedBody = useMemo(() => rewriteAssets(extractBody(gameHtml)), []);
   const scopedJs = useMemo(() => rewriteAssets(gameJs), []);
   const srcDoc = useMemo(() => {
+    console.log('[GAME1CHALLENGE] Building srcDoc');
     return `
       <!doctype html>
       <html lang="en">
@@ -63,11 +65,11 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
       if (event.data?.type !== 'game1Completed' || completedRef.current) {
         return;
       }
-      // Only accept completion if the player is in fullscreen
-      if (!document.fullscreenElement) {
+      // DISABLED FOR TESTING - Accept completion even without fullscreen
+      /* if (!document.fullscreenElement) {
         // Ignore completion events while not fullscreen
         return;
-      }
+      } */
       completedRef.current = true;
       setTimeout(() => {
           onComplete();
@@ -149,12 +151,13 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
               srcDoc={srcDoc}
               ref={frameRef}
               className={cn(
-                'game1-surface h-[720px] w-full rounded-lg border-0',
-                !isFullscreen && 'pointer-events-none'
+                'game1-surface h-[720px] w-full rounded-lg border-0'
+                /* DISABLED FOR TESTING: !isFullscreen && 'pointer-events-none' */
               )}
             />
 
-            {!isFullscreen && (
+            {/* FULLSCREEN OVERLAY DISABLED FOR TESTING */}
+            {/* {!isFullscreen && (
               <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-background/90 backdrop-blur">
                 <div className="text-center space-y-4 p-6">
                   <p className="font-semibold text-lg">Fullscreen Required</p>
@@ -164,7 +167,7 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </main>

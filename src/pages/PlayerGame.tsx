@@ -389,14 +389,17 @@ const PlayerGame = () => {
   };
 
   const handleLevelClick = (challengeId: number) => {
-    if (room.status !== 'playing') {
+    console.log('[PLAYER_GAME] Level clicked:', challengeId, 'Room status:', room.status);
+    
+    // DISABLED FOR TESTING - Allow clicking even when game is not playing
+    /* if (room.status !== 'playing') {
       toast({
         title: "Game Not Active",
         description: "Wait for the Game Master to start the hunt.",
         variant: "destructive",
       });
       return;
-    }
+    } */
 
     // Lock challenges - DISABLED FOR TESTING
     // const isLocked = challengeId > currentPlayer.currentChallenge;
@@ -418,8 +421,12 @@ const PlayerGame = () => {
       5: `/game5/${roomCode}`,
     };
 
-    if (challengeRoutes[challengeId]) {
-      navigate(challengeRoutes[challengeId]);
+    const route = challengeRoutes[challengeId];
+    console.log('[PLAYER_GAME] Navigating to:', route);
+    if (route) {
+      navigate(route);
+    } else {
+      console.log('[PLAYER_GAME] ❌ No route found for challenge', challengeId);
     }
   };
 
@@ -429,7 +436,8 @@ const PlayerGame = () => {
       <div>
 =======
     <div className="min-h-screen bg-background">
-      {!isFullscreen && (
+      {/* FULLSCREEN REQUIREMENT DISABLED FOR TESTING */}
+      {/* {!isFullscreen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur">
           <div className="max-w-md w-full rounded-xl bg-background border border-border p-6 text-center">
             <p className="font-semibold text-lg">Fullscreen Required</p>
@@ -450,9 +458,14 @@ const PlayerGame = () => {
             </div>
           </div>
         </div>
+<<<<<<< HEAD
       )}
       <div className={!isFullscreen ? 'pointer-events-none opacity-50' : ''}>
 >>>>>>> 22df33948b4d572f22610c24bfcdcdc19d1cfafd
+=======
+      )} */}
+      <div className={/* !isFullscreen ? 'pointer-events-none opacity-50' : */ ''}>
+>>>>>>> c381266bbbfe6efdd88e939315baa077a39f86ed
         {/* Header */}
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
           <div className="container mx-auto flex items-center justify-between px-4 py-3">
