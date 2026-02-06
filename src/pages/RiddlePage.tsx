@@ -550,8 +550,7 @@ const RiddlePage = () => {
 
   return (
     <div 
-      className="w-full flex flex-col bg-cover bg-center bg-fixed bg-no-repeat relative overflow-hidden"
-      style={{ minHeight: '100vh', minHeight: '100dvh' }}
+      className="w-full flex flex-col bg-cover bg-center bg-fixed bg-no-repeat relative overflow-hidden min-h-screen"
       style={{
         backgroundImage: 'url(/winterfell-bg.jpg)',
       }}

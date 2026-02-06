@@ -97,8 +97,7 @@ const WinnerPage = () => {
 
   return (
     <div 
-      className="flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ minHeight: '100vh', minHeight: '100dvh' }}
+      className="flex items-center justify-center p-4 relative overflow-hidden min-h-screen"
       style={{
         backgroundImage: 'url(/images/background2.jpg)',
         backgroundSize: 'cover',

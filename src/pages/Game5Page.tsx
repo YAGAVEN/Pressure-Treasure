@@ -129,7 +129,7 @@ const Game5Page = () => {
   }, [room, currentPlayer, toast]);
 
   return (
-    <div className="relative" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
+    <div className="relative min-h-screen">
       <LevelAnimation houseTheme={room.houseTheme} challengeId={5} />
       <div className="relative z-10">
         <Game5Challenge onComplete={handleComplete} onCancel={handleCancel} />

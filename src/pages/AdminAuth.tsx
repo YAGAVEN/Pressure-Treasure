@@ -90,7 +90,7 @@ const AdminAuth = () => {
   };
 
   return (
-    <div className="flex flex-col bg-medieval-pattern" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
+    <div className="flex flex-col bg-medieval-pattern min-h-screen">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur">
         <div className="container mx-auto flex items-center gap-4 px-4 py-4">
