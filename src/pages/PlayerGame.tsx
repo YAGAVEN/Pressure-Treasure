@@ -311,11 +311,11 @@ const PlayerGame = () => {
   }, [room?.id, syncPlayersForRoom]);
 
   // Redirect if no room or no player
-  useEffect(() => {
-    if (!room || !currentPlayer) {
-      navigate('/join');
-    }
-  }, [room, currentPlayer, navigate]);
+  // useEffect(() => {
+  //   if (!room || !currentPlayer) {
+  //     navigate('/join');
+  //   }
+  // }, [room, currentPlayer, navigate]);
 
   if (!room || !currentPlayer) {
     return null;
