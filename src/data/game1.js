@@ -839,7 +839,7 @@ function checkAndTriggerPenalties() {
     }
     
     // Check for Ghost Shuffle penalty (consecutiveWrongAttempts === 3)
-    if (stage1State.consecutiveWrongAttempts === 3) {
+    if (stage1State.currentGridSize !== '8x8' && stage1State.consecutiveWrongAttempts === 3) {
         triggerGhostShuffle();
         return; // Only one penalty at a time
     }
