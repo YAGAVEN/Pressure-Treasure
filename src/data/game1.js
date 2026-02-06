@@ -1,7 +1,7 @@
 const stage1State = {
     // Grid configuration
-    currentGridSize: '4x4',           // Current grid size: '4x4', '6x6', or '8x8'
-    currentLevelIndex: 0,              // Current level index: 0 (4x4), 1 (6x6), 2 (8x8), 3 (maze)
+    currentGridSize: '3x3',           // Current grid size: '3x3', '4x4', or '6x6'
+    currentLevelIndex: 0,              // Current level index: 0 (3x3), 1 (4x4), 2 (6x6), 3 (maze)
     
      cards: [],
     
@@ -41,7 +41,7 @@ const stage1State = {
 
 
 function resetStage1State() {
-    stage1State.currentGridSize = '4x4';
+    stage1State.currentGridSize = '3x3';
     stage1State.currentLevelIndex = 0;
     stage1State.cards = [];
     stage1State.flippedCards = [];
@@ -74,7 +74,7 @@ function resetStage1GridState(levelIndex) {
     }
     
     // Map level index to grid size
-    const gridSizes = ['4x4', '6x6', '8x8'];
+    const gridSizes = ['3x3', '4x4', '6x6'];
     stage1State.currentLevelIndex = levelIndex;
     stage1State.currentGridSize = gridSizes[levelIndex];
     
@@ -139,17 +139,18 @@ function getTotalPairsForCurrentGrid() {
 
 /**
  * Check if current level is complete
- * Checks if all cards are matched
- * @returns {boolean} - True if all cards are matched
+ * Checks if all non-fixed cards are matched
+ * @returns {boolean} - True if all non-fixed cards are matched
  */
 function isCurrentLevelComplete() {
     if (!stage1State.cards || stage1State.cards.length === 0) {
         return false;
     }
     
-    // Check if all cards are matched
+    // Check if all non-fixed cards are matched
+    // Fixed cards (in odd grids like 3x3) don't block progression
     const allMatched = stage1State.cards.every(
-        card => card.isMatched
+        card => card.isFixed || card.isMatched
     );
     
     return allMatched;
@@ -411,8 +412,8 @@ function startGame() {
     // Reset Stage-1 state
     resetStage1State();
     
-    // Generate cards for initial grid (4x4)
-    stage1State.cards = generateCards('4x4');
+    // Generate cards for initial grid (3x3)
+    stage1State.cards = generateCards('3x3');
     
     // Render the card grid
     renderCardGrid();
@@ -472,23 +473,24 @@ function nextLevel() {
 
 /**
  * Generate cards based on grid size
- * Creates pairs of cards for all grids: 4x4, 6x6, and 8x8
+ * Creates pairs of cards for all grids: 3x3, 4x4, and 6x6
  * Each card has exactly one matching pair
  * Cards are shuffled randomly
- * @param {string} gridSize - Grid size: '4x4', '6x6', or '8x8'
+ * @param {string} gridSize - Grid size: '3x3', '4x4', or '6x6'
  * @returns {Array} - Flat array of card objects with id, iconSrc, isFlipped, isMatched, isFixed
  */
 function generateCards(gridSize) {
     // Validate grid size
-    if (!['4x4', '6x6', '8x8'].includes(gridSize)) {
-        throw new Error('Grid size must be "4x4", "6x6", or "8x8"');
+    if (!['3x3', '4x4', '6x6'].includes(gridSize)) {
+        throw new Error('Grid size must be "3x3", "4x4", or "6x6"');
     }
     
     const size = parseInt(gridSize);
     const totalCards = size * size;
     
     // Calculate number of pairs needed
-    const totalPairs = totalCards / 2;
+    // For odd grids (3x3), one card will be fixed, so we need (totalCards - 1) / 2 pairs
+    const totalPairs = gridSize === '3x3' ? Math.floor(totalCards / 2) : totalCards / 2;
     
     // Pool of tech stack icons for card pairs
     // Using recognizable technology stack icons from simple-icons CDN
@@ -550,6 +552,17 @@ function generateCards(gridSize) {
                 isFixed: false
             }
         );
+    }
+    
+    // For 3x3 grid, add one fixed card in the center
+    if (gridSize === '3x3') {
+        pairCards.push({
+            id: cardId++,
+            iconSrc: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/star.svg',
+            isFlipped: true,
+            isMatched: false,
+            isFixed: true
+        });
     }
     
     // Shuffle only the pair cards
@@ -839,7 +852,7 @@ function checkAndTriggerPenalties() {
     }
     
     // Check for Ghost Shuffle penalty (consecutiveWrongAttempts === 3)
-    if (stage1State.currentGridSize !== '8x8' && stage1State.consecutiveWrongAttempts === 3) {
+    if (stage1State.consecutiveWrongAttempts === 3) {
         triggerGhostShuffle();
         return; // Only one penalty at a time
     }
@@ -1088,7 +1101,7 @@ function checkGridCompletion() {
     // Mark current level as complete
     stage1State.isLevelComplete = true;
 
-    // Check if current grid is the last one (5x5, index 2)
+    // Check if current grid is the last one (6x6, index 2)
     if (stage1State.currentLevelIndex >= 2) {
         // Last memory grid complete - launch maze as final level
         launchMazeLevel();
