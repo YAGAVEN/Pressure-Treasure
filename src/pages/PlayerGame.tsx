@@ -289,7 +289,7 @@ const PlayerGame = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
       <div>
         {/* Header */}
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">

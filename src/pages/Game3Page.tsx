@@ -58,7 +58,7 @@ const Game3Page = () => {
   }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="relative" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
       {/* Background Animation */}
       <LevelAnimation 
         houseTheme={room.houseTheme}

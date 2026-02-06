@@ -36,7 +36,7 @@ const Index = () => {
   }));
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative overflow-hidden" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
       {/* Background Video */}
       <video 
         ref={videoRef}
@@ -44,7 +44,8 @@ const Index = () => {
         loop 
         muted={isMuted}
         playsInline
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 w-full object-cover"
+        style={{ height: '100%', minHeight: '100vh', minHeight: '100dvh' }}
       >
         <source src="/intro-video.mp4" type="video/mp4" />
       </video>
@@ -67,7 +68,7 @@ const Index = () => {
       </div>
       
       {/* Content Container */}
-      <div className="relative z-10 flex min-h-screen flex-col justify-between">
+      <div className="relative z-10 flex flex-col justify-between" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
         {/* Hero Section - Title Only */}
         <div className="flex flex-1 flex-col items-center justify-center px-4 py-8">
           <div className="relative flex flex-col items-center text-center" style={{ minHeight: '200px', width: '100%' }}>
