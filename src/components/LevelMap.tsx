@@ -363,7 +363,7 @@ const LevelNode = ({
   );
 };
 
-// Animated path connector
+// Animated path connector with travel tracking
 const PathConnector = ({
   startPos,
   endPos,
@@ -371,6 +371,7 @@ const PathConnector = ({
   isCurrent,
   isLocked,
   index,
+  isTraveled,
 }: {
   startPos: { x: number; y: number };
   endPos: { x: number; y: number };
@@ -378,11 +379,15 @@ const PathConnector = ({
   isCurrent: boolean;
   isLocked: boolean;
   index: number;
+  isTraveled: boolean;
 }) => {
   const midX = (startPos.x + endPos.x) / 2;
   const startY = startPos.y + 7;
   const endY = endPos.y + 7;
   const pathData = `M ${startPos.x} ${startY} Q ${midX} ${(startY + endY) / 2} ${endPos.x} ${endY}`;
+
+  // Path is traveled if it's completed or is the current active path
+  const showTraveled = isTraveled || isCompleted;
 
   return (
     <svg
@@ -394,8 +399,8 @@ const PathConnector = ({
           <stop
             offset="0%"
             stopColor={
-              isCompleted
-                ? 'rgba(16, 185, 129, 0.4)'
+              showTraveled
+                ? 'rgba(16, 185, 129, 0.6)'
                 : isCurrent
                 ? 'rgba(217, 119, 6, 0.5)'
                 : 'rgba(100, 116, 139, 0.2)'
@@ -404,8 +409,8 @@ const PathConnector = ({
           <stop
             offset="100%"
             stopColor={
-              isCompleted
-                ? 'rgba(16, 185, 129, 0.2)'
+              showTraveled
+                ? 'rgba(16, 185, 129, 0.3)'
                 : isCurrent
                 ? 'rgba(217, 119, 6, 0.2)'
                 : 'rgba(100, 116, 139, 0.1)'
@@ -414,20 +419,20 @@ const PathConnector = ({
         </linearGradient>
 
         <filter id={`pathGlow-${index}`}>
-          <feGaussianBlur stdDeviation={isCompleted ? 2 : isCurrent ? 3 : 1} />
+          <feGaussianBlur stdDeviation={showTraveled ? 3 : isCurrent ? 3 : 1} />
         </filter>
       </defs>
 
-      {/* Glow layer for completed/current paths */}
-      {(isCompleted || isCurrent) && (
+      {/* Glow layer for traveled/current paths */}
+      {(showTraveled || isCurrent) && (
         <motion.path
           d={pathData}
           fill="none"
-          stroke={isCompleted ? 'rgba(16, 185, 129, 0.3)' : 'rgba(217, 119, 6, 0.3)'}
-          strokeWidth="4"
+          stroke={showTraveled ? 'rgba(16, 185, 129, 0.4)' : 'rgba(217, 119, 6, 0.3)'}
+          strokeWidth="6"
           filter={`url(#pathGlow-${index})`}
           initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: isCurrent ? [0.4, 0.8, 0.4] : 0.6 }}
+          animate={{ pathLength: 1, opacity: isCurrent ? [0.4, 0.8, 0.4] : 0.7 }}
           transition={{
             pathLength: { duration: 1.5, delay: index * 0.1 },
             opacity: isCurrent ? { duration: 2, repeat: Infinity } : { duration: 0.5 },
@@ -435,28 +440,80 @@ const PathConnector = ({
         />
       )}
 
-      {/* Main path */}
+      {/* Main path - thicker for traveled paths */}
       <motion.path
         d={pathData}
         fill="none"
         stroke={`url(#pathGradient-${index})`}
-        strokeWidth={isCompleted ? 2.5 : isCurrent ? 3 : 2}
+        strokeWidth={showTraveled ? 4 : isCurrent ? 3 : 2}
         strokeLinecap="round"
+        strokeDasharray={showTraveled ? "0" : "5,5"}
         initial={{ pathLength: 0, opacity: 0 }}
         animate={{ pathLength: 1, opacity: 1 }}
         transition={{ duration: 1.5, delay: index * 0.1 }}
       />
+
+      {/* Animated dots along traveled path */}
+      {showTraveled && (
+        <>
+          <motion.circle
+            cx={startPos.x + (endPos.x - startPos.x) * 0.25}
+            cy={startY + (endY - startY) * 0.25}
+            r="3"
+            fill="rgba(16, 185, 129, 0.8)"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.6, 1, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              delay: 0,
+            }}
+          />
+          <motion.circle
+            cx={startPos.x + (endPos.x - startPos.x) * 0.5}
+            cy={startY + (endY - startY) * 0.5}
+            r="3"
+            fill="rgba(16, 185, 129, 0.8)"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.6, 1, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              delay: 0.3,
+            }}
+          />
+          <motion.circle
+            cx={startPos.x + (endPos.x - startPos.x) * 0.75}
+            cy={startY + (endY - startY) * 0.75}
+            r="3"
+            fill="rgba(16, 185, 129, 0.8)"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.6, 1, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              delay: 0.6,
+            }}
+          />
+        </>
+      )}
 
       {/* Pulsing dot on current path */}
       {isCurrent && (
         <motion.circle
           cx={midX}
           cy={(startY + endY) / 2}
-          r="2"
-          fill="rgba(217, 119, 6, 0.8)"
+          r="4"
+          fill="rgba(251, 191, 36, 0.9)"
           animate={{
-            r: [2, 4, 2],
-            opacity: [0.8, 0.2, 0.8],
+            r: [3, 6, 3],
+            opacity: [0.9, 0.3, 0.9],
           }}
           transition={{
             duration: 1.5,
@@ -471,35 +528,59 @@ const PathConnector = ({
 // Player token that moves along the path
 const PlayerToken = ({
   levelPositions,
-  completedCount,
+  currentLevelIndex,
 }: {
   levelPositions: { x: number; y: number }[];
-  completedCount: number;
+  currentLevelIndex: number;
 }) => {
-  // Position token at the current level
-  const tokenLevelIndex = Math.min(completedCount, levelPositions.length - 1);
+  // Position token at the current level (where the player is now)
+  const tokenLevelIndex = Math.min(currentLevelIndex, levelPositions.length - 1);
   const tokenPos = levelPositions[tokenLevelIndex];
 
   return (
     <motion.div
-      className="absolute"
-      style={{
+      className="absolute z-30"
+      initial={false}
+      animate={{
         left: `${tokenPos.x}%`,
         top: `${tokenPos.y}%`,
+      }}
+      style={{
         transform: 'translate(-50%, -50%)',
       }}
-      animate={{
-        scale: [1, 1.2, 1],
-      }}
       transition={{
-        duration: 2,
-        repeat: Infinity,
+        type: 'spring',
+        stiffness: 100,
+        damping: 15,
+        duration: 0.8,
       }}
     >
+      {/* Glow effect around player */}
       <motion.div
-        className="text-2xl filter drop-shadow-lg"
+        className="absolute inset-0 rounded-full bg-yellow-400/30 blur-xl"
+        style={{
+          width: '80px',
+          height: '80px',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
         animate={{
-          y: [0, -5, 0],
+          scale: [1, 1.3, 1],
+          opacity: [0.3, 0.6, 0.3],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+      
+      <motion.div
+        className="text-4xl filter drop-shadow-2xl relative z-10"
+        animate={{
+          y: [0, -8, 0],
+          scale: [1, 1.1, 1],
         }}
         transition={{
           duration: 1.5,
@@ -509,6 +590,29 @@ const PlayerToken = ({
       >
         👑
       </motion.div>
+      
+      {/* Sparkle effects */}
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          className="absolute w-2 h-2 bg-yellow-300 rounded-full"
+          style={{
+            left: '50%',
+            top: '50%',
+          }}
+          animate={{
+            x: [0, (i - 1) * 20],
+            y: [0, -30 - i * 5],
+            opacity: [1, 0],
+            scale: [1, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            delay: i * 0.5,
+          }}
+        />
+      ))}
     </motion.div>
   );
 };
@@ -609,6 +713,10 @@ const LevelMap = ({
         const isCompleted = completedChallenges.includes(challenge.id);
         const isCurrent = currentChallenge === challenge.id;
         const nextIsLocked = false; // DISABLED FOR TESTING: nextChallenge.id > currentChallenge;
+        
+        // Path is traveled if both nodes are completed
+        const isTraveled = completedChallenges.includes(challenge.id) && 
+                          completedChallenges.includes(nextChallenge.id);
 
         return (
           <PathConnector
@@ -618,13 +726,17 @@ const LevelMap = ({
             isCompleted={isCompleted}
             isCurrent={isCurrent}
             isLocked={nextIsLocked}
+            isTraveled={isTraveled}
             index={index}
           />
         );
       })}
 
-      {/* Player token */}
-      <PlayerToken levelPositions={levelPositions} completedCount={completedChallenges.length} />
+      {/* Player token - positioned at current level */}
+      <PlayerToken 
+        levelPositions={levelPositions} 
+        currentLevelIndex={currentChallenge - 1}
+      />
 
       {/* Level nodes container */}
       <div className="relative w-full h-full p-8" style={{ zIndex: 2 }}>
