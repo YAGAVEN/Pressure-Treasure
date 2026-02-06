@@ -11,20 +11,27 @@ const Game1Page = () => {
   const { toast } = useToast();
   const room = roomCode ? getRoom(roomCode) : undefined;
 
+  console.log('[GAME1PAGE] Rendering - roomCode:', roomCode, 'room:', room, 'currentPlayer:', currentPlayer);
+
   useEffect(() => {
+    console.log('[GAME1PAGE] useEffect - room:', room, 'currentPlayer:', currentPlayer);
     if (!room || !currentPlayer) {
+      console.log('[GAME1PAGE] ❌ No room or player, redirecting to /join');
       navigate('/join');
       return;
     }
+    
+    console.log('[GAME1PAGE] ✅ Room and player found, allowing access');
 
-    if (room.status !== 'playing') {
+    // DISABLED FOR TESTING - Allow access even when game not started
+    /* if (room.status !== 'playing') {
       toast({
         title: 'Game Not Active',
         description: 'The game must be active to play this challenge.',
         variant: 'destructive',
       });
       navigate(`/game/${roomCode}`);      return;
-    }
+    } */
 
     // Check if challenge is locked - DISABLED FOR TESTING
     // if (currentPlayer.currentChallenge > 1 || currentPlayer.completedChallenges.includes(1)) {
@@ -54,13 +61,19 @@ const Game1Page = () => {
   };
 
   if (!room || !currentPlayer) {
-    return null;
+    console.log('[GAME1PAGE] Render blocked - waiting for room/player');
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+      <p className="text-muted-foreground">Loading...</p>
+    </div>;
   }
 
+  console.log('[GAME1PAGE] Rendering Game1Challenge component');
+
+  // FULLSCREEN DISABLED FOR TESTING
   // Lock the screen in fullscreen while the game is playing (best-effort).
 // It will try to re-enter fullscreen if the user exits (e.g., presses Escape)
 // and will stop (and exit fullscreen) when the room status becomes 'finished'.
-useEffect(() => {
+/* useEffect(() => {
   if (!room || !currentPlayer) return;
 
   let active = true;
@@ -145,7 +158,7 @@ useEffect(() => {
     }
   };
 // Re-run when room status changes so we can stop when 'finished'
-}, [room, currentPlayer, toast]);
+}, [room, currentPlayer, toast]); */
 
 return <Game1Challenge onComplete={handleComplete} onCancel={handleCancel} />;
 };
