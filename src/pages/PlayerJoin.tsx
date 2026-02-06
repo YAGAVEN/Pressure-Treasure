@@ -114,7 +114,6 @@ const PlayerJoin = () => {
                 Enter your room code and choose a name to begin your quest
               </CardDescription>
             </CardHeader>
-          
           <CardContent>
             <form onSubmit={handleJoin} className="space-y-6">
               <div className="space-y-2">

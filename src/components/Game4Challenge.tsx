@@ -73,8 +73,45 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
   const [showHint, setShowHint] = useState(false);
   const [canProceed, setCanProceed] = useState(false);
 
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!(typeof document !== 'undefined' && document.fullscreenElement));
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const enterFullscreen = async () => {
+    try {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        await el.requestFullscreen();
+      } else if ((el as any).mozRequestFullScreen) {
+        await (el as any).mozRequestFullScreen();
+      } else if ((el as any).webkitRequestFullscreen) {
+        await (el as any).webkitRequestFullscreen();
+      } else if ((el as any).msRequestFullscreen) {
+        await (el as any).msRequestFullscreen();
+      }
+    } catch (err) {
+      console.error('Fullscreen request failed:', err);
+    }
+  };
+
   const currentLevel: Game4Level = game4Levels[currentLevelIndex];
   const totalLevels = game4Levels.length;
+
+  // Stopwords to exclude from scoring
+  const stopwords = new Set([
+    'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+    'of', 'with', 'by', 'from', 'as', 'is', 'are', 'was', 'were', 'be',
+    'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will',
+    'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that',
+    'these', 'those', 'it', 'its', 'his', 'her', 'their', 'them', 'he',
+    'she', 'they', 'we', 'you', 'i', 'me', 'my', 'your', 'our', 'who',
+    'what', 'where', 'when', 'why', 'how', 'which', 'while', 'against',
+    'made', 'sitting', 'showing'
+  ]);
 
   useEffect(() => {
     if (userInput.trim()) {
@@ -84,12 +121,15 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
       const userWords = userText.split(/\s+/);
       const bagOfWordsLower = currentLevel.bagOfWords.map(w => w.toLowerCase());
       
-      // Count matched words - each word gives 5 points
-      const matchedWords = userWords.filter(word => 
+      // Filter out stopwords and get unique words only
+      const uniqueUserWords = [...new Set(userWords)].filter(word => !stopwords.has(word));
+      
+      // Count matched words - each unique word gives 5 points
+      const matchedWords = uniqueUserWords.filter(word => 
         bagOfWordsLower.includes(word)
       );
       
-      const pointsEarned = matchedWords.length * 5;
+      const pointsEarned = matchedWords.length * 10;
       const maxPoints = 100; // Cap at 100 points
       const accuracyPercent = Math.min(pointsEarned, maxPoints);
       
@@ -112,7 +152,8 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
       setCanProceed(false);
     } else {
       // Completed all levels
-      onComplete();
+      if (isFullscreen) onComplete();
+      // otherwise ignore completion until fullscreen
     }
   };
 
@@ -125,8 +166,20 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -50 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-4xl"
+          className={"w-full max-w-4xl" + (!isFullscreen ? ' pointer-events-none' : '')}
         >
+
+        {!isFullscreen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="max-w-md w-full rounded-xl bg-background/95 backdrop-blur border border-border p-6 text-center">
+              <p className="font-semibold text-lg">Fullscreen Required</p>
+              <p className="text-sm text-muted-foreground mt-2">You must enter fullscreen to play this trial. Click below to enter fullscreen.</p>
+              <div className="mt-4">
+                <Button onClick={enterFullscreen}>Enter Fullscreen</Button>
+              </div>
+            </div>
+          </div>
+        )}
           <Card className="border-2">
             <CardHeader>
               <div className="flex items-center justify-between mb-2">

@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Documentation and migration files (not needed in deployment)
+*.md
+!README.md
+*.sql
+*.txt

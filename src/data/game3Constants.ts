@@ -1,13 +1,13 @@
 // Game 3 Constants
 
-export const GAME_WIDTH = 800;
-export const GAME_HEIGHT = 600;
+export const GAME_WIDTH = 1200;
+export const GAME_HEIGHT = 800;
 export const TILE_SIZE = 32;
 
 // Physics
 export const GRAVITY = 0.6;
 export const MAX_FALL_SPEED = 15;
-export const PLAYER_SPEED = 5;
+export const PLAYER_SPEED = 4.5;
 export const PLAYER_JUMP_FORCE = -14;
 export const ICE_FRICTION = 0.98;
 export const NORMAL_FRICTION = 0.85;

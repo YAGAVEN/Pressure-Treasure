@@ -7,12 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 import { useGame } from '@/contexts/GameContext';
 import { HOUSE_NAMES, HOUSE_MOTTOS, HouseTheme, Room } from '@/types/game';
 import { formatTime, calculateProgress } from '@/lib/gameUtils';
 import { 
   Shield, Plus, Trash2, Play, Square, RotateCcw, Users, 
-  Clock, Crown, LogOut, Copy, Check
+  Clock, Crown, LogOut, Copy, Check, X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -42,6 +43,7 @@ const AdminDashboard = () => {
   const [newRoomTimer, setNewRoomTimer] = useState(30);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [, forceUpdate] = useState({});
+  const [expandedRoomId, setExpandedRoomId] = useState<string | null>(null);
 
   // Define adminRooms early so it can be used in useEffects
   const adminRooms = rooms.filter(r => r.adminId === admin?.id);
@@ -170,6 +172,125 @@ const AdminDashboard = () => {
 
   if (!isAdminAuthenticated) {
     return null;
+  }
+
+  // If a room is playing and expanded, show full-page view
+  const expandedRoom = adminRooms.find(r => r.id === expandedRoomId);
+  if (expandedRoom && expandedRoom.status === 'playing') {
+    const players = getPlayersInRoom(expandedRoom.code);
+    
+    return (
+      <div className="min-h-screen bg-medieval-pattern">
+        {/* Compact Header */}
+        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
+          <div className="container mx-auto flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedRoomId(null)}
+                className="gap-2"
+              >
+                <X className="h-4 w-4" />
+                Back
+              </Button>
+              <div>
+                <p className="font-cinzel font-semibold">{expandedRoom.name}</p>
+                <p className="text-xs text-muted-foreground">{HOUSE_NAMES[expandedRoom.houseTheme]}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              {/* Timer Display */}
+              <div className="flex flex-col items-center">
+                <Clock className="h-5 w-5 text-accent mb-1" />
+                <p className="font-cinzel text-xl font-bold text-accent">
+                  {formatTime(expandedRoom.timerRemaining)}
+                </p>
+              </div>
+              
+              {/* Overall Progress Percentage */}
+              <div className="flex flex-col items-center">
+                <p className="text-xs text-muted-foreground mb-1">Overall Progress</p>
+                <p className="font-cinzel text-2xl font-bold">
+                  {Math.round(players.reduce((sum, p) => sum + calculateProgress(p.completedChallenges), 0) / (players.length || 1))}%
+                </p>
+              </div>
+              
+              <Button
+                onClick={() => endGame(expandedRoom.id)}
+                variant="destructive"
+                size="sm"
+                className="gap-2"
+              >
+                <Square className="h-4 w-4" />
+                End Game
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Full-Page Participant Grid - No Scrolling */}
+        <main className="container mx-auto px-4 py-8 flex flex-col h-[calc(100vh-100px)]">
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {players.length === 0 ? (
+              <Card className="flex-1 flex items-center justify-center border-dashed">
+                <CardContent className="flex flex-col items-center justify-center">
+                  <Users className="mb-4 h-12 w-12 text-muted-foreground/50" />
+                  <p className="font-cinzel text-lg text-muted-foreground">No players yet</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 auto-rows-max overflow-y-auto">
+                {players.map((player) => {
+                  const actualProgress = calculateProgress(player.completedChallenges);
+                  const completionPercentage = actualProgress;
+                  
+                  // Determine visual representation (bars filled out of 5)
+                  const filledBars = Math.ceil((completionPercentage / 100) * 5);
+                  
+                  return (
+                    <Card key={player.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-cinzel font-semibold text-lg flex-1">{player.username}</h3>
+                          <div className="text-right">
+                            <p className="font-cinzel text-2xl font-bold text-primary">{completionPercentage}%</p>
+                            <p className="text-xs text-muted-foreground">Progress</p>
+                          </div>
+                        </div>
+                        
+                        {/* Visual Progress Bar Representation */}
+                        <div className="flex gap-2 mb-3">
+                          {Array.from({ length: 5 }).map((_, index) => (
+                            <div
+                              key={index}
+                              className={`flex-1 h-8 rounded transition-all ${
+                                index < filledBars
+                                  ? 'bg-gradient-to-r from-primary to-primary/80'
+                                  : 'bg-muted'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        
+                        {/* Standard Progress Bar */}
+                        <Progress value={completionPercentage} className="h-2" />
+                        
+                        {/* Completed Challenges */}
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          Completed Challenges: {player.completedChallenges.join(', ') || 'None'}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    );
   }
 
   const handleCreateRoom = () => {
@@ -422,7 +543,19 @@ const AdminDashboard = () => {
                     {/* Player List */}
                     {players.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground">Players:</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-muted-foreground">Players:</p>
+                          {room.status === 'playing' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 text-xs"
+                              onClick={() => setExpandedRoomId(room.id)}
+                            >
+                              Expand View
+                            </Button>
+                          )}
+                        </div>
                         <div className="max-h-24 space-y-1 overflow-y-auto">
                           {players.map((player) => {
                             const actualProgress = calculateProgress(player.completedChallenges);
