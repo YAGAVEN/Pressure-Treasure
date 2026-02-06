@@ -25,6 +25,7 @@ body {
       url("background.png") center / cover no-repeat;
 
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
 
     display: flex;
     justify-content: center;

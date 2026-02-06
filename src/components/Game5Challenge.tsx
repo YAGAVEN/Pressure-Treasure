@@ -74,8 +74,10 @@ export const Game5Challenge = ({ onComplete, onCancel }: Game5ChallengeProps) =>
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      className="flex items-center justify-center p-4"
       style={{
+        minHeight: '100vh',
+        minHeight: '100dvh',
         backgroundImage: 'url(/images/background2.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',

@@ -108,7 +108,7 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern">
+    <div className="bg-medieval-pattern" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
       <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">

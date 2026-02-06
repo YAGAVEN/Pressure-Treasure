@@ -180,7 +180,7 @@ const AdminDashboard = () => {
     const players = getPlayersInRoom(expandedRoom.code);
     
     return (
-      <div className="min-h-screen bg-medieval-pattern">
+      <div className="bg-medieval-pattern" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
         {/* Compact Header */}
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
           <div className="container mx-auto flex items-center justify-between px-4 py-3">
@@ -347,7 +347,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern">
+    <div className="bg-medieval-pattern" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">

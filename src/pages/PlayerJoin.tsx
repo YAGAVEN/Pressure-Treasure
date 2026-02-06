@@ -80,7 +80,7 @@ const PlayerJoin = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
+    <div className="relative flex flex-col overflow-hidden" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -91,7 +91,7 @@ const PlayerJoin = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       
       {/* Content */}
-      <div className="relative z-10 flex min-h-screen flex-col">
+      <div className="relative z-10 flex flex-col" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
         {/* Header */}
         <header className="border-b border-border/50 bg-black/30 backdrop-blur">
           <div className="container mx-auto flex items-center gap-4 px-4 py-4">

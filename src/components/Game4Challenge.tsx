@@ -158,7 +158,7 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern flex items-center justify-center p-4">
+    <div className="flex items-center justify-center bg-medieval-pattern p-4" style={{ minHeight: '100vh', minHeight: '100dvh' }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={currentLevel.id}
