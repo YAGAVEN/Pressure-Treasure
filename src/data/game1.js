@@ -869,8 +869,16 @@ function checkAndTriggerPenalties() {
  * Triggered when consecutiveWrongAttempts === 3
  * Shuffles ONLY non-fixed, non-matched cards
  * Resets consecutiveWrongAttempts
+ * DISABLED for 3rd round (6x6 grid)
  */
 function triggerGhostShuffle() {
+    // Skip ghost shuffle for 3rd round (level index 2 = 6x6 grid)
+    if (stage1State.currentLevelIndex === 2) {
+        // Reset consecutive wrong attempts without shuffling
+        stage1State.consecutiveWrongAttempts = 0;
+        return;
+    }
+    
     // Mark penalty as active
     stage1State.penaltyActive = true;
     
