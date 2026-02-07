@@ -25,7 +25,16 @@ export const game4Levels: Game4Level[] = [
       "animal", "animals", "equine", "running", "motion", "movement",
       "clothing", "jacket", "garment", "medieval", "period", "historical",
       "soil", "earth", "terrain", "landscape", "horizon", "distance",
-      "action", "tense", "tension", "danger", "dangerous", "threat"
+      "action", "tense", "tension", "danger", "dangerous", "threat","helmet","armor"
+      ,"alone","lonely","solitary","defiant","defiance","courageous","courageously","heroism","heroic","determination","determined","ready","prepared","combat","fight","fighting","northern","winterfell","boots","fur","steely","resolve",
+      "unsheathing","blade","steel","mounted","riders","rushing","charge",
+      "stormy","cloudy","gray","bleak","harsh","gritty","realistic",
+      "defensive","stance","position","feet","grounded", "firm","person","male","figure","individual","human","bearded","beard",
+      "wet","rain","rainy","weather","outdoor","outdoors","field",
+      "animal","animals","equine","running","motion","movement",
+      "clothing","jacket","garment","medieval","period","historical",
+      "soil","earth","terrain","landscape","horizon","distance",
+      "action","tense","tension","danger","dangerous","threat","marching","charging","battle","war","cavalry","horses","soldiers"
     ]
   },
   {
@@ -35,7 +44,16 @@ export const game4Levels: Game4Level[] = [
     bagOfWords: [
       "daenerys", "generate","image","targaryen", "woman", "queen", "silver", "blonde", "hair", "overlooking", "viewing", "watching",
       "army", "massive", "soldiers", "troops", "helmets", "spears", "formation", "unsullied",
-      "snow", "snowy", "winter", "white", "ruins", "ruined", "city", "destroyed",
+      "snow", "snowy", "winter", "white", "ruins", "ruined", "city", "destroyed","sheilds","armor","uniforms","clothing","clothes",
+      "town", "buildings", "architecture", "leader", "commander", "regal", "powerful",
+      "khaleesi", "mother", "dragons", "breaker", "chains", "surveying", "observing",
+      "frost", "frozen", "ice", "cold", "desolate", "devastated", "aftermath",
+      "conquest", "conqueror", "invading", "invasion", "military", "organized",
+      "ranks", "rows", "disciplined", "trained", "warrior", "warriors", "legion",
+      "cloak", "coat", "outfit", "dress", "costume", "elegant", "noble",
+      "pale", "platinum", "braided", "long", "flowing", "crowned", "royalty",
+      "empire", "forces", "countless", "numerous", "vast", "assembled",
+      "person", "female", "lady", "standing", "crowd", "people", "group",
       "buildings", "architecture", "leader", "commander", "regal", "powerful",
       "khaleesi", "mother", "dragons", "breaker", "chains", "surveying", "observing",
       "frost", "frozen", "ice", "cold", "desolate", "devastated", "aftermath",
@@ -64,6 +82,9 @@ export const game4Levels: Game4Level[] = [
       "royal", "medieval", "gothic", "ominous", "foreboding", "intimidating",
       "weapons", "armament", "steel", "jagged", "pointed", "fearsome",
       "conquered", "aegon", "victory", "symbol", "symbolic", "authority",
+      "lamp","kings","banners","windows","dusty","ancient","historic","legendary","famous","solitary","alone","centered","center","focal","point",
+      "abandoned","vacant","unoccupied","waiting","ominously","room","interior","indoor","space","building","structure",
+      "architecture","architectural","design","constructed","built",
       "masonry", "walls", "ceiling", "high", "tall", "grand", "vast",
       "windows", "dusty", "ancient", "historic", "legendary", "famous",
       "solitary", "alone", "centered", "center", "focal", "point",
@@ -73,7 +94,7 @@ export const game4Levels: Game4Level[] = [
       "furniture", "object", "item", "artifact", "piece",
       "atmospheric", "atmosphere", "moody", "dim", "lighting",
       "window", "opening", "openings", "arch", "arches", "arched",
-      "step", "steps", "stairway", "stairs", "platform", "elevated","banners"
+      "step", "steps", "stairway", "stairs", "platform", "elevated","banners","pillars","majestic"
     ]
   },
   {
@@ -85,11 +106,12 @@ export const game4Levels: Game4Level[] = [
       "beast", "black", "dark", "scales", "reptile", "giant", "large", "massive",
       "eye", "eyes", "staring", "gazing", "looking", "contact", "intense", "connection",
       "bond", "touching", "hand", "skin", "fantasy", "mythical", "powerful",
-      "drogon", "rhaegal", "viserion", "child", "children", "mother", "maternal",
+      "dragon", "rhaegal", "viserion", "child", "children", "mother", "maternal",
       "tender", "gentle", "loving", "affection", "affectionate", "caring",
-      "profile", "side", "view", "beside", "next", "near", "proximity",
+      "profile", "side", "view", "beside", "next", "near", "proximity","red",
       "scaly", "textured", "rough", "detailed", "intricate", "realistic",
-      "glowing", "golden", "amber", "fiery", "bright", "luminous",
+      "staring", "gazing", "looking", "contact", "intense", "connection",
+      "wings","scary","winter","rocks","sharp","face","standing","glowing", "golden", "amber", "fiery", "bright", "luminous",
       "majestic", "magnificent", "awesome", "fearsome", "terrifying",
       "snout", "nose", "nostrils", "mouth", "teeth", "fangs", "horns",
       "magical", "supernatural", "legendary", "ancient", "primordial",
@@ -112,7 +134,7 @@ export const game4Levels: Game4Level[] = [
       "stone", "rock", "carved", "architecture", "castle", "fortress", "medieval",
       "wall", "sigil", "emblem", "symbol", "dragon", "three-headed", "targaryen",
       "design", "pattern", "map", "floor", "empty", "grand", "imposing", "dark",
-      "dragonstone", "large",
+      "dragonstone", "large","food","dinner","ceiling","windows","banners","candels","lamp", 
       "throne", "council", "war", "planning", "strategy", "strategic",
       "crest", "banner", "heraldry", "heraldic", "coat", "arms",
       "westeros", "essos", "continents", "painted", "mural",

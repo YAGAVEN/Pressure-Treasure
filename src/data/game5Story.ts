@@ -37,7 +37,7 @@ export const game5Stories: Game5StoryData[] = [
     ],
     question: "What color flames burned in Ramsay's night lamps?",
     hint: "Look for the special flames lighting the Dreadfort heir's nighttime schemes.",
-    acceptedAnswers: ["three-tongued", "three tongued"]
+    acceptedAnswers: ["three-tongued", "three tongued","3"]
   },
   {
     title: "The Drowned God's Gift",
