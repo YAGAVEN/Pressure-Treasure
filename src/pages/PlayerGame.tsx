@@ -64,73 +64,43 @@ const PlayerGame = () => {
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  // Enter fullscreen on mount and try to keep it
+  // Enter fullscreen on mount (only in production)
   useEffect(() => {
-    if (!room || !currentPlayer) return;
+    if (!room || !currentPlayer || import.meta.env.DEV) return;
 
     let active = true;
-    let attempts = 0;
-    const maxAttempts = 8;
-    const retryDelay = 500;
     const elem = document.documentElement;
 
     const tryEnterFullscreen = async () => {
-      if (!active) return;
+      if (!active || document.fullscreenElement) return;
       try {
-        if (document.fullscreenElement) return;
-        attempts++;
         if (elem.requestFullscreen) await elem.requestFullscreen();
         else if ((elem as any).mozRequestFullScreen) await (elem as any).mozRequestFullScreen();
         else if ((elem as any).webkitRequestFullscreen) await (elem as any).webkitRequestFullscreen();
         else if ((elem as any).msRequestFullscreen) await (elem as any).msRequestFullscreen();
       } catch (err) {
-        if (attempts < maxAttempts) {
-          setTimeout(tryEnterFullscreen, retryDelay);
-        }
+        // Ignore - user will see the overlay if needed
       }
     };
 
-    const handleFullscreenChange = () => {
-      if (!active) return;
-      const isFull = !!document.fullscreenElement;
-      if (!isFull) {
-        // Don't aggressively re-enter, just update state
-        // Let the overlay show and user can click button
-      }
-    };
-
-    const keyHandler = (e: KeyboardEvent) => {
-      // Don't prevent Escape - let browser handle it naturally
-    };
-
-    const visibilityHandler = () => {
-      if (document.visibilityState === 'visible' && !document.fullscreenElement) {
-        // Only try once when page becomes visible
-        tryEnterFullscreen();
-      }
-    };
-
+    // Try once on mount
     tryEnterFullscreen();
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('keydown', keyHandler);
-    document.addEventListener('visibilitychange', visibilityHandler);
 
     return () => {
       active = false;
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('keydown', keyHandler);
-      document.removeEventListener('visibilitychange', visibilityHandler);
     };
   }, [room, currentPlayer]);
 
   // Sync state with room data when room changes (initial load)
   useEffect(() => {
     if (room) {
-      console.log('[ROOM_SYNC] Syncing room state - Timer:', room.timerRemaining, 'Status:', room.status);
+      console.log('[ROOM_SYNC] Syncing room state - Timer:', room.timerRemaining, 'Status:', room.status, 'Room ID:', room.id, 'Room Code:', room.code);
       setRoomTimer(room.timerRemaining ?? 0);
       setRoomStatus((room.status as any) ?? 'waiting');
+    } else {
+      console.log('[ROOM_SYNC] ⚠️ No room data available');
     }
-  }, [room?.id]);
+  }, [room?.id, room?.status]);
 
   // Fetch initial players from database when joining room
   useEffect(() => {
@@ -389,6 +359,8 @@ const PlayerGame = () => {
   };
 
   const handleLevelClick = (challengeId: number) => {
+    console.log('[PLAYERGAME] handleLevelClick called - challengeId:', challengeId, 'room.status:', room.status, 'isGamePlaying:', room.status === 'playing');
+    
     if (room.status !== 'playing') {
       toast({
         title: "Game Not Active",
@@ -398,7 +370,23 @@ const PlayerGame = () => {
       return;
     }
 
+<<<<<<< HEAD
     // All challenges are now unlocked for dev/testing purposes
+=======
+    // Game 1 is always accessible when game is playing (it's the first challenge)
+    // Other challenges are locked until the previous one is completed
+    const isLocked = challengeId > 1 && challengeId > currentPlayer.currentChallenge;
+    console.log('[PLAYERGAME] Challenge', challengeId, 'isLocked:', isLocked, 'currentChallenge:', currentPlayer.currentChallenge);
+    
+    if (isLocked) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      return;
+    }
+>>>>>>> 54b89a13a9ce4ea4a428f8aa8c9435f162229bab
 
     // Navigate to appropriate challenge page
     const challengeRoutes: { [key: number]: string } = {
@@ -409,6 +397,7 @@ const PlayerGame = () => {
       5: `/game5/${roomCode}`,
     };
 
+    console.log('[PLAYERGAME] Navigating to:', challengeRoutes[challengeId]);
     if (challengeRoutes[challengeId]) {
       navigate(challengeRoutes[challengeId]);
     }
@@ -416,7 +405,7 @@ const PlayerGame = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {!isFullscreen && (
+      {!isFullscreen && import.meta.env.PROD && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur">
           <div className="max-w-md w-full rounded-xl bg-background border border-border p-6 text-center">
             <p className="font-semibold text-lg">Fullscreen Required</p>
@@ -438,7 +427,7 @@ const PlayerGame = () => {
           </div>
         </div>
       )}
-      <div className={!isFullscreen ? 'pointer-events-none opacity-50' : ''}>
+      <div className={!isFullscreen && import.meta.env.PROD ? 'pointer-events-none opacity-50' : ''}>
         {/* Header */}
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
           <div className="container mx-auto flex items-center justify-between px-4 py-3">

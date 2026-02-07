@@ -245,11 +245,16 @@ const LevelNode = ({
 
       {/* Main node button */}
       <motion.button
-        onClick={() => {
-          console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable);
+        onClick={(e) => {
+          console.log('[LEVELNODE] 🖱️ BUTTON CLICKED - Raw click event fired!', challenge.id);
+          console.log('[LEVELNODE] Event details:', e.type, e.target);
+          console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable, 'isLocked:', isLocked);
           if (isClickable) {
+            console.log('[LEVELNODE] ✅ Clicking is allowed, calling onClick');
             onBurst?.(position.x, position.y);
             onClick(challenge.id);
+          } else {
+            console.log('[LEVELNODE] ❌ Click blocked - isClickable is false');
           }
         }}
         onMouseEnter={handleHover}
@@ -547,7 +552,7 @@ const PlayerToken = ({
 
   return (
     <motion.div
-      className="absolute z-30"
+      className="absolute z-30 pointer-events-none"
       initial={false}
       animate={{
         left: `${tokenPos.x}%`,
@@ -754,6 +759,10 @@ const LevelMap = ({
           // Other challenges are locked until reached
           const isLocked = challenge.id > 1 && challenge.id > currentChallenge;
           const isClickable = !isLocked && isGamePlaying;
+
+          if (challenge.id === 1) {
+            console.log('[LEVELMAP] Game 1 state - isLocked:', isLocked, 'isGamePlaying:', isGamePlaying, 'isClickable:', isClickable, 'currentChallenge:', currentChallenge);
+          }
 
           return (
             <LevelNode
