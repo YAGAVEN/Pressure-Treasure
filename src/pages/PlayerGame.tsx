@@ -398,17 +398,7 @@ const PlayerGame = () => {
       return;
     }
 
-    // Game 1 is always accessible when game is playing (it's the first challenge)
-    // Other challenges are locked until the previous one is completed
-    const isLocked = challengeId > 1 && challengeId > currentPlayer.currentChallenge;
-    if (isLocked) {
-      toast({
-        title: "Challenge Locked",
-        description: "Complete previous challenges first.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // All challenges are now unlocked for dev/testing purposes
 
     // Navigate to appropriate challenge page
     const challengeRoutes: { [key: number]: string } = {
