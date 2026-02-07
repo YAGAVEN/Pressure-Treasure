@@ -49,15 +49,22 @@ const Game3: React.FC<Game3Props> = ({ onComplete, onCancel }) => {
   }, [gameState.gameComplete, onComplete]);
   
   return (
-    <div className="relative flex items-center justify-center bg-[#0a0a0f] min-h-screen">
+    <div className="fixed inset-0 flex items-center justify-center bg-[#0a0a0f] w-screen h-screen overflow-hidden">
       {/* Game Canvas */}
-      <div className="relative">
+      <div className="relative w-full h-full flex items-center justify-center">
         <canvas
           ref={canvasRef}
           width={GAME_WIDTH}
           height={GAME_HEIGHT}
-          className="border-4 border-[#3a3a4a] rounded-lg shadow-2xl"
-          style={{ imageRendering: 'pixelated' }}
+          className="border-4 border-[#3a3a4a] shadow-2xl"
+          style={{ 
+            imageRendering: 'pixelated',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            width: 'auto',
+            height: 'auto',
+            objectFit: 'contain'
+          }}
         />
 
         {!isFullscreen && (

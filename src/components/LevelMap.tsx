@@ -245,16 +245,14 @@ const LevelNode = ({
 
       {/* Main node button */}
       <motion.button
-        onClick={(e) => {
-          console.log('[LEVELNODE] 🖱️ BUTTON CLICKED - Raw click event fired!', challenge.id);
-          console.log('[LEVELNODE] Event details:', e.type, e.target);
+        onClick={() => {
           console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable, 'isLocked:', isLocked);
           if (isClickable) {
-            console.log('[LEVELNODE] ✅ Clicking is allowed, calling onClick');
+            console.log('[LEVELNODE] ✅ Calling onClick handler for challenge', challenge.id);
             onBurst?.(position.x, position.y);
             onClick(challenge.id);
           } else {
-            console.log('[LEVELNODE] ❌ Click blocked - isClickable is false');
+            console.log('[LEVELNODE] ❌ Challenge is not clickable');
           }
         }}
         onMouseEnter={handleHover}
