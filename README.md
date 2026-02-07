@@ -59,10 +59,46 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Backend & Real-time Database)
+- Framer Motion (Animations)
+
+## Environment Setup
+
+Before running the project, you need to set up your environment variables:
+
+1. Copy `.env.example` to `.env.local`:
+
+   ```sh
+   cp .env.example .env.local
+   ```
+
+2. Fill in your Supabase credentials in `.env.local`:
+   - `VITE_SUPABASE_URL`: Your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+
+You can find these values in your Supabase project settings under Settings > API.
 
 ## How can I deploy this project?
 
+### Deploy with Lovable
+
 Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+
+### Deploy with Vercel, Netlify, or other platforms
+
+1. **Build the project**:
+
+   ```sh
+   npm run build
+   ```
+
+2. **Set environment variables** on your hosting platform:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+
+3. **Deploy the `dist` folder** or connect your Git repository for automatic deployments.
+
+**Important**: Make sure to set up your environment variables in your hosting platform's settings before deployment.
 
 ## Can I connect a custom domain to my Lovable project?
 

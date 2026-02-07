@@ -28,15 +28,16 @@ const Game5Page = () => {
       return;
     }
 
-    // Check if challenge is locked (challenge 5 requires challenge 4 to be completed) - DISABLED FOR TESTING
-    // if (currentPlayer.currentChallenge < 5) {
-    //   toast({
-    //     title: "Challenge Locked",
-    //     description: "Complete previous challenges first.",
-    //     variant: "destructive",
-    //   });
-    //   navigate(`/game/${roomCode}`);
-    // }
+    // Check if challenge is locked (challenge 5 requires challenge 4 to be completed)
+    if (currentPlayer.currentChallenge < 5) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
+      return;
+    }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {
@@ -129,7 +130,7 @@ const Game5Page = () => {
   }, [room, currentPlayer, toast]);
 
   return (
-    <div className="min-h-screen relative">
+    <div className="relative min-h-screen">
       <LevelAnimation houseTheme={room.houseTheme} challengeId={5} />
       <div className="relative z-10">
         <Game5Challenge onComplete={handleComplete} onCancel={handleCancel} />

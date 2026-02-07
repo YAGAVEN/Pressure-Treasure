@@ -245,6 +245,7 @@ const LevelNode = ({
 
       {/* Main node button */}
       <motion.button
+<<<<<<< HEAD
         onClick={() => {
           console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable, 'isLocked:', isLocked);
           if (isClickable) {
@@ -253,6 +254,18 @@ const LevelNode = ({
             onClick(challenge.id);
           } else {
             console.log('[LEVELNODE] ❌ Challenge is not clickable');
+=======
+        onClick={(e) => {
+          console.log('[LEVELNODE] 🖱️ BUTTON CLICKED - Raw click event fired!', challenge.id);
+          console.log('[LEVELNODE] Event details:', e.type, e.target);
+          console.log('[LEVELNODE] Clicked challenge', challenge.id, 'isClickable:', isClickable, 'isLocked:', isLocked);
+          if (isClickable) {
+            console.log('[LEVELNODE] ✅ Clicking is allowed, calling onClick');
+            onBurst?.(position.x, position.y);
+            onClick(challenge.id);
+          } else {
+            console.log('[LEVELNODE] ❌ Click blocked - isClickable is false');
+>>>>>>> 54b89a13a9ce4ea4a428f8aa8c9435f162229bab
           }
         }}
         onMouseEnter={handleHover}
@@ -550,7 +563,7 @@ const PlayerToken = ({
 
   return (
     <motion.div
-      className="absolute z-30"
+      className="absolute z-30 pointer-events-none"
       initial={false}
       animate={{
         left: `${tokenPos.x}%`,
@@ -723,7 +736,8 @@ const LevelMap = ({
 
         const isCompleted = completedChallenges.includes(challenge.id);
         const isCurrent = currentChallenge === challenge.id;
-        const nextIsLocked = false; // DISABLED FOR TESTING: nextChallenge.id > currentChallenge;
+        // Path to next challenge: locked if next challenge is > 1 and > currentChallenge
+        const nextIsLocked = nextChallenge.id > 1 && nextChallenge.id > currentChallenge;
         const isTraveled = isCompleted; // Path is traveled if starting challenge is completed
 
         return (
@@ -752,12 +766,13 @@ const LevelMap = ({
           const position = levelPositions[index];
           const isCompleted = completedChallenges.includes(challenge.id);
           const isCurrent = currentChallenge === challenge.id;
-          const isLocked = false; // DISABLED FOR TESTING: challenge.id > currentChallenge;
-          const isClickable = true; // DISABLED FOR TESTING: !isLocked && isGamePlaying;
+          // Game 1 is always unlocked when game is playing (first challenge)
+          // Other challenges are locked until reached
+          const isLocked = challenge.id > 1 && challenge.id > currentChallenge;
+          const isClickable = !isLocked && isGamePlaying;
 
-          // Debug logging
-          if (index === 0) {
-            console.log('[LEVELMAP] Level 1 - isLocked:', isLocked, 'isGamePlaying:', isGamePlaying, 'isClickable:', isClickable);
+          if (challenge.id === 1) {
+            console.log('[LEVELMAP] Game 1 state - isLocked:', isLocked, 'isGamePlaying:', isGamePlaying, 'isClickable:', isClickable, 'currentChallenge:', currentChallenge);
           }
 
           return (

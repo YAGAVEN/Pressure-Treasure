@@ -11,15 +11,21 @@ interface Game1ChallengeProps {
   onCancel?: () => void;
 }
 
-const ASSET_REPLACEMENTS: Array<[RegExp, string]> = [
-  [/\bbackground\.png\b/g, '/images/background.jpg'],
-  [/\bcastle\.jpg\b/g, '/images/background2.jpg'],
-];
-
-const rewriteAssets = (content: string) =>
-  ASSET_REPLACEMENTS.reduce((updated, [pattern, replacement]) => {
+const rewriteAssets = (content: string) => {
+  // Get the base URL from the current window location
+  // This ensures images work both in dev and production, even in iframes
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  
+  const ASSET_REPLACEMENTS: Array<[RegExp, string]> = [
+    [/\bbackground\.png\b/g, `${baseUrl}/images/background.jpg`],
+    [/\bcastle\.jpg\b/g, `${baseUrl}/images/background2.jpg`],
+    [/\/src\/assets\/GameofThrones\.png/g, `${baseUrl}/images/GameofThrones.png`],
+  ];
+  
+  return ASSET_REPLACEMENTS.reduce((updated, [pattern, replacement]) => {
     return updated.replace(pattern, replacement);
   }, content);
+};
 
 const extractBody = (html: string) => {
   const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
@@ -72,12 +78,15 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
         console.log('[GAME1CHALLENGE] ❌ Not a completion message or already completed', event.data?.type, 'completed:', completedRef.current);
         return;
       }
-      // DISABLED FOR TESTING - Accept completion even without fullscreen
-      /* if (!document.fullscreenElement) {
+      if (!document.fullscreenElement) {
         // Ignore completion events while not fullscreen
         return;
+<<<<<<< HEAD
       } */
       console.log('[GAME1CHALLENGE] ✅ Game completed! Calling onComplete in 1.2s');
+=======
+      }
+>>>>>>> 54b89a13a9ce4ea4a428f8aa8c9435f162229bab
       completedRef.current = true;
       setTimeout(() => {
           onComplete();
@@ -120,7 +129,7 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern">
+    <div className="bg-medieval-pattern min-h-screen">
       <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
         <div className="container mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
@@ -163,13 +172,12 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
               onLoad={() => console.log('[GAME1CHALLENGE] ✅ Iframe loaded successfully')}
               onError={(e) => console.error('[GAME1CHALLENGE] ❌ Iframe error:', e)}
               className={cn(
-                'game1-surface h-[720px] w-full rounded-lg border-0'
-                /* DISABLED FOR TESTING: !isFullscreen && 'pointer-events-none' */
+                'game1-surface h-[720px] w-full rounded-lg border-0',
+                !isFullscreen && 'pointer-events-none'
               )}
             />
 
-            {/* FULLSCREEN OVERLAY DISABLED FOR TESTING */}
-            {/* {!isFullscreen && (
+            {!isFullscreen && (
               <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-background/90 backdrop-blur">
                 <div className="text-center space-y-4 p-6">
                   <p className="font-semibold text-lg">Fullscreen Required</p>
@@ -179,7 +187,7 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
                   </div>
                 </div>
               </div>
-            )} */}
+            )}
           </div>
         </div>
       </main>

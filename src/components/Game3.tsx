@@ -49,7 +49,7 @@ const Game3: React.FC<Game3Props> = ({ onComplete, onCancel }) => {
   }, [gameState.gameComplete, onComplete]);
   
   return (
-    <div className={"relative flex items-center justify-center min-h-screen bg-[#0a0a0f]" + (!isFullscreen ? ' pointer-events-none' : '')}>
+    <div className="relative flex items-center justify-center bg-[#0a0a0f] min-h-screen">
       {/* Game Canvas */}
       <div className="relative">
         <canvas

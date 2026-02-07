@@ -110,12 +110,9 @@ const AdminDashboard = () => {
           console.log('[ADMIN] Player change detected! Event:', payload.eventType, 'Data:', payload);
           
           // Extract room code from the payload
-          const roomCode = payload.new?.room_code || payload.old?.room_code;
-          if (!roomCode) {
-            console.log('[ADMIN] No room code in payload, skipping');
-            return;
-          }
-
+        const newData = payload.new as any;
+        const oldData = payload.old as any;
+        const roomCode = newData?.room_code || oldData?.room_code;
           // Fetch updated players for this room
           try {
             const { data: updatedPlayers, error } = await supabase
@@ -180,7 +177,7 @@ const AdminDashboard = () => {
     const players = getPlayersInRoom(expandedRoom.code);
     
     return (
-      <div className="min-h-screen bg-medieval-pattern">
+      <div className="bg-medieval-pattern min-h-screen">
         {/* Compact Header */}
         <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
           <div className="container mx-auto flex items-center justify-between px-4 py-3">
@@ -347,7 +344,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-medieval-pattern">
+    <div className="bg-medieval-pattern min-h-screen">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border/50 bg-background/95 backdrop-blur">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">

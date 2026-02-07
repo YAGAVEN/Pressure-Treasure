@@ -476,15 +476,16 @@ const RiddlePage = () => {
       return;
     }
 
-    // Check if challenge is locked (challenge 2 requires challenge 1 to be completed) - DISABLED FOR TESTING
-    // if (currentPlayer.currentChallenge < 2) {
-    //   toast({
-    //     title: "Challenge Locked",
-    //     description: "Complete challenge 1 first.",
-    //     variant: "destructive",
-    //   });
-    //   navigate(`/game/${roomCode}`);
-    // }
+    // Check if challenge is locked (challenge 2 requires challenge 1 to be completed)
+    if (currentPlayer.currentChallenge < 2) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete challenge 1 first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
+      return;
+    }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   // Attempt to enter fullscreen when the game starts (best-effort, respects user/browser preferences)
@@ -550,7 +551,7 @@ const RiddlePage = () => {
 
   return (
     <div 
-      className="min-h-screen w-full flex flex-col bg-cover bg-center bg-fixed bg-no-repeat relative overflow-hidden"
+      className="w-full flex flex-col bg-cover bg-center bg-fixed bg-no-repeat relative overflow-hidden min-h-screen"
       style={{
         backgroundImage: 'url(/winterfell-bg.jpg)',
       }}

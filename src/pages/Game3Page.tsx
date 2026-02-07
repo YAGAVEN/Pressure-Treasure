@@ -29,15 +29,16 @@ const Game3Page = () => {
       return;
     }
 
-    // Check if challenge is locked (challenge 3 requires challenge 2 to be completed) - DISABLED FOR TESTING
-    // if (currentPlayer.currentChallenge < 3) {
-    //   toast({
-    //     title: "Challenge Locked",
-    //     description: "Complete previous challenges first.",
-    //     variant: "destructive",
-    //   });
-    //   navigate(`/game/${roomCode}`);
-    // }
+    // Check if challenge is locked (challenge 3 requires challenge 2 to be completed)
+    if (currentPlayer.currentChallenge < 3) {
+      toast({
+        title: "Challenge Locked",
+        description: "Complete previous challenges first.",
+        variant: "destructive",
+      });
+      navigate(`/game/${roomCode}`);
+      return;
+    }
   }, [room, currentPlayer, navigate, roomCode, toast]);
 
   const handleComplete = () => {
@@ -132,7 +133,7 @@ const Game3Page = () => {
   }, [room, currentPlayer, toast]);
 
   return (
-    <div className="min-h-screen relative">
+    <div className="relative min-h-screen">
       {/* Background Animation */}
       <LevelAnimation 
         houseTheme={room.houseTheme}

@@ -129,10 +129,18 @@
 
 html {
   font-family: 'Trajan Pro', serif;
+  /* Prevent address bar resizing issues on mobile */
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
   font-family: 'Trajan Pro', serif;
+  height: 100%;
+  overflow: auto;
+  /* Support dynamic viewport units for modern browsers */
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height - accounts for mobile browser UI */
 }
 
 @layer components {
