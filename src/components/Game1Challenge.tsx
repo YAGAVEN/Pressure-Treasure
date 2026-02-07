@@ -81,12 +81,8 @@ export const Game1Challenge = ({ onComplete, onCancel }: Game1ChallengeProps) =>
       if (!document.fullscreenElement) {
         // Ignore completion events while not fullscreen
         return;
-<<<<<<< HEAD
-      } */
+      } 
       console.log('[GAME1CHALLENGE] ✅ Game completed! Calling onComplete in 1.2s');
-=======
-      }
->>>>>>> 54b89a13a9ce4ea4a428f8aa8c9435f162229bab
       completedRef.current = true;
       setTimeout(() => {
           onComplete();

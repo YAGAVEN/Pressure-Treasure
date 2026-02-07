@@ -37,7 +37,6 @@ const Game1Page = () => {
   useEffect(() => {
     if (!room || !currentPlayer) return;
     
-<<<<<<< HEAD
     console.log('[GAME1PAGE] ✅ Room and player found, allowing access');
 
     // DISABLED FOR TESTING - Allow access even when game not started
@@ -63,12 +62,6 @@ const Game1Page = () => {
     //   }
     // }
   }, [room, currentPlayer, roomCode, toast]);
-=======
-    console.log('[GAME1PAGE] ✅ Room and player found - Game 1 is always accessible (first challenge)');
-    // Game 1 is the first challenge - always accessible to all players
-    // The fullscreen effect below will handle game state enforcement
-  }, [room, currentPlayer, navigate, roomCode, toast]);
->>>>>>> 54b89a13a9ce4ea4a428f8aa8c9435f162229bab
 
   const handleComplete = () => {
     completeChallenge(1);

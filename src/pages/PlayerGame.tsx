@@ -359,7 +359,6 @@ const PlayerGame = () => {
   };
 
   const handleLevelClick = (challengeId: number) => {
-<<<<<<< HEAD
     console.log('[PLAYER_GAME] Level clicked:', challengeId, 'Room status:', room.status, 'Room code:', roomCode);
     
     // Ensure we have room and player data
@@ -372,9 +371,6 @@ const PlayerGame = () => {
       });
       return;
     }
-=======
-    console.log('[PLAYERGAME] handleLevelClick called - challengeId:', challengeId, 'room.status:', room.status, 'isGamePlaying:', room.status === 'playing');
->>>>>>> 54b89a13a9ce4ea4a428f8aa8c9435f162229bab
     
     if (room.status !== 'playing') {
       toast({
@@ -408,7 +404,6 @@ const PlayerGame = () => {
       5: `/game5/${roomCode}`,
     };
 
-<<<<<<< HEAD
     const route = challengeRoutes[challengeId];
     console.log('[PLAYER_GAME] Navigating to:', route, 'for challenge', challengeId);
     if (route) {
@@ -421,11 +416,6 @@ const PlayerGame = () => {
         description: "Challenge route not found. Please try again.",
         variant: "destructive",
       });
-=======
-    console.log('[PLAYERGAME] Navigating to:', challengeRoutes[challengeId]);
-    if (challengeRoutes[challengeId]) {
-      navigate(challengeRoutes[challengeId]);
->>>>>>> 54b89a13a9ce4ea4a428f8aa8c9435f162229bab
     }
   };
 
