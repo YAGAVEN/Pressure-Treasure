@@ -1,7 +1,7 @@
 const stage1State = {
     // Grid configuration
     currentGridSize: '3x3',           // Current grid size: '3x3', '4x4', or '6x6'
-    currentLevelIndex: 0,              // Current level index: 0 (3x3), 1 (4x4), 2 (6x6), 3 (maze)
+    currentLevelIndex: 0,              // Current level index: 0 (3x3), 1 (4x4), 2 (6x6)
     
      cards: [],
     
@@ -26,15 +26,7 @@ const stage1State = {
     // Game status
     isGameActive: false,              // Whether the game is currently active
     isLevelComplete: false,           // Whether current level is complete
-    stage1Completed: false,           // Whether Stage-1 is completed (all 3 grids + maze done)
-    
-    // Maze state
-    mazeActive: false,                // Whether maze level is currently active
-    maze: null,                       // 2D array representing maze grid
-    mazeStartCell: null,              // {row, col} of start position
-    mazeGoalCell: null,               // {row, col} of goal position
-    mazePath: new Set(),              // Set of cell coords in user's drawn path
-    mazeIsDrawing: false,             // Whether user is currently dragging mouse
+    stage1Completed: false,           // Whether Stage-1 is completed (all 3 grids done)
     
     score: 0
 };
@@ -55,10 +47,6 @@ function resetStage1State() {
     stage1State.isGameActive = false;
     stage1State.isLevelComplete = false;
     stage1State.stage1Completed = false;
-    stage1State.mazeActive = false;
-    stage1State.maze = null;
-    stage1State.mazePath = new Set();
-    stage1State.mazeIsDrawing = false;
     stage1State.score = 0;
 }
 
@@ -869,8 +857,16 @@ function checkAndTriggerPenalties() {
  * Triggered when consecutiveWrongAttempts === 3
  * Shuffles ONLY non-fixed, non-matched cards
  * Resets consecutiveWrongAttempts
+ * DISABLED for 3rd round (6x6 grid)
  */
 function triggerGhostShuffle() {
+    // Skip ghost shuffle for 3rd round (level index 2 = 6x6 grid)
+    if (stage1State.currentLevelIndex === 2) {
+        // Reset consecutive wrong attempts without shuffling
+        stage1State.consecutiveWrongAttempts = 0;
+        return;
+    }
+    
     // Mark penalty as active
     stage1State.penaltyActive = true;
     
@@ -1103,8 +1099,9 @@ function checkGridCompletion() {
 
     // Check if current grid is the last one (6x6, index 2)
     if (stage1State.currentLevelIndex >= 2) {
-        // Last memory grid complete - launch maze as final level
-        launchMazeLevel();
+        // Last memory grid complete - show completion screen
+        stage1State.stage1Completed = true;
+        showStage1Completion();
         return;
     }
 
@@ -1236,405 +1233,7 @@ function hideMessage() {
     // To be implemented: Hide game message
 }
 
-// ===== MAZE GAME LOGIC =====
-// All maze-related functions for the final Stage-1 level
 
-/**
- * Launch the maze level after 5x5 completion
- * This is called automatically when the last memory grid is completed
- */
-function launchMazeLevel() {
-    console.log('Launching Maze Level...');
-    
-    // Update state
-    stage1State.currentLevelIndex = 3;
-    stage1State.mazeActive = true;
-    stage1State.isGameActive = true;
-    stage1State.mazePath = new Set();
-    
-    // Hide card grid
-    elements.cardGrid.parentElement.classList.add('fade-out');
-    
-    // Generate maze
-    stage1State.maze = generateMaze(7, 7);
-    
-    // Show maze container
-    const mazeContainer = document.getElementById('maze-container');
-    if (mazeContainer) {
-        mazeContainer.classList.remove('hidden');
-        renderMazeGrid();
-        setupMazeInteraction();
-    }
-}
-
-/**
- * Generate a simple all-walkable maze (no walls)
- * All cells are walkable, START at (0,0), GOAL at (6,6)
- * @param {number} rows - Number of rows
- * @param {number} cols - Number of columns
- * @returns {Array} - 2D array where all values are 0 (empty/walkable)
- */
-function generateMaze(rows, cols) {
-    // Create a simple grid with NO walls - all cells are walkable (value 0)
-    const maze = Array(rows)
-        .fill()
-        .map(() => Array(cols).fill(0));
-    
-    // Set start and goal positions
-    stage1State.mazeStartCell = { row: 0, col: 0 };
-    stage1State.mazeGoalCell = { row: rows - 1, col: cols - 1 };
-    
-    return maze;
-}
-
-/**
- * Render the maze grid in HTML
- */
-function renderMazeGrid() {
-    const mazeGrid = document.getElementById('maze-grid');
-    if (!mazeGrid || !stage1State.maze) return;
-    
-    mazeGrid.innerHTML = '';
-    const rows = stage1State.maze.length;
-    const cols = stage1State.maze[0].length;
-    
-    // Set grid template columns
-    mazeGrid.style.gridTemplateColumns = `repeat(${cols}, 40px)`;
-    
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            const cell = document.createElement('div');
-            cell.className = 'maze-cell';
-            cell.dataset.row = r;
-            cell.dataset.col = c;
-            
-            // Determine cell type
-            if (stage1State.maze[r][c] === 1) {
-                cell.classList.add('wall');
-            } else {
-                cell.classList.add('empty');
-            }
-            
-            // Mark start and goal
-            if (r === stage1State.mazeStartCell.row && c === stage1State.mazeStartCell.col) {
-                cell.classList.add('start');
-                cell.textContent = 'S';
-            } else if (r === stage1State.mazeGoalCell.row && c === stage1State.mazeGoalCell.col) {
-                cell.classList.add('goal');
-                cell.textContent = 'G';
-            }
-            
-            mazeGrid.appendChild(cell);
-        }
-    }
-}
-
-/**
- * Setup mouse interaction for drawing path in maze
- */
-function setupMazeInteraction() {
-    const mazeGrid = document.getElementById('maze-grid');
-    if (!mazeGrid) return;
-    
-    // Mouse down - start drawing
-    mazeGrid.addEventListener('mousedown', handleMazeMouseDown);
-    mazeGrid.addEventListener('mousemove', handleMazeMouseMove);
-    mazeGrid.addEventListener('mouseup', handleMazeMouseUp);
-    mazeGrid.addEventListener('mouseleave', handleMazeMouseUp);
-    
-    // Touch support
-    mazeGrid.addEventListener('touchstart', handleMazeTouchStart);
-    mazeGrid.addEventListener('touchmove', handleMazeTouchMove);
-    mazeGrid.addEventListener('touchend', handleMazeTouchEnd);
-}
-
-/**
- * Get maze cell at pixel coordinates
- * @param {number} x - Page X coordinate
- * @param {number} y - Page Y coordinate
- * @returns {Object} - {row, col} or null
- */
-function getMazeCellAtCoords(x, y) {
-    const mazeGrid = document.getElementById('maze-grid');
-    const rect = mazeGrid.getBoundingClientRect();
-    const localX = x - rect.left;
-    const localY = y - rect.top;
-    
-    // Account for gap (2px) in grid
-    const cellSize = 40;
-    const gap = 2;
-    const cellAndGap = cellSize + gap;
-    
-    const col = Math.floor(localX / cellAndGap);
-    const row = Math.floor(localY / cellAndGap);
-    
-    // Validate bounds
-    if (row >= 0 && row < stage1State.maze.length && 
-        col >= 0 && col < stage1State.maze[0].length) {
-        return { row, col };
-    }
-    
-    return null;
-}
-
-/**
- * Handle mouse down on maze
- */
-function handleMazeMouseDown(e) {
-    if (stage1State.mazeActive && !stage1State.mazeIsDrawing) {
-        stage1State.mazeIsDrawing = true;
-        const cell = getMazeCellAtCoords(e.clientX, e.clientY);
-        if (cell && stage1State.maze[cell.row][cell.col] === 0) {
-            addCellToPath(cell);
-        }
-    }
-}
-
-/**
- * Handle mouse move on maze
- */
-function handleMazeMouseMove(e) {
-    if (stage1State.mazeActive && stage1State.mazeIsDrawing) {
-        const cell = getMazeCellAtCoords(e.clientX, e.clientY);
-        if (cell && stage1State.maze[cell.row][cell.col] === 0) {
-            const cellKey = `${cell.row},${cell.col}`;
-            
-            // Only add if not already in path
-            if (!stage1State.mazePath.has(cellKey)) {
-                // Check if this cell is adjacent to last cell in path
-                if (isValidMoveToCell(cell)) {
-                    addCellToPath(cell);
-                    checkMazeCompletion();
-                }
-            }
-        }
-    }
-}
-
-/**
- * Handle mouse up on maze
- */
-function handleMazeMouseUp(e) {
-    stage1State.mazeIsDrawing = false;
-}
-
-/**
- * Touch support for mobile devices
- */
-function handleMazeTouchStart(e) {
-    e.preventDefault();
-    handleMazeMouseDown({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
-}
-
-function handleMazeTouchMove(e) {
-    e.preventDefault();
-    handleMazeMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
-}
-
-function handleMazeTouchEnd(e) {
-    e.preventDefault();
-    handleMazeMouseUp(e);
-}
-
-/**
- * Check if move to a cell is valid (must be adjacent and not backtracking excessively)
- * @param {Object} cell - {row, col}
- * @returns {boolean}
- */
-function isValidMoveToCell(cell) {
-    const cellKey = `${cell.row},${cell.col}`;
-    
-    // Already in path
-    if (stage1State.mazePath.has(cellKey)) {
-        return false;
-    }
-    
-    // If path is empty, any empty cell is valid
-    if (stage1State.mazePath.size === 0) {
-        return true;
-    }
-    
-    // Get last cell in path
-    const pathArray = Array.from(stage1State.mazePath);
-    const lastCellStr = pathArray[pathArray.length - 1];
-    const [lastRow, lastCol] = lastCellStr.split(',').map(Number);
-    
-    // Check if adjacent (up, down, left, right only - no diagonals)
-    const rowDiff = Math.abs(cell.row - lastRow);
-    const colDiff = Math.abs(cell.col - lastCol);
-    
-    return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-}
-
-/**
- * Add cell to the path
- * @param {Object} cell - {row, col}
- */
-function addCellToPath(cell) {
-    const cellKey = `${cell.row},${cell.col}`;
-    stage1State.mazePath.add(cellKey);
-    
-    // Update cell visual with path highlighting and glow
-    const cellElement = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
-    if (cellElement) {
-        cellElement.classList.add('path');
-        cellElement.classList.add('path-glow');  // Add glow effect to path
-    }
-}
-
-/**
- * Check if maze is completed (path reached goal)
- */
-function checkMazeCompletion() {
-    if (stage1State.mazePath.size === 0) return;
-    
-    const pathArray = Array.from(stage1State.mazePath);
-    const lastCellStr = pathArray[pathArray.length - 1];
-    const [lastRow, lastCol] = lastCellStr.split(',').map(Number);
-    
-    // Check if reached goal
-    if (lastRow === stage1State.mazeGoalCell.row && 
-        lastCol === stage1State.mazeGoalCell.col) {
-        completeMazeLevel();
-    }
-}
-
-/**
- * Complete the maze level and trigger celebration, then transition to Stage-1 completion
- */
-function completeMazeLevel() {
-    console.log('🏆 Maze Completed! Starting Celebration...');
-    
-    // Disable further interaction immediately
-    stage1State.mazeActive = false;
-    stage1State.isGameActive = false;
-    
-    // Get maze container for applying celebration animations
-    const mazeContainer = document.getElementById('maze-container');
-    const goalCell = document.querySelector(`[data-row="${stage1State.mazeGoalCell.row}"][data-col="${stage1State.mazeGoalCell.col}"]`);
-    
-    // Animate goal cell with pulsing orange glow
-    if (goalCell) {
-        goalCell.classList.add('goal-reached');
-    }
-    
-    // Add score
-    stage1State.score += 20;
-    updateDisplay();
-    
-    // Apply celebration animation classes to maze container
-    if (mazeContainer) {
-        mazeContainer.classList.add('victory-shake');   // Wobble effect
-        mazeContainer.classList.add('victory-glow');    // Expanding glow
-        mazeContainer.classList.add('victory-pulse');   // Scale bounce
-    }
-    
-    // Create sparkle burst particles
-    createSparkles(40);
-    
-    // After celebration window, fade maze and show completion screen
-    setTimeout(() => {
-        stage1State.stage1Completed = true;
-        
-        // Fade maze to transparent
-        if (mazeContainer) {
-            mazeContainer.style.opacity = '0';
-            mazeContainer.style.pointerEvents = 'none';
-        }
-        
-        // Remove fade from card grid
-        const cardGrid = document.querySelector('.game-board');
-        if (cardGrid) {
-            cardGrid.classList.remove('fade-out');
-        }
-        
-        // Show Stage-1 completion screen
-        showStage1Completion();
-    }, 1200);
-}
-
-/**
- * Create sparkle/confetti particles that burst outward
- * @param {number} count - Number of particles to create
- */
-function createSparkles(count) {
-    const mazeContainer = document.getElementById('maze-container');
-    if (!mazeContainer) return;
-    
-    const rect = mazeContainer.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const emojis = ['✨', '⭐', '🌟', '💫', '🎆'];
-    
-    for (let i = 0; i < count; i++) {
-        // Random emoji
-        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        
-        // Create sparkle element
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        sparkle.textContent = emoji;
-        document.body.appendChild(sparkle);
-        
-        // Calculate burst trajectory (360° radial distribution)
-        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.2;
-        const distance = 150 + Math.random() * 100;
-        const tx = Math.cos(angle) * distance;
-        const ty = Math.sin(angle) * distance;
-        
-        // Position at maze center
-        sparkle.style.left = centerX + 'px';
-        sparkle.style.top = centerY + 'px';
-        
-        // Set animation variables
-        sparkle.style.setProperty('--tx', tx + 'px');
-        sparkle.style.setProperty('--ty', ty + 'px');
-        
-        // Vary animation duration for natural effect
-        const duration = 0.8 + Math.random() * 0.4;
-        sparkle.style.animationDuration = duration + 's';
-        
-        // Trigger animation
-        sparkle.classList.add('animate');
-        
-        // Remove from DOM after animation completes
-        setTimeout(() => {
-            sparkle.remove();
-        }, duration * 1000);
-    }
-}
-
-/**
- * Hide the maze level
- */
-function hideMazeLevel() {
-    const mazeContainer = document.getElementById('maze-container');
-    if (mazeContainer) {
-        mazeContainer.classList.add('hidden');
-    }
-    
-    // Remove fade from card grid
-    elements.cardGrid.parentElement.classList.remove('fade-out');
-}
-
-/**
- * Reset maze state
- */
-function resetMazeState() {
-    stage1State.mazeActive = false;
-    stage1State.maze = null;
-    stage1State.mazePath = new Set();
-    stage1State.mazeIsDrawing = false;
-    
-    // Clear maze grid
-    const mazeGrid = document.getElementById('maze-grid');
-    if (mazeGrid) {
-        mazeGrid.innerHTML = '';
-    }
-    
-    hideMazeLevel();
-}
 
 // ===== INITIALIZE GAME =====
 // Start the game when DOM is ready

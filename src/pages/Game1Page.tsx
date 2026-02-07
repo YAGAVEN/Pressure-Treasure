@@ -15,16 +15,53 @@ const Game1Page = () => {
 
   useEffect(() => {
     console.log('[GAME1PAGE] useEffect - room:', room, 'currentPlayer:', currentPlayer);
-    if (!room || !currentPlayer) {
-      console.log('[GAME1PAGE] ❌ No room or player, redirecting to /join');
-      navigate('/join');
+    // Only redirect if we're sure there's no room/player after a delay
+    // This prevents premature redirects during navigation
+    const timeoutId = setTimeout(() => {
+      if (!room || !currentPlayer) {
+        console.log('[GAME1PAGE] ❌ No room or player after delay, redirecting to /join');
+        navigate('/join');
+      }
+    }, 500);
+
+    // Clear timeout if room/player become available
+    if (room && currentPlayer) {
+      clearTimeout(timeoutId);
       return;
     }
+
+    return () => clearTimeout(timeoutId);
+  }, [room, currentPlayer, navigate, roomCode]);
+
+  // Separate effect to check game status
+  useEffect(() => {
+    if (!room || !currentPlayer) return;
     
-    console.log('[GAME1PAGE] ✅ Room and player found - Game 1 is always accessible (first challenge)');
-    // Game 1 is the first challenge - always accessible to all players
-    // The fullscreen effect below will handle game state enforcement
-  }, [room, currentPlayer, navigate, roomCode, toast]);
+    console.log('[GAME1PAGE] ✅ Room and player found, allowing access');
+
+    // DISABLED FOR TESTING - Allow access even when game not started
+    /* if (room.status !== 'playing') {
+      toast({
+        title: 'Game Not Active',
+        description: 'The game must be active to play this challenge.',
+        variant: 'destructive',
+      });
+      navigate(`/game/${roomCode}`);      return;
+    } */
+
+    // Check if challenge is locked - DISABLED FOR TESTING
+    // if (currentPlayer.currentChallenge > 1 || currentPlayer.completedChallenges.includes(1)) {
+    //   // Already completed or passed, allow access
+    //   if (!currentPlayer.completedChallenges.includes(1) && currentPlayer.currentChallenge !== 1) {
+    //     toast({
+    //       title: "Challenge Locked",
+    //       description: "Complete previous challenges first.",
+    //       variant: "destructive",
+    //     });
+    //     navigate(`/game/${roomCode}`);
+    //   }
+    // }
+  }, [room, currentPlayer, roomCode, toast]);
 
   const handleComplete = () => {
     completeChallenge(1);

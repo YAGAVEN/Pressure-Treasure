@@ -10,7 +10,7 @@ export const game4Levels: Game4Level[] = [
     image: "/images/level1_jon.jpg",
     hint: "The Bastard of Winterfell faces the charge.",
     bagOfWords: [
-      "jon", "snow", "man", "warrior", "standing", "stands", "alone", "battlefield", "mud", "muddy", "ground",
+      "jon", "generate", "snow", "man", "warrior", "standing", "stands", "alone", "battlefield", "mud", "muddy", "ground",
       "drawing", "sword", "weapon", "charging", "cavalry", "horses", "soldiers",
       "dark", "cloak", "leather", "armor", "brave", "facing", "enemy", "army",
       "dramatic", "dramatically", "cinematic", "battle", "war", "courage",
@@ -33,7 +33,7 @@ export const game4Levels: Game4Level[] = [
     image: "/images/level2_dany.jpg",
     hint: "The Queen of Ashes surveys her forces.",
     bagOfWords: [
-      "daenerys", "targaryen", "woman", "queen", "silver", "blonde", "hair", "overlooking", "viewing", "watching",
+      "daenerys", "generate","image","targaryen", "woman", "queen", "silver", "blonde", "hair", "overlooking", "viewing", "watching",
       "army", "massive", "soldiers", "troops", "helmets", "spears", "formation", "unsullied",
       "snow", "snowy", "winter", "white", "ruins", "ruined", "city", "destroyed",
       "buildings", "architecture", "leader", "commander", "regal", "powerful",
@@ -48,7 +48,7 @@ export const game4Levels: Game4Level[] = [
       "outdoor", "outdoors", "weather", "sky", "cloudy", "overcast",
       "structure", "structures", "walls", "ruins", "rubble", "debris",
       "uniform", "uniforms", "equipment", "gear", "armed", "weapons",
-      "gathering", "assembled", "lined", "organized", "orderly", "formation"
+      "gathering", "assembled", "lined", "organized", "orderly", "formation","woman"
     ]
   },
   {
@@ -56,7 +56,7 @@ export const game4Levels: Game4Level[] = [
     image: "/images/level3_throne.jpg",
     hint: "The most dangerous seat in the realm.",
     bagOfWords: [
-      "throne", "chair", "seat", "iron", "metal", "swords", "blades", "melted",
+      "throne", "generate","image","chair", "seat", "iron", "metal", "swords", "blades", "melted",
       "forged", "twisted", "sharp", "dangerous", "hall", "great", "chamber",
       "dark", "darkness", "shadows", "light", "shafts", "beams", "rays", "sunlight",
       "stone", "pillars", "columns", "majestic", "imposing", "power", "empty",
@@ -73,7 +73,7 @@ export const game4Levels: Game4Level[] = [
       "furniture", "object", "item", "artifact", "piece",
       "atmospheric", "atmosphere", "moody", "dim", "lighting",
       "window", "opening", "openings", "arch", "arches", "arched",
-      "step", "steps", "stairway", "stairs", "platform", "elevated"
+      "step", "steps", "stairway", "stairs", "platform", "elevated","banners"
     ]
   },
   {
@@ -81,7 +81,7 @@ export const game4Levels: Game4Level[] = [
     image: "/images/level4_dragon.jpg",
     hint: "Mother and Child.",
     bagOfWords: [
-      "close", "up", "daenerys", "targaryen", "woman", "face", "close-up", "closeup", "portrait", "dragon", "creature",
+      "close", "up", "generate","image","daenerys", "targaryen", "woman", "face", "close-up", "closeup", "portrait", "dragon", "creature",
       "beast", "black", "dark", "scales", "reptile", "giant", "large", "massive",
       "eye", "eyes", "staring", "gazing", "looking", "contact", "intense", "connection",
       "bond", "touching", "hand", "skin", "fantasy", "mythical", "powerful",
@@ -100,7 +100,7 @@ export const game4Levels: Game4Level[] = [
       "texture", "pattern", "surface", "detail", "details",
       "expression", "facial", "emotion", "emotional", "moment",
       "lighting", "lit", "illuminated", "glow", "shine", "shining",
-      "intimate", "personal", "relationship", "together", "pair"
+      "intimate", "personal", "relationship", "together", "pair","standing"
     ]
   },
   {
@@ -108,7 +108,7 @@ export const game4Levels: Game4Level[] = [
     image: "/images/level5_hall.jpg",
     hint: "The ancestral seat of House Targaryen.",
     bagOfWords: [
-      "geometric", "hall", "room", "chamber", "dining", "table", "symmetrical",
+      "geometric","hall", "room", "chamber", "dining", "table", "symmetrical",
       "stone", "rock", "carved", "architecture", "castle", "fortress", "medieval",
       "wall", "sigil", "emblem", "symbol", "dragon", "three-headed", "targaryen",
       "design", "pattern", "map", "floor", "empty", "grand", "imposing", "dark",
@@ -124,7 +124,7 @@ export const game4Levels: Game4Level[] = [
       "royal", "noble", "regal", "kingly", "queenly",
       "somber", "serious", "solemn", "formal", "ceremonial",
       "seats", "benches", "gathering", "meeting", "assembly",
-      "interior", "indoor", "building", "structure", "constructed",
+      "interior", "generate","image","indoor", "building", "structure", "constructed",
       "artwork", "art", "decoration", "decorative", "ornament",
       "candle", "candles", "candlelight", "flame", "flames", "fire",
       "illumination", "lighting", "lit", "light", "lights",
