@@ -5,7 +5,7 @@ import { TILE_SIZE, COLORS, GAME_HEIGHT } from '@/data/game3Constants';
 // Fire theme with lava platforms, fire bursts, disappearing platforms, screen shake
 
 export const level3: Level = {
-  id: 3,
+  id: 2,
   name: 'Dragonstone – The Fire Trial',
   theme: 'fire',
   backgroundColor: COLORS.fire.background,

@@ -5,7 +5,7 @@ import { TILE_SIZE, COLORS, GAME_HEIGHT } from '@/data/game3Constants';
 // Castle theme with swinging blades, guillotines, narrow platforms, wall spikes
 
 export const level2: Level = {
-  id: 2,
+  id: 1,
   name: "King's Landing – Castle of Blades",
   theme: 'castle',
   backgroundColor: COLORS.castle.background,
