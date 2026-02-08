@@ -5,7 +5,7 @@ import { TILE_SIZE, COLORS, GAME_HEIGHT } from '@/data/game3Constants';
 // Ice theme with slippery platforms, floor spikes, freeze zones, and collapsing platforms
 
 export const level1: Level = {
-  id: 1,
+  id: 3,
   name: 'The North – Frozen Path',
   theme: 'ice',
   backgroundColor: COLORS.ice.background,
@@ -120,32 +120,32 @@ export const level1: Level = {
     },
     
     // Wall spikes - appear mid-jump
-    {
-      id: 'spike5',
-      type: 'wall_spike',
-      x: 1400,
-      y: GAME_HEIGHT - 380,
-      width: 20,
-      height: 60,
-      isActive: true,
-      isHidden: true,
-      triggerDistance: 100,
-      activationDelay: 300,
-      direction: 'right',
-    },
+    // {
+    //   id: 'spike5',
+    //   type: 'wall_spike',
+    //   x: 1400,
+    //   y: GAME_HEIGHT - 380,
+    //   width: 20,
+    //   height: 60,
+    //   isActive: true,
+    //   isHidden: true,
+    //   triggerDistance: 100,
+    //   activationDelay: 300,
+    //   direction: 'right',
+    // },
     
     // Final trap before goal
-    {
-      id: 'spike6',
-      type: 'floor_spike',
-      x: 1680,
-      y: GAME_HEIGHT - 380,
-      width: 40,
-      height: 30,
-      isActive: true,
-      isHidden: true,
-      triggerDistance: 60,
-      activationDelay: 100,
-    },
+    // {
+    //   id: 'spike6',
+    //   type: 'floor_spike',
+    //   x: 1680,
+    //   y: GAME_HEIGHT - 380,
+    //   width: 40,
+    //   height: 30,
+    //   isActive: true,
+    //   isHidden: true,
+    //   triggerDistance: 60,
+    //   activationDelay: 100,
+    // },
   ],
 };

@@ -65,7 +65,7 @@ export const COLORS = {
 
 // Level themes
 export const LEVEL_NAMES = [
-  'The North – Frozen Path',
   "King's Landing – Castle of Blades",
   'Dragonstone – The Fire Trial',
+  'The North – Frozen Path',
 ];
