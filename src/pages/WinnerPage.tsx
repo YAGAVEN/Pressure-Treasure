@@ -22,33 +22,11 @@ const WinnerPage = () => {
     }
   }, [room, currentPlayer, navigate]);
 
-  // Get top 3 winners using the same algorithm as AdminDashboard leaderboard
-  const topWinners = [...players]
-    .sort((a, b) => {
-      const aProgress = calculateProgress(a.completedChallenges);
-      const bProgress = calculateProgress(b.completedChallenges);
-      
-      if (aProgress === 100 && bProgress === 100) {
-        // Both completed: use completedAt (who finished first)
-        if (a.completedAt && b.completedAt) {
-          return a.completedAt - b.completedAt; // Earlier time wins
-        }
-        if (a.completedAt) return -1;
-        if (b.completedAt) return 1;
-        return (a.progressUpdatedAt || a.joinedAt) - (b.progressUpdatedAt || b.joinedAt);
-      }
-      
-      // Different progress: higher is better
-      if (bProgress !== aProgress) {
-        return bProgress - aProgress;
-      }
-      
-      // Same progress (not 100%): who reached this level first wins
-      const aTime = a.progressUpdatedAt || a.joinedAt;
-      const bTime = b.progressUpdatedAt || b.joinedAt;
-      return aTime - bTime;
-    })
-    .slice(0, 3);
+  // Use the official room.winners (calculated when game ended) for consistency
+  // Map Winner objects back to Player objects for display
+  const topWinners = (room?.winners || [])
+    .map(winner => players.find(p => p.id === winner.playerId))
+    .filter((p): p is NonNullable<typeof p> => p !== undefined);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -212,6 +190,9 @@ const WinnerPage = () => {
                               getRankColor(rank)
                             )}>
                               {getRankText(rank)}
+                            </p>
+                            <p className="text-sm text-amber-200/70 mt-1">
+                              Progress: {calculateProgress(winner.completedChallenges)}%
                             </p>
                           </div>
 
