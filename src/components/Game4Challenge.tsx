@@ -51,7 +51,7 @@ const AccuracyMeter = ({ accuracy }: { accuracy: number }) => {
           className={`h-full transition-all duration-500 ease-out ${getBarColor()} relative`}
           style={{ width: `${displayAccuracy}%` }}
         >
-          {accuracy >= 80 && (
+          {accuracy >= 90 && (
             <div className="absolute inset-0 flex items-center justify-center">
               <Flame className="w-4 h-4 text-white animate-pulse" />
             </div>
@@ -134,7 +134,7 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
       const accuracyPercent = Math.min(pointsEarned, maxPoints);
       
       setAccuracy(accuracyPercent);
-      setCanProceed(accuracyPercent >= 80);
+      setCanProceed(accuracyPercent >= 90);
     } else {
       setAccuracy(0);
       setCanProceed(false);
@@ -293,7 +293,7 @@ export const Game4Challenge = ({ onComplete, onCancel }: Game4ChallengeProps) =>
           </Card>
 
           {/* Victory Modal - shown after last level */}
-          {currentLevelIndex === totalLevels - 1 && accuracy >= 80 && (
+          {currentLevelIndex === totalLevels - 1 && accuracy >= 90 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
