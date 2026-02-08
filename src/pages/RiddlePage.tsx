@@ -157,12 +157,6 @@ const ALL_QUESTIONS = [
     "hint": "Unique ID..."
   },
   {
-    "id": 25,
-    "riddle": "I am a special type of binary tree where all levels are completely filled except possibly the last level, which is filled from left to right. I am frequently used to implement heaps and priority queues efficiently. What am I?",
-    "answer": "COMPLETE BINARY TREE",
-    "hint": "Heap structure..."
-  },
-  {
     "id": 26,
     "riddle": "I help you repeat the same task again and again without rewriting the same code. I continue until a certain condition tells me to stop. I save time, reduce effort, and make programs shorter and smarter. What concept am I?",
     "hint": "I am used for repetition in programming.",
