@@ -1,109 +1,186 @@
-# Welcome to your Lovable project
+# 🎮 Pressure & Treasure
 
-## Project info
+A multi-player interactive game platform featuring multiple challenge-based mini-games with real-time synchronization. Players compete through various puzzle challenges, riddles, and brain teasers in an engaging, pressure-filled environment.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## ✨ Features
 
-## How can I edit this code?
+- 🎯 **Multiple Game Modes**: Five unique challenge games including riddles, puzzles, and interactive challenges
+- 👥 **Multi-player Support**: Real-time player synchronization and admin controls
+- 🎨 **Modern UI**: Beautiful interface built with shadcn-ui and Tailwind CSS
+- 🎬 **Smooth Animations**: Engaging animations powered by Framer Motion
+- 🔊 **Background Music**: Immersive audio experience
+- 📱 **Responsive Design**: Works seamlessly across desktop and mobile devices
+- ⚡ **Real-time Updates**: Live game state synchronization using Supabase
+- 🎭 **Admin Dashboard**: Comprehensive game management and player monitoring
+- 🏆 **Winner Tracking**: Automatic winner detection and celebration screens
 
-There are several ways of editing your application.
+## 🎮 Game Modes
 
-**Use Lovable**
+1. **Game 1**: HTML/CSS/JS based challenge
+2. **Riddle Challenge**: Brain-teasing riddles with multiple difficulty levels
+3. **Game 3**: Interactive puzzle game
+4. **Game 4**: Multi-level challenge progression
+5. **Game 5**: Story-based challenge experience
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🛠️ Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn-ui (Radix UI)
+- **Backend & Database**: Supabase
+- **Real-time**: Supabase Real-time subscriptions
+- **State Management**: React Context + Hooks
+- **Animations**: Framer Motion
+- **Routing**: React Router
+- **Form Handling**: React Hook Form + Zod
+- **Data Fetching**: TanStack Query (React Query)
+- **Testing**: Vitest
 
-**Use your preferred IDE**
+## 📋 Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js 18+ (recommended: use [nvm](https://github.com/nvm-sh/nvm))
+- npm or bun package manager
+- Supabase account (free tier available)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Installation
 
-Follow these steps:
+1. **Clone the repository**
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+git clone https://github.com/yourusername/pressure-treasure.git
+cd pressure-treasure
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. **Install dependencies**
 
-# Step 3: Install the necessary dependencies.
-npm i
+```bash
+npm install
+# or
+bun install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. **Set up environment variables**
+
+Create a `.env.local` file in the root directory:
+
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+> **Note**: Get your Supabase credentials from your Supabase project dashboard under Settings > API
+
+4. **Start the development server**
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🗄️ Database Setup
 
-**Use GitHub Codespaces**
+This project uses Supabase as the backend. You'll need to set up the following tables in your Supabase project:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- `players` - Player information and game state
+- `rooms` - Game room management
+- Additional tables based on your specific game requirements
 
-## What technologies are used for this project?
+Refer to your Supabase dashboard to create these tables or use the Supabase CLI for migrations.
 
-This project is built with:
+## 🎯 Usage
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-- Supabase (Backend & Real-time Database)
-- Framer Motion (Animations)
+### For Players
 
-## Environment Setup
+1. Navigate to the player join page
+2. Enter your name and room code
+3. Wait for the admin to start the game
+4. Complete challenges and compete with other players
 
-Before running the project, you need to set up your environment variables:
+### For Admins
 
-1. Copy `.env.example` to `.env.local`:
+1. Access the admin dashboard
+2. Create or manage game rooms
+3. Monitor player progress in real-time
+4. Control game flow and advance levels
 
-   ```sh
-   cp .env.example .env.local
-   ```
+## 🧪 Testing
 
-2. Fill in your Supabase credentials in `.env.local`:
-   - `VITE_SUPABASE_URL`: Your Supabase project URL
-   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+Run the test suite:
 
-You can find these values in your Supabase project settings under Settings > API.
+```bash
+npm run test
+```
 
-## How can I deploy this project?
+Watch mode for development:
 
-### Deploy with Lovable
+```bash
+npm run test:watch
+```
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 📦 Building for Production
 
-### Deploy with Vercel, Netlify, or other platforms
+Create a production build:
 
-1. **Build the project**:
+```bash
+npm run build
+```
 
-   ```sh
-   npm run build
-   ```
+Preview the production build locally:
 
-2. **Set environment variables** on your hosting platform:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
+```bash
+npm run preview
+```
 
-3. **Deploy the `dist` folder** or connect your Git repository for automatic deployments.
+## 🚀 Deployment
 
-**Important**: Make sure to set up your environment variables in your hosting platform's settings before deployment.
+### Deploy to Vercel
 
-## Can I connect a custom domain to my Lovable project?
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
 
-Yes, you can!
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add environment variables in Vercel project settings
+4. Deploy!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Deploy to Netlify
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+1. Build the project: `npm run build`
+2. Deploy the `dist` folder to Netlify
+3. Configure environment variables in Netlify dashboard
+
+### Other Platforms
+
+The built application is a static site in the `dist` folder. You can deploy it to any static hosting service (GitHub Pages, Cloudflare Pages, etc.).
+
+**Important**: Always configure your environment variables in your hosting platform's settings before deployment.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👏 Acknowledgments
+
+- Built with [Vite](https://vitejs.dev/)
+- UI components from [shadcn/ui](https://ui.shadcn.com/)
+- Backend powered by [Supabase](https://supabase.com/)
+- Icons from [Lucide](https://lucide.dev/)
+
+## 📧 Contact
+
+For questions or support, please open an issue in the GitHub repository.
+
+---
+
+Made with ❤️ by the Pressure & Treasure Team

@@ -1,8 +1,29 @@
 {
-  "name": "vite_react_shadcn_ts",
-  "private": true,
-  "version": "0.0.0",
+  "name": "pressure-treasure",
+  "version": "1.0.0",
+  "description": "A multi-player interactive game platform featuring multiple challenge-based mini-games with real-time synchronization",
   "type": "module",
+  "author": "Pressure & Treasure Team",
+  "license": "MIT",
+  "keywords": [
+    "game",
+    "multiplayer",
+    "react",
+    "typescript",
+    "supabase",
+    "real-time",
+    "puzzle",
+    "riddle",
+    "challenge"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/pressure-treasure.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/pressure-treasure/issues"
+  },
+  "homepage": "https://github.com/yourusername/pressure-treasure#readme",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
