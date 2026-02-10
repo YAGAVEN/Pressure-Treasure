@@ -115,40 +115,6 @@ const AdminAuth = () => {
           </CardHeader>
           
           <CardContent>
-            {/* Sign Up tab hidden - uncomment Tabs wrapper to re-enable */}
-            <div className="mt-6">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="gamemaster@westeros.com"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <Button type="submit" className="w-full font-cinzel" disabled={isLoading}>
-                  {isLoading ? 'Authenticating...' : 'Enter the Realm'}
-                </Button>
-              </form>
-            </div>
-            
-            {/* Sign Up form kept for future use - currently hidden
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login" className="font-cinzel">Login</TabsTrigger>
@@ -235,7 +201,6 @@ const AdminAuth = () => {
                 </form>
               </TabsContent>
             </Tabs>
-            */}
           </CardContent>
         </Card>
       </main>
